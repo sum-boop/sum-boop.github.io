@@ -1,0 +1,27 @@
+{
+  "name": "Sumit Anand — CCTV Operator & Surveillance Specialist",
+  "short_name": "Sumit Anand",
+  "description": "Precision monitoring, gate control, and loss prevention across India's largest logistics hubs.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#030711",
+  "theme_color": "#030711",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

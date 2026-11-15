@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Remix sum-boob.github.io",
+  "description": "Imported from GitHub: sum-boop/sum-boob.github.io",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
