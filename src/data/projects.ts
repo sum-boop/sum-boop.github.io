@@ -3,6 +3,8 @@ import surveillanceWallImg from '@/assets/images/deployment_surveillance_wall_17
 import gateTerminalImg from '@/assets/images/deployment_gate_terminal_1794580054781.jpg';
 import warehouseDockImg from '@/assets/images/deployment_warehouse_dock_1794580052470.jpg';
 import forensicDeskImg from '@/assets/images/deployment_forensic_desk_1794580052641.jpg';
+import lossPreventionImg from '@/assets/images/loss_prevention_aisle_1794781428399.jpg';
+import emergencyResponseImg from '@/assets/images/emergency_response_desk_1794781429407.jpg';
 
 export const deployments = [
   {
@@ -28,7 +30,7 @@ export const deployments = [
     image: surveillanceWallImg,
     imageAlt: 'Illustrative reference image of security monitoring displays in a warehouse',
     tags: ['Milestone XProtect VMS', 'CP Plus', 'Multi-Channel Monitoring', 'Loss Prevention'],
-    gallery: [surveillanceWallImg, forensicDeskImg, warehouseDockImg],
+    gallery: [surveillanceWallImg, forensicDeskImg, lossPreventionImg],
   },
   {
     id: 'op2',
@@ -51,7 +53,7 @@ export const deployments = [
       'High-density commercial vehicle logging for India’s largest Flipkart hub. Gate-in/gate-out entry synchronization, driver credential checks, and 100% accurate MS Excel logging.',
     cardImage: gateTerminalImg,
     image: gateTerminalImg,
-    imageAlt: 'Illustrative reference image of a data logging workstation',
+    imageAlt: 'Illustrative reference image of a commercial fleet gate logging terminal',
     tags: ['GIGO Gate Entry', 'MS Excel', 'Vehicle Logs', 'Badge Verification'],
     gallery: [gateTerminalImg, warehouseDockImg, surveillanceWallImg],
   },
@@ -74,11 +76,11 @@ export const deployments = [
       'Badge-access enforcement, camera maintenance, and fire-safety drill coordination for an audited mega-hub facility.',
     description:
       'Continuous monitoring of high-value inventory zones, anomaly flagging, and coordinated escalation to shift managers. Zero-incident operational accuracy maintained across the current posting.',
-    cardImage: warehouseDockImg,
-    image: warehouseDockImg,
-    imageAlt: 'Illustrative reference image of a security access control system',
+    cardImage: lossPreventionImg,
+    image: lossPreventionImg,
+    imageAlt: 'Illustrative reference image of a badge-controlled warehouse vault aisle with overhead dome cameras',
     tags: ['Loss Prevention', 'Incident Flagging', 'Escalation Protocols', 'Site Coordination'],
-    gallery: [warehouseDockImg, surveillanceWallImg, gateTerminalImg],
+    gallery: [lossPreventionImg, surveillanceWallImg, forensicDeskImg],
   },
   {
     id: 'op4',
@@ -100,9 +102,9 @@ export const deployments = [
       'Timestamped footage extraction, chain-of-custody documentation, and cross-camera timeline reconstruction for internal loss investigations.',
     cardImage: forensicDeskImg,
     image: forensicDeskImg,
-    imageAlt: 'Illustrative reference image of an operator reviewing multiple screens',
+    imageAlt: 'Illustrative reference image of an operator reviewing multiple surveillance timelines',
     tags: ['Footage Playback', 'Forensic Review', 'Chain of Custody', 'Reporting'],
-    gallery: [forensicDeskImg, surveillanceWallImg, warehouseDockImg],
+    gallery: [forensicDeskImg, surveillanceWallImg, lossPreventionImg],
   },
   {
     id: 'op5',
@@ -124,7 +126,7 @@ export const deployments = [
       'Perimeter monitoring, dock-movement verification, and patrol oversight at an Ekart Logistics facility. Coordinated with shift supervisors on access control and visitor verification.',
     cardImage: warehouseDockImg,
     image: warehouseDockImg,
-    imageAlt: 'Illustrative reference image of a warehouse loading dock',
+    imageAlt: 'Illustrative reference image of a warehouse loading dock under CCTV oversight',
     tags: ['Perimeter Monitoring', 'Dock Verification', 'Patrol Oversight', 'Visitor Access'],
     gallery: [warehouseDockImg, gateTerminalImg, forensicDeskImg],
   },
@@ -146,10 +148,10 @@ export const deployments = [
       'Fire-drill participation, emergency equipment operation, and daily shift-log maintenance under CCTV oversight.',
     description:
       'Alarm-to-action dispatch, evacuation routing under live surveillance, fire safety inspections, and post-incident shift reporting.',
-    cardImage: gateTerminalImg,
-    image: gateTerminalImg,
-    imageAlt: 'Illustrative reference image of an emergency coordination control station',
+    cardImage: emergencyResponseImg,
+    image: emergencyResponseImg,
+    imageAlt: 'Illustrative reference image of an emergency response and evacuation dispatch console',
     tags: ['Fire Safety', 'First Aid', 'Emergency Escalation', 'Shift Reporting'],
-    gallery: [gateTerminalImg, surveillanceWallImg, forensicDeskImg],
+    gallery: [emergencyResponseImg, surveillanceWallImg, forensicDeskImg],
   },
 ] satisfies readonly DeploymentBriefing[];

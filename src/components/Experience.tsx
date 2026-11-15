@@ -4,15 +4,19 @@ import { ArrowUpRight, BriefcaseBusiness, ChevronDown, Shield } from 'lucide-rea
 import { useVms } from '@/context/VmsContext';
 import { experience } from '@/data/experience';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { ChoreoReveal, motionDurations, motionEasings, useIsTouch } from '@/motion';
+import { motionDurations, motionEasings, useIsTouch } from '@/motion';
+import { useStaggeredCardGroup } from '@/utils/scrollStory';
 import { SectionHeading } from './SectionHeading';
 
 export function Experience() {
   const { activeSiteId, setActiveSiteId, viewMode } = useVms();
   const sectionRef = useRef<HTMLElement>(null);
+  const timelineRef = useRef<HTMLOListElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const isTouch = useIsTouch();
   const trackProgress = !prefersReducedMotion && !isTouch;
+
+  useStaggeredCardGroup(timelineRef, '.experience-entry');
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -75,7 +79,9 @@ export function Experience() {
                       key={entry.id}
                     >
                       <span className="mono-label">
-                        0{idx + 1} / {entry.startYear}–{entry.endYear}
+                        0{idx + 1} /{' '}
+                        <time dateTime={String(entry.startYear)}>{entry.startYear}</time>–
+                        <time dateTime={String(entry.endYear)}>{entry.endYear}</time>
                       </span>
                       <strong>{entry.site}</strong>
                       <small>{entry.company}</small>
@@ -86,21 +92,17 @@ export function Experience() {
             </div>
           </aside>
 
-          <ol className="experience-timeline">
+          <ol className="experience-timeline" ref={timelineRef}>
             {experience.map((entry, index) => {
               const entrySiteId = entry.site === 'Ekart Logistics' ? 'ekart' : 'flipkart';
               const isSiteHighlighted = viewMode === 'alarms' || activeSiteId === entrySiteId;
               const isExpanded = Boolean(expandedIds[entry.id]);
               const panelId = `experience-panel-${entry.id}`;
               return (
-                <ChoreoReveal
-                  as="li"
+                <li
                   className={`experience-entry experience-entry--${entry.status} ${
                     isSiteHighlighted ? 'experience-entry--vms-focus' : ''
                   }`}
-                  delay={index * 0.08}
-                  direction={index % 2 === 0 ? 'right' : 'left'}
-                  distance={28}
                   key={entry.id}
                 >
                   <div aria-hidden="true" className="experience-rail">
@@ -115,10 +117,12 @@ export function Experience() {
                   <div className="experience-content">
                     <div className="experience-topline">
                       <span className="experience-date tabular-nums">
-                        {entry.startYear} — {entry.endYear}
+                        <time dateTime={String(entry.startYear)}>{entry.startYear}</time> —{' '}
+                        <time dateTime={String(entry.endYear)}>{entry.endYear}</time>
                       </span>
                       <span className={`experience-status experience-status--${entry.status}`}>
-                        <i /> {entry.status === 'active' ? 'Active post' : 'Archived'}
+                        <i aria-hidden="true" />{' '}
+                        {entry.status === 'active' ? 'Active post' : 'Archived'}
                       </span>
                     </div>
                     <div className="experience-header-row">
@@ -186,7 +190,7 @@ export function Experience() {
                   <span aria-hidden="true" className="experience-index">
                     LOG / 0{index + 1}
                   </span>
-                </ChoreoReveal>
+                </li>
               );
             })}
           </ol>

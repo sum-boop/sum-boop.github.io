@@ -1,11 +1,10 @@
 import { memo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
-import { useGSAP } from '@gsap/react';
-import { gsap, ScrollTrigger } from '@/utils/animMaster';
 import { ArrowUpRight, Cpu, Network, ScanEye, ShieldCheck } from 'lucide-react';
 import { type VmsViewMode, useVms } from '@/context/VmsContext';
 import { skillCategories, skillTicker } from '@/data/skills';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { VelocityMarquee, useIsTouch } from '@/motion';
+import { useStaggeredCardGroup } from '@/utils/scrollStory';
 import { SectionHeading } from './SectionHeading';
 
 const icons = [ScanEye, Network, Cpu, ShieldCheck] as const;
@@ -13,42 +12,12 @@ const CATEGORY_VMS_MODES: readonly VmsViewMode[] = ['live', 'playback', 'smart-m
 
 export const Skills = memo(function Skills() {
   const { viewMode, setViewMode } = useVms();
-  const sectionRef = useRef<HTMLElement>(null);
-  const cardsRef = useRef<(HTMLElement | null)[]>([]);
+  const gridRef = useRef<HTMLDivElement>(null);
   const isTouch = useIsTouch();
   const prefersReducedMotion = useReducedMotion();
   const interactive = !isTouch && !prefersReducedMotion;
 
-  // ScrollTrigger Batch for Staggered Card Reveals
-  useGSAP(
-    () => {
-      if (prefersReducedMotion) return;
-
-      const validCards = cardsRef.current.filter(Boolean);
-      if (validCards.length === 0) return;
-
-      ScrollTrigger.batch(validCards, {
-        start: 'top 85%',
-        onEnter: (batch) => {
-          gsap.fromTo(
-            batch,
-            { y: 80, opacity: 0, rotateX: -15, transformPerspective: 1000 },
-            {
-              y: 0,
-              opacity: 1,
-              rotateX: 0,
-              stagger: 0.15,
-              duration: 1.0,
-              ease: 'power3.out',
-              overwrite: 'auto',
-            },
-          );
-        },
-        once: true,
-      });
-    },
-    { scope: sectionRef, dependencies: [prefersReducedMotion] },
-  );
+  useStaggeredCardGroup(gridRef, '.skill-card');
 
   const handleSpotlightMove = (event: ReactPointerEvent<HTMLElement>) => {
     if (!interactive || event.pointerType === 'touch') return;
@@ -58,7 +27,7 @@ export const Skills = memo(function Skills() {
   };
 
   return (
-    <section aria-labelledby="skills-title" className="content-section skills-section" id="skills" ref={sectionRef}>
+    <section aria-labelledby="skills-title" className="content-section skills-section" id="skills">
       <div className="section-inner">
         <SectionHeading
           description="A working toolkit across Milestone XProtect Smart Client consoles, connectivity, gate operations, and safety response."
@@ -68,7 +37,7 @@ export const Skills = memo(function Skills() {
           title="Systems in sync."
           tone="violet"
         />
-        <div className="skills-grid">
+        <div className="skills-grid" ref={gridRef}>
           {skillCategories.map((category, index) => {
             const Icon = icons[index] ?? ScanEye;
             const mappedMode = CATEGORY_VMS_MODES[index] ?? 'live';
@@ -80,7 +49,6 @@ export const Skills = memo(function Skills() {
                 }`}
                 key={category.name}
                 onPointerMove={handleSpotlightMove}
-                ref={(el) => (cardsRef.current[index] = el)}
               >
                 <div className="skill-card-header">
                   <span className="skill-icon">

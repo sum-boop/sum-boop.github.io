@@ -22,7 +22,7 @@ export const PortfolioSections = memo(function PortfolioSections({
 }: PortfolioSectionsProps) {
   return (
     <PageTransition>
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <Hero theme={theme} />
         <About />
         <Skills />

@@ -9,6 +9,7 @@ const TARGET_SELECTOR = "a, button, [role='button'], input, textarea, select";
 
 export function Cursor() {
   const finePointer = useMediaQuery('(hover: hover) and (pointer: fine)');
+  const desktopViewport = useMediaQuery('(min-width: 768px)');
   const isTouch = useIsTouch();
   const reducedMotion = useReducedMotion();
   const [cursorTarget, setCursorTarget] = useState(false);
@@ -17,8 +18,10 @@ export function Cursor() {
   const springX = useSpring(x, motionSprings.snappy);
   const springY = useSpring(y, motionSprings.snappy);
 
+  const active = finePointer && desktopViewport && !isTouch && !reducedMotion;
+
   useEffect(() => {
-    if (!finePointer || isTouch || reducedMotion) return;
+    if (!active) return;
 
     document.body.classList.add('custom-cursor-enabled');
     const onPointerMove = (event: PointerEvent) => {
@@ -46,9 +49,9 @@ export function Cursor() {
       document.removeEventListener('pointerout', onPointerOut);
       document.body.classList.remove('custom-cursor-enabled');
     };
-  }, [finePointer, isTouch, reducedMotion, x, y]);
+  }, [active, x, y]);
 
-  if (!finePointer || isTouch || reducedMotion) return null;
+  if (!active) return null;
   return (
     <m.div
       aria-hidden="true"

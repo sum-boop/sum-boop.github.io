@@ -24,6 +24,8 @@ import { assetPath } from '@/utils/assets';
 import { startSafeViewTransition } from '@/utils/viewTransition';
 import { resolveSiteFromName } from '@/utils/vmsLogic';
 import { initSmoothScroll } from '@/utils/animMaster';
+import { useMicroInteractions } from '@/utils/microInteractions';
+import { scheduleIdle } from '@/utils/yieldToMain';
 
 const VALID_PATHS = new Set([
   '',
@@ -62,6 +64,7 @@ function AppContent() {
   const { theme, toggleTheme } = useTheme();
   const { setActiveSiteId, setSelectedFeedId } = useVms();
   const showToast = useToast();
+  useMicroInteractions(showToast);
 
   const openDeployment = useCallback(
     (deployment: DeploymentBriefing) => {
@@ -168,8 +171,12 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    const lenis = initSmoothScroll();
+    let lenis: ReturnType<typeof initSmoothScroll> = null;
+    const cancelIdle = scheduleIdle(() => {
+      lenis = initSmoothScroll();
+    }, 350);
     return () => {
+      cancelIdle();
       lenis?.destroy();
     };
   }, []);
@@ -192,11 +199,11 @@ function AppContent() {
       
       <AnimatePresence mode="wait">
         <m.div
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.98 }}
-          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          initial={{ opacity: 0 }}
           key={is404 ? '404' : 'portfolio'}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
         >
           {is404 ? (
             <NotFound onReturn={returnHome} />
@@ -223,6 +230,7 @@ function AppContent() {
       ) : null}
       <Modal
         className="modal-window--briefing"
+        descriptionId="dialog-description"
         isOpen={activeDeployment !== null}
         onClose={closeDialog}
         onNavigate={navigateDeployment}
@@ -296,7 +304,9 @@ function AppContent() {
                 </strong>
               </div>
             </div>
-            <p className="modal-description">{activeDeployment.description}</p>
+            <p className="modal-description" id="dialog-description">
+              {activeDeployment.description}
+            </p>
             <ul aria-label="Skills used in deployment" className="modal-tags">
               {activeDeployment.tags.map((tag) => (
                 <li key={tag}>{tag}</li>

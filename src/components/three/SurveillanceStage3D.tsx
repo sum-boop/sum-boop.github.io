@@ -59,30 +59,32 @@ const _targetCamPos = new THREE.Vector3();
 const _targetLook = new THREE.Vector3();
 const _pointer = new THREE.Vector2();
 
-function detectSoftwareGl(): boolean {
+interface WebGLCapability {
+  supported: boolean;
+  isSoftwareGl: boolean;
+}
+
+let cachedWebGLCapability: WebGLCapability | null = null;
+
+function getWebGLCapability(): WebGLCapability {
+  if (cachedWebGLCapability) return cachedWebGLCapability;
   try {
     const probeCanvas = document.createElement('canvas');
     const gl = probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl');
-    if (!gl) return true;
+    if (!gl) {
+      cachedWebGLCapability = { supported: false, isSoftwareGl: true };
+      return cachedWebGLCapability;
+    }
     const ext = gl.getExtension('WEBGL_debug_renderer_info');
     const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
     const gpu = String(gl.getParameter(param) ?? '');
+    const isSoftwareGl = /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
     gl.getExtension('WEBGL_lose_context')?.loseContext();
-    return /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
+    cachedWebGLCapability = { supported: true, isSoftwareGl };
+    return cachedWebGLCapability;
   } catch {
-    return true;
-  }
-}
-
-function isWebGLSupported(): boolean {
-  try {
-    const probeCanvas = document.createElement('canvas');
-    const gl = probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl');
-    if (!gl) return false;
-    gl.getExtension('WEBGL_lose_context')?.loseContext();
-    return true;
-  } catch {
-    return false;
+    cachedWebGLCapability = { supported: false, isSoftwareGl: true };
+    return cachedWebGLCapability;
   }
 }
 
@@ -98,7 +100,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   const stageRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
 
-  const [webglFailed, setWebglFailed] = useState(() => !isWebGLSupported());
+  const [webglFailed, setWebglFailed] = useState(() => !getWebGLCapability().supported);
   const [dockOpen, setDockOpen] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth > 640 : true,
   );
@@ -134,9 +136,11 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
   const applyThemeCallbackRef = useRef<((nextTheme: ThemeMode) => void) | null>(null);
   const applyFinishCallbackRef = useRef<((nextFinish: FinishId) => void) | null>(null);
+  const requestRenderRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     explodeTargetRef.current = explodeLevel;
+    requestRenderRef.current?.();
   }, [explodeLevel]);
 
   useEffect(() => {
@@ -162,6 +166,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     bundle.primaryTexture.needsUpdate = true;
     drawSmartClientAuxCanvas(bundle.auxCanvas, screenStateRef.current);
     bundle.auxTexture.needsUpdate = true;
+    requestRenderRef.current?.();
   }, [activeSiteId, selectedFeedId, theme, viewMode]);
 
   useEffect(() => {
@@ -201,7 +206,13 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     if (!mount) return;
 
     let isDisposed = false;
-    const isSoftwareGl = detectSoftwareGl();
+    const { supported, isSoftwareGl } = getWebGLCapability();
+    if (!supported) {
+      queueMicrotask(() => {
+        if (!isDisposed) setWebglFailed(true);
+      });
+      return;
+    }
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -221,7 +232,9 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.04;
-    renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(
+      isSoftwareGl ? 1 : Math.min(Math.max(window.devicePixelRatio || 1, 1), 2),
+    );
     renderer.shadowMap.enabled = !isSoftwareGl;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.setClearColor(initialBgHex, 1);
@@ -385,38 +398,34 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
 
-    const resizeObserver = new ResizeObserver(() => {
-      if (isDisposed) return;
-      const nextWidth = Math.max(240, mount.clientWidth);
-      const nextHeight = Math.max(240, mount.clientHeight);
-      camera.aspect = nextWidth / nextHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(nextWidth, nextHeight);
-      renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio || 1, 2));
-      renderer.render(scene, camera);
-    });
-    resizeObserver.observe(mount);
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      isVisible = false;
+    };
 
-    let isVisible = true;
-    const intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        const nextVisible = entry?.isIntersecting ?? true;
-        isVisible = nextVisible;
-        if (nextVisible && !isDisposed) {
-          renderer.render(scene, camera);
-        }
-      },
-      { threshold: 0.02 },
-    );
-    intersectionObserver.observe(mount);
+    const onContextRestored = () => {
+      if (isDisposed) return;
+      isVisible = true;
+      requestRender();
+    };
+
+    renderer.domElement.addEventListener('webglcontextlost', onContextLost);
+    renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
 
     let frameId = 0;
+    let frameRequested = false;
+    let isRenderingTick = false;
     let currentExplode = 0;
     let lastTickTime = performance.now();
     let elapsed = 0;
+    let isVisible = true;
 
     function afterDraw(cb: () => void) {
       const gl = renderer.getContext() as WebGL2RenderingContext;
+      if (typeof gl.fenceSync !== 'function') {
+        frameId = window.setTimeout(cb, 80);
+        return;
+      }
       const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
       gl.flush();
       const poll = () => {
@@ -435,8 +444,59 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       frameId = window.setTimeout(poll, 5);
     }
 
-    function tick() {
+    function requestRender() {
+      if (isDisposed || !isVisible || frameRequested || isRenderingTick) return;
+      frameRequested = true;
+      if (isSoftwareGl) {
+        afterDraw(() => {
+          frameRequested = false;
+          tick();
+        });
+      } else {
+        frameId = requestAnimationFrame(() => {
+          frameRequested = false;
+          tick();
+        });
+      }
+    }
+
+    requestRenderRef.current = requestRender;
+
+    const onControlChange = () => {
+      requestRender();
+    };
+    controls.addEventListener('change', onControlChange);
+
+    const resizeObserver = new ResizeObserver(() => {
       if (isDisposed) return;
+      const nextWidth = Math.max(240, mount.clientWidth);
+      const nextHeight = Math.max(240, mount.clientHeight);
+      camera.aspect = nextWidth / nextHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(nextWidth, nextHeight);
+      renderer.setPixelRatio(
+        isSoftwareGl ? 1 : Math.min(Math.max(window.devicePixelRatio || 1, 1), 2),
+      );
+      requestRender();
+    });
+    resizeObserver.observe(mount);
+
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        const nextVisible = entry?.isIntersecting ?? true;
+        isVisible = nextVisible;
+        if (nextVisible && !isDisposed) {
+          lastTickTime = performance.now();
+          requestRender();
+        }
+      },
+      { threshold: 0.02 },
+    );
+    intersectionObserver.observe(mount);
+
+    function tick() {
+      if (isDisposed || !isVisible) return;
+      isRenderingTick = true;
 
       const now = performance.now();
       const delta = Math.min(0.1, (now - lastTickTime) / 1000);
@@ -445,17 +505,13 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
       const targetExplode = explodeTargetRef.current;
       currentExplode = THREE.MathUtils.damp(currentExplode, targetExplode, 9, delta);
+      const explodeSettled = Math.abs(currentExplode - targetExplode) < 0.001;
+      if (explodeSettled) {
+        currentExplode = targetExplode;
+      }
 
       for (const layer of assembly.explodeLayers) {
         layer.object.position.y = layer.baseY + layer.offsetY * currentExplode;
-      }
-
-      if (assembly.joystickStick) {
-        assembly.joystickStick.rotation.z = Math.sin(elapsed * 1.8) * 0.06;
-        assembly.joystickStick.rotation.x = Math.cos(elapsed * 1.4) * 0.05;
-      }
-      if (assembly.orbitRing) {
-        assembly.orbitRing.rotation.z = elapsed * 0.12;
       }
 
       const flight = presetFlightRef.current;
@@ -464,42 +520,60 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         _targetLook.set(...flight.target);
         camera.position.lerp(_targetCamPos, 0.07);
         controls.target.lerp(_targetLook, 0.07);
-        if (camera.position.distanceTo(_targetCamPos) < 0.01) {
+        if (
+          camera.position.distanceTo(_targetCamPos) < 0.01 &&
+          controls.target.distanceTo(_targetLook) < 0.01
+        ) {
+          camera.position.copy(_targetCamPos);
+          controls.target.copy(_targetLook);
           flight.active = false;
         }
       }
 
-      controls.update();
-      renderer.render(scene, camera);
+      const controlsMoved = controls.update();
+      const needsNextFrame = !explodeSettled || flight.active || controlsMoved;
 
-      if (isVisible) {
-        if (isSoftwareGl) {
-          afterDraw(tick);
-        } else {
-          frameId = requestAnimationFrame(tick);
+      if (needsNextFrame) {
+        if (assembly.joystickStick) {
+          assembly.joystickStick.rotation.z = Math.sin(elapsed * 1.8) * 0.06;
+          assembly.joystickStick.rotation.x = Math.cos(elapsed * 1.4) * 0.05;
         }
-      } else {
-        frameId = window.setTimeout(tick, 300);
+        if (assembly.orbitRing) {
+          assembly.orbitRing.rotation.z = elapsed * 0.12;
+        }
+      }
+
+      renderer.render(scene, camera);
+      isRenderingTick = false;
+
+      if (needsNextFrame) {
+        requestRender();
       }
     }
 
-    if (isSoftwareGl) {
-      afterDraw(tick);
-    } else {
-      frameId = requestAnimationFrame(tick);
-    }
+    // Render initial settled frame on mount (on-demand)
+    requestRender();
 
     return () => {
       isDisposed = true;
+      requestRenderRef.current = null;
       cancelAnimationFrame(frameId);
       window.clearTimeout(frameId);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       controls.removeEventListener('start', onControlStart);
+      controls.removeEventListener('change', onControlChange);
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       controls.dispose();
+      envTexture.dispose();
+      for (const geometry of assembly.geometries) {
+        geometry.dispose();
+      }
+      materialsRef.current = null;
       disposeMaterialBundle(materials);
       renderer.dispose();
       mount.innerHTML = '';
@@ -513,6 +587,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       position: preset.position,
       target: preset.target,
     };
+    requestRenderRef.current?.();
   };
 
   const handleResetView = () => {
@@ -522,6 +597,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       position: [3.55, 2.42, 4.2],
       target: [0.06, 0.78, 0.02],
     };
+    requestRenderRef.current?.();
   };
 
   if (webglFailed) {
@@ -548,6 +624,13 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         <BriefCamOverlay
           activeModule={briefCamModule}
           onClose={() => setShowBriefCam(false)}
+          onInspectFeed={() => {
+            setViewMode('live', { scrollToSection: false });
+            const smartClientPreset = CAMERA_PRESETS.find((preset) => preset.id === 'smart-client');
+            if (smartClientPreset) {
+              handleSelectPreset(smartClientPreset);
+            }
+          }}
           onSelectModule={setBriefCamModule}
         />
       )}
@@ -557,6 +640,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         <div className="stage3d-standard-tabs">
           {(['views', 'exports', 'search', 'alarms', 'monitor'] as const).map((tab) => (
             <button
+              aria-pressed={consoleTab === tab}
               key={tab}
               className={`stage3d-client-tab ${consoleTab === tab ? 'stage3d-client-tab--active' : ''}`}
               onClick={() => {
@@ -580,14 +664,41 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
             title="BriefCam Video Content Analytics Plugin"
             type="button"
           >
-            <Zap size={15} />
-            <span className="briefcam-badge-dot" />
+            <Zap aria-hidden="true" size={15} />
+            <span aria-hidden="true" className="briefcam-badge-dot" />
           </button>
-          <button className="icon-button" title="User Profile" type="button">
-            <User size={15} />
+          <button
+            aria-label="Operator profile readout"
+            className="icon-button"
+            onClick={() =>
+              setSelectedPart({
+                id: 'operator-profile',
+                label: 'Operator: Sumit Anand · Shift Lead',
+                spec: 'Flipkart Kalash Mega Hub · Milestone XProtect Smart Client · 32+ Ch',
+                sectionId: 'about',
+                actionLabel: 'Operator Profile',
+              })
+            }
+            title="Operator Profile"
+            type="button"
+          >
+            <User aria-hidden="true" size={15} />
           </button>
-          <button className="icon-button" title="Client Settings" type="button">
-            <Settings size={15} />
+          <button
+            aria-label="Toggle 3D workstation control dock"
+            className="icon-button"
+            onClick={() => {
+              setDockOpen((prev) => !prev);
+              setSelectedPart({
+                id: 'client-settings',
+                label: 'Smart Client Viewport Diagnostics',
+                spec: `Finish: ${FINISH_PRESETS[activeFinish].label} · Active View: ${activePreset.toUpperCase()}`,
+              });
+            }}
+            title="Workstation Controls (H)"
+            type="button"
+          >
+            <Settings aria-hidden="true" size={15} />
           </button>
         </div>
       </div>

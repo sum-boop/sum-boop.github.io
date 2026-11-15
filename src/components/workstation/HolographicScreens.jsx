@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { RoundedBox, Text } from '@react-three/drei';
 import { animated, useSpring } from '@react-spring/three';
 import * as THREE from 'three';
@@ -39,42 +39,118 @@ const CCTVShader = {
   `
 };
 
-function ScreenFrame({ width, height, position, rotation, onFocus, focusKey, children }) {
+function ScreenFrame({
+  width,
+  height,
+  position,
+  rotation,
+  onFocus,
+  focusKey,
+  enableHoverScale = false,
+  children,
+}) {
   const [hovered, setHovered] = useState(false);
-  const bezelMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: 0x0B1018,
-    metalness: 0.8,
-    roughness: 0.3,
-  }), []);
+  const invalidate = useThree((state) => state.invalidate);
+  const groupRef = useRef();
+  const bezelGlowRef = useRef();
 
-  const glassMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    transmission: 0.9,
-    roughness: 0.1,
-    thickness: 0.5,
-    ior: 1.5,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.05,
-    reflectivity: 0.9,
-    transparent: true,
-    opacity: 0.88,
-  }), []);
+  const bezelMat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: 0x0b1018,
+        metalness: 0.8,
+        roughness: 0.3,
+        emissive: new THREE.Color('#22D3EE'),
+        emissiveIntensity: 0.04,
+      }),
+    [],
+  );
+
+  const glassMat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transmission: 0.9,
+        roughness: 0.1,
+        thickness: 0.5,
+        ior: 1.5,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.05,
+        reflectivity: 0.9,
+        transparent: true,
+        opacity: 0.88,
+      }),
+    [],
+  );
+
+  useFrame((state, delta) => {
+    const targetScale = enableHoverScale && hovered ? 1.02 : 1.0;
+    const targetEmissive = hovered ? (enableHoverScale ? 0.35 : 0.18) : 0.04;
+    const targetEdgeOpacity = hovered ? 1.0 : 0.6;
+    const alpha = 1 - Math.exp(-12 * Math.min(delta, 0.05));
+
+    let animBusy = false;
+
+    if (groupRef.current) {
+      const nextScale = THREE.MathUtils.lerp(groupRef.current.scale.x, targetScale, alpha);
+      groupRef.current.scale.setScalar(nextScale);
+      if (Math.abs(nextScale - targetScale) > 0.0005) {
+        animBusy = true;
+      } else {
+        groupRef.current.scale.setScalar(targetScale);
+      }
+    }
+
+    if (Math.abs(bezelMat.emissiveIntensity - targetEmissive) > 0.002) {
+      bezelMat.emissiveIntensity = THREE.MathUtils.lerp(
+        bezelMat.emissiveIntensity,
+        targetEmissive,
+        alpha,
+      );
+      animBusy = true;
+    } else {
+      bezelMat.emissiveIntensity = targetEmissive;
+    }
+
+    if (bezelGlowRef.current) {
+      if (Math.abs(bezelGlowRef.current.opacity - targetEdgeOpacity) > 0.005) {
+        bezelGlowRef.current.opacity = THREE.MathUtils.lerp(
+          bezelGlowRef.current.opacity,
+          targetEdgeOpacity,
+          alpha,
+        );
+        animBusy = true;
+      } else {
+        bezelGlowRef.current.opacity = targetEdgeOpacity;
+      }
+    }
+
+    if (animBusy) {
+      state.invalidate();
+    }
+  });
 
   return (
     <group
+      ref={groupRef}
       position={position}
       rotation={rotation}
       onClick={(e) => {
         e.stopPropagation();
+        invalidate();
         if (onFocus && focusKey) onFocus(focusKey);
       }}
-      onPointerOver={() => {
+      onPointerOver={(e) => {
+        e.stopPropagation();
         setHovered(true);
         document.body.style.cursor = 'pointer';
+        invalidate();
       }}
-      onPointerOut={() => {
+      onPointerOut={(e) => {
+        e.stopPropagation();
         setHovered(false);
         document.body.style.cursor = 'default';
+        invalidate();
       }}
     >
       {/* Bezel */}
@@ -85,7 +161,13 @@ function ScreenFrame({ width, height, position, rotation, onFocus, focusKey, chi
       {/* Thin Cyan Emissive Edge Line */}
       <lineSegments position={[0, 0, 0.031]}>
         <edgesGeometry args={[new THREE.BoxGeometry(width - 0.02, height - 0.02, 0.001)]} />
-        <lineBasicMaterial color="#22D3EE" transparent opacity={hovered ? 1.0 : 0.6} linewidth={2} />
+        <lineBasicMaterial
+          ref={bezelGlowRef}
+          color="#22D3EE"
+          transparent
+          opacity={hovered ? 1.0 : 0.6}
+          linewidth={2}
+        />
       </lineSegments>
 
       {/* Glass Front */}
@@ -104,6 +186,73 @@ function ScreenFrame({ width, height, position, rotation, onFocus, focusKey, chi
         {children}
       </group>
     </group>
+  );
+}
+
+export function ResetViewButton3D({ focus, onReset }) {
+  const [hovered, setHovered] = useState(false);
+  const invalidate = useThree((state) => state.invalidate);
+  const { scale, emissive } = useSpring({
+    scale: hovered ? 1.06 : 1,
+    emissive: hovered ? 2.4 : focus !== 'overview' ? 1.4 : 0.65,
+    config: { tension: 320, friction: 20 },
+    onChange: () => invalidate(),
+  });
+
+  // Position cleanly in the active HUD corner when zoomed in, or at desk center in overview
+  const placement =
+    focus === 'screen-focus'
+      ? { pos: [-0.88, 2.36, -0.45], rot: [0, 0.18, 0] }
+      : focus === 'briefcam-focus'
+        ? { pos: [2.92, 2.36, -0.45], rot: [0, -0.18, 0] }
+        : focus === 'heatmap'
+          ? { pos: [5.15, 2.12, -0.75], rot: [0, -0.45, 0] }
+          : { pos: [0, 0.88, 0.68], rot: [-0.28, 0, 0] };
+
+  return (
+    <animated.group
+      position={placement.pos}
+      rotation={placement.rot}
+      scale={scale}
+      onClick={(e) => {
+        e.stopPropagation();
+        invalidate();
+        if (onReset) onReset();
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = 'pointer';
+        invalidate();
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+        document.body.style.cursor = 'default';
+        invalidate();
+      }}
+    >
+      <RoundedBox args={[0.72, 0.15, 0.03]} radius={0.03} smoothness={3}>
+        <animated.meshStandardMaterial
+          color="#0E1726"
+          emissive="#22D3EE"
+          emissiveIntensity={emissive}
+          roughness={0.28}
+          metalness={0.6}
+          toneMapped={false}
+        />
+      </RoundedBox>
+      <Text
+        position={[0, 0, 0.018]}
+        fontSize={0.042}
+        color="#E6F1FF"
+        anchorX="center"
+        anchorY="middle"
+        letterSpacing={0.08}
+      >
+        RESET VIEW
+      </Text>
+    </animated.group>
   );
 }
 
@@ -241,7 +390,8 @@ export default function HolographicScreens({ activeTab, setActiveTab, onFocus, c
         position={[-1.9, 1.35, -0.6]}
         rotation={[0, 0.18, 0]}
         onFocus={onFocus}
-        focusKey="main"
+        focusKey="screen-focus"
+        enableHoverScale={true}
       >
         {/* Top Header */}
         <group position={[0, 0.8, 0]}>
@@ -350,7 +500,7 @@ export default function HolographicScreens({ activeTab, setActiveTab, onFocus, c
         position={[1.9, 1.35, -0.6]}
         rotation={[0, -0.18, 0]}
         onFocus={onFocus}
-        focusKey="briefcam"
+        focusKey="briefcam-focus"
       >
         {/* Top Header & Tabs */}
         <group position={[0, 0.78, 0]}>
@@ -360,28 +510,28 @@ export default function HolographicScreens({ activeTab, setActiveTab, onFocus, c
           <group position={[0.3, 0, 0]}>
             <TabButton
               label="REVIEW"
-              active={activeTab === 'review'}
+              active={activeTab === 'REVIEW'}
               onClick={() => {
-                setActiveTab('review');
-                onFocus('briefcam');
+                setActiveTab('REVIEW');
+                onFocus('briefcam-focus');
               }}
               position={[-0.5, 0, 0]}
             />
             <TabButton
               label="RESPOND"
-              active={activeTab === 'respond'}
+              active={activeTab === 'RESPOND'}
               onClick={() => {
-                setActiveTab('respond');
-                onFocus('briefcam');
+                setActiveTab('RESPOND');
+                onFocus('briefcam-focus');
               }}
               position={[0, 0, 0]}
             />
             <TabButton
               label="RESEARCH"
-              active={activeTab === 'research'}
+              active={activeTab === 'RESEARCH'}
               onClick={() => {
-                setActiveTab('research');
-                onFocus('briefcam');
+                setActiveTab('RESEARCH');
+                onFocus('briefcam-focus');
               }}
               position={[0.5, 0, 0]}
             />

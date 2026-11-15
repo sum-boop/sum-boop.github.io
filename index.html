@@ -25,9 +25,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      as="style"
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
+      onload="this.onload=null;this.rel='stylesheet'"
+      rel="preload"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <style>
+      html{background:#0b1018;color:#f2f7ff;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif}
+      html[data-theme="light"]{background:#f5f7fa;color:#0f172a}
+      body{margin:0;background:inherit;color:inherit}
+    </style>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Sumit Anand" />
     <meta property="og:url" content="https://sum-boob-github-io.vercel.app/" />

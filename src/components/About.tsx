@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Activity, Fingerprint, MapPin, ShieldCheck } from 'lucide-react';
 import { careerSites } from '@/data/experience';
 import { profile } from '@/data/profile';
 import { ChoreoReveal, Counter } from '@/motion';
 import { assetPath } from '@/utils/assets';
+import { useStaggeredCardGroup } from '@/utils/scrollStory';
 import { SectionHeading } from './SectionHeading';
 
 export function About() {
   const [imageFailed, setImageFailed] = useState(false);
+  const employersRef = useRef<HTMLDivElement>(null);
+  const metricsRef = useRef<HTMLDivElement>(null);
+
+  useStaggeredCardGroup(employersRef, '.about-employer-item');
+  useStaggeredCardGroup(metricsRef, '.about-metric');
 
   return (
     <section aria-labelledby="about-title" className="content-section about-section" id="about">
@@ -70,15 +76,9 @@ export function About() {
                 {paragraph}
               </ChoreoReveal>
             ))}
-            <div aria-label="Career sites" className="about-employers">
-              {careerSites.map((site, index) => (
-                <ChoreoReveal
-                  className="about-employer-item"
-                  delay={0.04 + index * 0.05}
-                  direction="up"
-                  distance={14}
-                  key={site.id}
-                >
+            <div aria-label="Career sites" className="about-employers" ref={employersRef}>
+              {careerSites.map((site) => (
+                <div className="about-employer-item" key={site.id}>
                   <a className="employer-chip" href="#experience">
                     <span
                       aria-hidden="true"
@@ -95,23 +95,18 @@ export function About() {
                       </small>
                     </span>
                   </a>
-                </ChoreoReveal>
+                </div>
               ))}
             </div>
-            <div className="about-metrics">
+            <div className="about-metrics" ref={metricsRef}>
               {profile.careerMetrics.map((metric, index) => {
                 const MetricIcon = index === 0 ? Activity : index === 1 ? ShieldCheck : Fingerprint;
                 return (
-                  <ChoreoReveal
-                    className="about-metric"
-                    delay={0.05 + index * 0.05}
-                    direction="scale"
-                    key={metric.label}
-                  >
+                  <div className="about-metric" key={metric.label}>
                     <MetricIcon aria-hidden="true" size={16} />
                     <Counter className="about-metric-value" value={metric.value} />
                     <span className="about-metric-label">{metric.label}</span>
-                  </ChoreoReveal>
+                  </div>
                 );
               })}
             </div>

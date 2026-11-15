@@ -17,25 +17,13 @@ import { assetPath } from '@/utils/assets';
 import { ContactForm } from './ContactForm';
 import { SectionHeading } from './SectionHeading';
 import { SocialIcon } from './SocialIcon';
-import { useToast } from './ToastProvider';
 
 export function Contact() {
   const [copied, setCopied] = useState(false);
-  const showToast = useToast();
 
-  async function copyEmail() {
-    try {
-      await navigator.clipboard.writeText(contact.email);
-      setCopied(true);
-      showToast({ type: 'success', title: 'Email copied', message: contact.email });
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      showToast({
-        type: 'info',
-        title: 'Direct email',
-        message: contact.email,
-      });
-    }
+  function markCopied() {
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
   }
 
   return (
@@ -75,6 +63,7 @@ export function Contact() {
                 <MessageCircle aria-hidden="true" size={17} />
                 <span>
                   <small>WHATSAPP</small>Chat directly on WhatsApp
+                  <span className="sr-only"> (opens in new tab)</span>
                 </span>
                 <ArrowUpRight aria-hidden="true" size={15} />
               </a>
@@ -94,7 +83,12 @@ export function Contact() {
                 <ArrowUpRight aria-hidden="true" size={15} />
               </a>
               <div className="terminal-actions">
-                <button className="copy-email" onClick={copyEmail} type="button">
+                <button
+                  className="copy-email"
+                  data-copy={contact.email}
+                  onClick={markCopied}
+                  type="button"
+                >
                   {copied ? (
                     <Check aria-hidden="true" size={15} />
                   ) : (
@@ -123,7 +117,10 @@ export function Contact() {
                       <SocialIcon platform={social.id} size={17} />
                     </span>
                     <span className="social-card-meta">
-                      <strong>{social.label}</strong>
+                      <strong>
+                        {social.label}
+                        <span className="sr-only"> (opens in new tab)</span>
+                      </strong>
                       <small>{social.handle}</small>
                     </span>
                     <ArrowUpRight aria-hidden="true" className="social-card-arrow" size={14} />
@@ -139,7 +136,10 @@ export function Contact() {
                     <MessageCircle aria-hidden="true" size={17} />
                   </span>
                   <span className="social-card-meta">
-                    <strong>WhatsApp</strong>
+                    <strong>
+                      WhatsApp
+                      <span className="sr-only"> (opens in new tab)</span>
+                    </strong>
                     <small>{contact.phone}</small>
                   </span>
                   <ArrowUpRight aria-hidden="true" className="social-card-arrow" size={14} />
@@ -154,6 +154,7 @@ export function Contact() {
               target="_blank"
             >
               <MapPin aria-hidden="true" size={15} /> {contact.location} · Open on Google Maps
+              <span className="sr-only"> (opens in new tab)</span>
               <ArrowUpRight aria-hidden="true" size={13} />
             </a>
           </ChoreoReveal>
@@ -164,8 +165,8 @@ export function Contact() {
           >
             <div className="contact-form-heading">
               <span className="mono-label">DIRECT MESSAGE COMPOSER</span>
-              <span aria-label="Available" className="availability-chip">
-                <i /> AVAILABLE
+              <span className="availability-chip">
+                <i aria-hidden="true" /> AVAILABLE
               </span>
             </div>
             <p>{contact.hireAvailability}</p>

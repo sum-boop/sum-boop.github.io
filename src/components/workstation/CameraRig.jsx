@@ -3,19 +3,23 @@ import { useFrame } from '@react-three/fiber';
 import { damp3, damp } from 'maath/easing';
 import * as THREE from 'three';
 
-const PRESETS = {
-  overview: { pos: [0, 1.9, 6.2], target: [1.2, 1.2, -0.5], fov: 40 },
-  main: { pos: [-1.9, 1.4, 2.2], target: [-1.9, 1.35, -0.6], fov: 34 },
-  briefcam: { pos: [1.9, 1.38, 2.1], target: [1.9, 1.35, -0.6], fov: 32 },
+export const CAMERA_PRESETS = {
+  overview: { pos: [0, 1.9, 6.2], target: [0.4, 1.25, -0.5], fov: 40 },
+  'screen-focus': { pos: [-1.9, 1.4, 2.2], target: [-1.9, 1.35, -0.6], fov: 34 },
+  'briefcam-focus': { pos: [1.9, 1.38, 2.1], target: [1.9, 1.35, -0.6], fov: 32 },
   heatmap: { pos: [4.1, 1.3, 1.6], target: [4.6, 1.25, -0.9], fov: 34 },
 };
 
+// Pre-allocated vectors to avoid GC churn inside useFrame
+const _targetPos = new THREE.Vector3();
+const _targetLookAt = new THREE.Vector3();
+
 export default function CameraRig({ focus = 'overview', enabled = true, onExit = () => {} }) {
-  const currentTargetRef = useRef(new THREE.Vector3(1.2, 1.2, -0.5));
+  const currentTargetRef = useRef(new THREE.Vector3(0.4, 1.25, -0.5));
   const smoothPosRef = useRef(new THREE.Vector3(0, 1.9, 6.2));
   const lastFovRef = useRef(40);
 
-  // Keyboard Escape listener
+  // Keyboard Escape listener to glide back to overview
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && onExit) {
@@ -29,51 +33,50 @@ export default function CameraRig({ focus = 'overview', enabled = true, onExit =
   useFrame((state, delta) => {
     if (!enabled) return;
 
-    const preset = PRESETS[focus] || PRESETS.overview;
+    const preset = CAMERA_PRESETS[focus] || CAMERA_PRESETS.overview;
     const isOverview = focus === 'overview';
+    const clampedDelta = Math.min(delta, 0.05);
 
-    // Check prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const smoothTime = prefersReducedMotion ? 1.2 : 0.55;
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const smoothTime = prefersReducedMotion ? 0.15 : 0.42;
 
-    // Target position and lookAt
-    const targetPos = new THREE.Vector3(...preset.pos);
-    const targetLookAt = new THREE.Vector3(...preset.target);
+    _targetPos.set(preset.pos[0], preset.pos[1], preset.pos[2]);
+    _targetLookAt.set(preset.target[0], preset.target[1], preset.target[2]);
 
-    // Subtle idle motion & mouse parallax
-    const t = state.clock.getElapsedTime();
-    const idleX = prefersReducedMotion || !isOverview ? 0 : Math.sin(t * 0.8) * 0.03;
-    const idleY = prefersReducedMotion || !isOverview ? 0 : Math.cos(t * 0.6) * 0.03;
-    const orbitX = prefersReducedMotion || !isOverview ? 0 : Math.sin(t * 0.2) * 0.15;
+    // Subtle pointer parallax offset when hovering inside the canvas
+    const parallaxAmp = isOverview ? 0.22 : 0.05;
+    _targetPos.x += state.pointer.x * parallaxAmp;
+    _targetPos.y += state.pointer.y * parallaxAmp;
 
-    targetPos.x += orbitX + idleX;
-    targetPos.y += idleY;
-
-    // Mouse parallax damping
-    const parallaxAmp = isOverview ? 0.25 : 0.06;
-    targetPos.x += state.pointer.x * parallaxAmp;
-    targetPos.y += state.pointer.y * parallaxAmp;
-
-    // Damp position
-    damp3(smoothPosRef.current, targetPos, smoothTime, delta);
+    // Physics-damped camera position & lerp lookAt convergence
+    damp3(smoothPosRef.current, _targetPos, smoothTime, clampedDelta);
     state.camera.position.copy(smoothPosRef.current);
 
-    // Damp lookAt target
-    currentTargetRef.current.lerp(targetLookAt, delta * 4);
+    const targetLerpAlpha = 1 - Math.exp(-8 * clampedDelta);
+    currentTargetRef.current.lerp(_targetLookAt, targetLerpAlpha);
     state.camera.lookAt(currentTargetRef.current);
 
-    // Damp FOV
-    const newFov = damp(state.camera.fov, preset.fov, smoothTime, delta);
-    if (Math.abs(newFov - lastFovRef.current) > 0.01) {
+    // Physics-damped FOV zoom transition
+    const newFov = damp(state.camera.fov, preset.fov, smoothTime, clampedDelta);
+    const fovChanged = Math.abs(newFov - lastFovRef.current) > 0.005;
+    if (fovChanged) {
       state.camera.fov = newFov;
       state.camera.updateProjectionMatrix();
       lastFovRef.current = newFov;
     }
 
-    // Cinematic roll based on movement speed/distance
-    const dist = smoothPosRef.current.distanceTo(targetPos);
-    const roll = Math.min(Math.max(dist * 0.02, -0.01), 0.01);
-    state.camera.rotation.z = THREE.MathUtils.lerp(state.camera.rotation.z, roll, delta * 3);
+    // Subtle banking roll proportional to camera lateral travel distance
+    const posDistance = smoothPosRef.current.distanceTo(_targetPos);
+    const targetDistance = currentTargetRef.current.distanceTo(_targetLookAt);
+    const roll = THREE.MathUtils.clamp((_targetPos.x - smoothPosRef.current.x) * 0.008, -0.015, 0.015);
+    state.camera.rotation.z = THREE.MathUtils.lerp(state.camera.rotation.z, roll, targetLerpAlpha);
+
+    // Keep requesting frames under frameloop="demand" until camera settles completely
+    if (posDistance > 0.004 || targetDistance > 0.004 || Math.abs(preset.fov - newFov) > 0.02) {
+      state.invalidate();
+    }
   });
 
   return null;

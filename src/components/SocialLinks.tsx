@@ -38,7 +38,7 @@ export function SocialLinks({ variant = 'hero', className }: SocialLinksProps) {
         return (
           <m.a
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            aria-label={`${social.label} — ${social.handle}`}
+            aria-label={`${social.label} — ${social.handle} (opens in new tab)`}
             className={`social-links-item social-links-item--${social.id}`}
             href={social.href}
             initial={prefersReducedMotion ? false : { opacity: 0, y: 12, scale: 0.94 }}

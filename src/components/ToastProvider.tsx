@@ -1,6 +1,7 @@
 import { AnimatePresence, m } from 'framer-motion';
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 import { Check, Info, X, XOctagon } from 'lucide-react';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { motionSprings } from '../motion/tokens';
 
 type ToastKind = 'success' | 'error' | 'info';
@@ -24,6 +25,7 @@ let nextToastId = 0;
 
 export function ToastProvider({ children }: PropsWithChildren) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
+  const prefersReducedMotion = useReducedMotion();
 
   const showToast = (toast: ToastInput) => {
     const record = { ...toast, id: ++nextToastId };
@@ -50,16 +52,22 @@ export function ToastProvider({ children }: PropsWithChildren) {
               toast.type === 'success' ? Check : toast.type === 'error' ? XOctagon : Info;
             return (
               <m.div
-                className={`toast toast--${toast.type}`}
+                className={`toast toast--${toast.type} toast-${toast.type}`}
                 key={toast.id}
-                layout
+                layout={!prefersReducedMotion}
                 role={toast.type === 'error' ? 'alert' : 'status'}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ ...motionSprings.snappy, layout: motionSprings.snappy }}
+                initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0.01 }
+                    : { ...motionSprings.snappy, layout: motionSprings.snappy }
+                }
               >
-                <Icon aria-hidden="true" size={18} />
+                <span aria-hidden="true" className="toast-icon">
+                  <Icon size={18} />
+                </span>
                 <div>
                   <p className="toast-title">{toast.title}</p>
                   <p className="toast-message">{toast.message}</p>

@@ -99,3 +99,180 @@ html[data-theme='light'] {
   --shadow-card: 0 8px 26px rgba(15, 23, 42, 0.06);
   --shadow-deep: 0 20px 52px rgba(15, 23, 42, 0.12);
 }
+
+/* =========================
+   1. OPERATING MODES
+   ========================= */
+:root {
+  --accent-rgb: 77, 166, 214;
+  --secondary-rgb: 127, 140, 224;
+  --status-rgb: 62, 180, 137;
+  --scanline-tint: rgba(77, 166, 214, 0.05);
+  --scanline-opacity: 0.08;
+  --grain-opacity: 0.05;
+  --mode-transition-duration: 600ms;
+  --mode-transition-ease: var(--ease-out);
+}
+
+html[data-mode='monitor'] {
+  --accent-rgb: 0, 229, 255;
+  --secondary-rgb: 167, 139, 250;
+  --status-rgb: 0, 255, 156;
+
+  --color-accent-cyan: #00e5ff;
+  --color-accent-violet: #a78bfa;
+  --color-accent-lime: #00ff9c;
+  --accent-cyan-text: #5cecff;
+  --accent-violet-text: #c4b5fd;
+  --accent-lime-text: #5effba;
+
+  --focus-ring-color: #00e5ff;
+  --focus-ring-halo: rgba(0, 229, 255, 0.22);
+  --color-border-strong: rgba(0, 229, 255, 0.38);
+  --color-primary-glow: rgba(0, 229, 255, 0.12);
+  --color-secondary-glow: rgba(167, 139, 250, 0.1);
+  --color-spotlight: rgba(0, 229, 255, 0.09);
+  --scanline-tint: rgba(0, 229, 255, 0.06);
+  --scanline-opacity: 0.08;
+  --grain-opacity: 0.05;
+}
+
+html[data-mode='alert'] {
+  --accent-rgb: 255, 176, 32;
+  --secondary-rgb: 255, 59, 78;
+  --status-rgb: 255, 90, 54;
+
+  --color-background: #0a0605;
+  --color-background-raised: #140b09;
+  --color-surface: #1b0f0c;
+  --color-surface-elevated: #261512;
+  --color-surface-glass: rgba(20, 11, 9, 0.88);
+
+  --color-accent-cyan: #ffb020;
+  --color-accent-blue: #ff8c2b;
+  --color-accent-violet: #ff3b4e;
+  --color-accent-lime: #ff5a36;
+  --color-accent-amber: #ffb020;
+  --color-accent-danger: #ff3b4e;
+
+  --accent-cyan-text: #ffc65c;
+  --accent-violet-text: #ff7a87;
+  --accent-lime-text: #ff8a6b;
+  --accent-amber-text: #ffd075;
+
+  --color-border: rgba(255, 176, 32, 0.22);
+  --color-border-strong: rgba(255, 176, 32, 0.45);
+  --focus-ring-color: #ffb020;
+  --focus-ring-halo: rgba(255, 176, 32, 0.28);
+  --color-primary-glow: rgba(255, 176, 32, 0.14);
+  --color-secondary-glow: rgba(255, 59, 78, 0.12);
+  --color-spotlight: rgba(255, 176, 32, 0.1);
+  --color-on-accent: #1a0b04;
+  --color-backdrop: rgba(10, 6, 5, 0.84);
+  --scanline-tint: rgba(255, 176, 32, 0.06);
+  --scanline-opacity: 0.1;
+  --grain-opacity: 0.06;
+}
+
+html[data-mode='night'] {
+  --accent-rgb: 63, 214, 196;
+  --secondary-rgb: 112, 168, 178;
+  --status-rgb: 63, 214, 196;
+
+  --color-background: #070a0d;
+  --color-background-raised: #0b1014;
+  --color-surface: #0f161c;
+  --color-surface-elevated: #141e26;
+  --color-surface-glass: rgba(11, 16, 20, 0.9);
+  --color-foreground: #d2dedc;
+  --color-text-secondary: #b2c2c0;
+  --color-text-muted: #8fa3a0;
+
+  --color-accent-cyan: #3fd6c4;
+  --color-accent-blue: #4ba9b8;
+  --color-accent-violet: #789fc4;
+  --color-accent-lime: #3fd6c4;
+  --accent-cyan-text: #6de0d2;
+  --accent-violet-text: #9dbbd9;
+  --accent-lime-text: #6de0d2;
+
+  --color-border: rgba(63, 214, 196, 0.16);
+  --color-border-strong: rgba(63, 214, 196, 0.32);
+  --focus-ring-color: #3fd6c4;
+  --focus-ring-halo: rgba(63, 214, 196, 0.16);
+  --color-primary-glow: rgba(63, 214, 196, 0.06);
+  --color-secondary-glow: rgba(112, 168, 178, 0.05);
+  --color-spotlight: rgba(63, 214, 196, 0.04);
+  --color-on-accent: #041513;
+  --scanline-tint: rgba(63, 214, 196, 0.03);
+  --scanline-opacity: 0.035;
+  --grain-opacity: 0.025;
+}
+
+html.mode-transitioning,
+html.mode-transitioning *,
+html.mode-transitioning *::before,
+html.mode-transitioning *::after {
+  transition:
+    background-color var(--mode-transition-duration) var(--mode-transition-ease),
+    border-color var(--mode-transition-duration) var(--mode-transition-ease),
+    color var(--mode-transition-duration) var(--mode-transition-ease),
+    box-shadow var(--mode-transition-duration) var(--mode-transition-ease) !important;
+}
+
+/* =========================
+   2. EDITORIAL TYPOGRAPHY TOKENS
+   ========================= */
+:root {
+  --font-display-wide: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --fs-hero-xl: clamp(2.4rem, 5.2vw, 4.4rem);
+  --fs-readout: clamp(0.72rem, 0.85vw, 0.82rem);
+  --fs-label: clamp(0.68rem, 0.78vw, 0.76rem);
+  --tracking-wide: 0.08em;
+  --tracking-mono: 0.14em;
+  --lh-tight: 1.08;
+  --lh-body: 1.65;
+}
+
+/* =========================
+   3. CONSOLE DEPTH AND TEXTURE TOKENS
+   ========================= */
+:root {
+  --shadow-inset-recess: inset 0 2px 6px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(0, 0, 0, 0.55);
+  --shadow-key-raised: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px -2px rgba(0, 0, 0, 0.55), 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-key-pressed: inset 0 2px 5px rgba(0, 0, 0, 0.72), inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  --surface-glass: var(--color-surface-glass);
+  --blur-glass: 14px;
+  --border-bevel-light: 1px solid rgba(255, 255, 255, 0.18);
+  --border-bevel-dark: 1px solid rgba(0, 0, 0, 0.55);
+  --glow-emissive-sm: 0 0 10px rgba(var(--accent-rgb), 0.18);
+  --glow-emissive-md: 0 0 22px rgba(var(--accent-rgb), 0.26);
+  --glow-emissive-lg: 0 0 40px rgba(var(--accent-rgb), 0.34);
+}
+
+/* =========================
+   4. MODE ACCESSIBILITY PREFERENCES
+   ========================= */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mode-transition-duration: 0.01ms;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --glow-emissive-sm: none;
+    --glow-emissive-md: none;
+    --glow-emissive-lg: none;
+    --color-border: rgba(203, 213, 225, 0.48);
+    --color-border-strong: rgba(126, 194, 232, 0.78);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --blur-glass: 0px;
+    --surface-glass: var(--color-surface);
+    --color-surface-glass: var(--color-surface);
+  }
+}

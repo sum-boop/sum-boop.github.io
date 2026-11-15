@@ -515,19 +515,43 @@ export const EarthGlobe = memo(function EarthGlobe({
       if (patliProj.pz > 0.08) {
         const bx = cx + patliProj.px * radius;
         const by = cy - patliProj.py * radius;
+        const activeNodeAttr = canvas.dataset.activeNode;
+        const hasActiveNode = activeNodeAttr !== undefined && activeNodeAttr !== '';
+        const activeNodeIndex = hasActiveNode ? Number(activeNodeAttr) : -1;
         const pulse = prefersReducedMotion ? 0.5 : (Math.sin(timeMs * 0.003) + 1) * 0.5;
-        const ringRadius = 6 + pulse * 9;
+        const ringRadius = (hasActiveNode ? 8 : 6) + pulse * (hasActiveNode ? 12 : 9);
 
         ctx.beginPath();
         ctx.arc(bx, by, ringRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(126, 194, 232, ${(0.56 - pulse * 0.34).toFixed(3)})`;
-        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = hasActiveNode
+          ? `rgba(0, 229, 255, ${(0.76 - pulse * 0.34).toFixed(3)})`
+          : `rgba(126, 194, 232, ${(0.56 - pulse * 0.34).toFixed(3)})`;
+        ctx.lineWidth = hasActiveNode ? 1.8 : 1.4;
         ctx.stroke();
 
+        if (hasActiveNode) {
+          ctx.beginPath();
+          ctx.arc(bx, by, ringRadius + 5, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(0, 229, 255, ${(0.34 - pulse * 0.18).toFixed(3)})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
         ctx.beginPath();
-        ctx.arc(bx, by, 3.4, 0, Math.PI * 2);
-        ctx.fillStyle = '#7ec2e8';
+        ctx.arc(bx, by, hasActiveNode ? 4.2 : 3.4, 0, Math.PI * 2);
+        ctx.fillStyle = hasActiveNode ? '#00e5ff' : '#7ec2e8';
         ctx.fill();
+
+        if (hasActiveNode && Number.isFinite(activeNodeIndex) && activeNodeIndex >= 0) {
+          const labels = ['KALASH HUB', 'EKART HUB', 'NCR CORRIDOR'] as const;
+          const nodeLabel = labels[activeNodeIndex] ?? `NODE 0${activeNodeIndex + 1}`;
+          ctx.save();
+          ctx.font = '600 9px monospace';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = isLight ? 'rgba(8, 36, 56, 0.92)' : 'rgba(224, 247, 255, 0.96)';
+          ctx.fillText(`0${activeNodeIndex + 1} · ${nodeLabel}`, bx + 11, by - 1);
+          ctx.restore();
+        }
       }
 
       // Fresnel-style atmospheric inner rim lighting
@@ -661,8 +685,10 @@ export const EarthGlobe = memo(function EarthGlobe({
               : 'Interactive 3D Earth globe highlighting Patli, Haryana, India'
           }
           className="earth-canvas"
+          height={480}
           ref={canvasRef}
           role={decorative ? undefined : 'img'}
+          width={480}
         />
       )}
       {!decorative ? (

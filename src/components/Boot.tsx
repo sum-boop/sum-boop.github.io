@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { motionDurations, motionEasings } from '../motion/tokens';
@@ -6,10 +6,24 @@ import { motionDurations, motionEasings } from '../motion/tokens';
 export function Boot() {
   const reducedMotion = useReducedMotion();
   const [visible, setVisible] = useState(() => !reducedMotion);
-  const finish = useCallback(() => setVisible(false), []);
+  const completedRef = useRef(false);
+
+  const notifyComplete = useCallback(() => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    document.dispatchEvent(new CustomEvent('boot:complete'));
+  }, []);
+
+  const finish = useCallback(() => {
+    setVisible(false);
+    notifyComplete();
+  }, [notifyComplete]);
 
   useEffect(() => {
-    if (reducedMotion || !visible) return;
+    if (reducedMotion || !visible) {
+      notifyComplete();
+      return;
+    }
 
     const autoDismiss = window.setTimeout(finish, 780);
     const onKeyDown = (event: KeyboardEvent) => {
@@ -20,7 +34,7 @@ export function Boot() {
       window.clearTimeout(autoDismiss);
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [finish, reducedMotion, visible]);
+  }, [finish, notifyComplete, reducedMotion, visible]);
 
   return (
     <AnimatePresence>

@@ -1,6 +1,7 @@
 import { AnimatePresence, LayoutGroup, m, useMotionValueEvent, useScroll } from 'framer-motion';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Command, Menu, Moon, Radio, Sun, X } from 'lucide-react';
+import { ArrowUpRight, Command, Moon, Radio, Sun, X } from 'lucide-react';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useScrollSpy } from '@/hooks/useScrollSpy';
 import type { ThemeMode } from '@/hooks/useTheme';
 import { ScrollProgress, motionDurations, motionEasings, motionSprings } from '@/motion';
@@ -46,6 +47,8 @@ export const Navbar = memo(function Navbar({
     };
   }, [menuOpen]);
 
+  const prefersReducedMotion = useReducedMotion();
+
   useEffect(() => {
     if (!menuOpen) return;
 
@@ -57,7 +60,7 @@ export const Navbar = memo(function Navbar({
         menuToggleRef.current?.focus();
       }
     };
-    const mq = window.matchMedia('(min-width: 768px)');
+    const mq = window.matchMedia('(min-width: 900px)');
     const onViewportChange = (event: MediaQueryListEvent) => {
       if (event.matches) setMenuOpen(false);
     };
@@ -115,12 +118,11 @@ export const Navbar = memo(function Navbar({
               {links.map((link) => {
                 const active = activeSection === link.href.slice(1);
                 return (
-                  <m.a
+                  <a
                     aria-current={active ? 'location' : undefined}
                     className="nav-link"
                     href={link.href}
                     key={link.href}
-                    whileTap={{ scale: 0.97 }}
                   >
                     {link.label}
                     {active ? (
@@ -131,7 +133,7 @@ export const Navbar = memo(function Navbar({
                         transition={motionSprings.snappy}
                       />
                     ) : null}
-                  </m.a>
+                  </a>
                 );
               })}
             </div>
@@ -161,17 +163,14 @@ export const Navbar = memo(function Navbar({
                 <Moon aria-hidden="true" size={16} />
               )}
             </button>
-            <m.button
+            <button
               aria-label="Let's talk — jump to contact section"
               className="nav-cta"
               onClick={scrollToContact}
-              transition={{ duration: motionDurations.micro, ease: motionEasings.out }}
               type="button"
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.97 }}
             >
               Let&apos;s talk <ArrowUpRight aria-hidden="true" size={14} />
-            </m.button>
+            </button>
             <button
               aria-controls="mobile-nav-overlay"
               aria-expanded={menuOpen}
@@ -181,7 +180,11 @@ export const Navbar = memo(function Navbar({
               ref={menuToggleRef}
               type="button"
             >
-              {menuOpen ? <X aria-hidden="true" size={18} /> : <Menu aria-hidden="true" size={18} />}
+              <span aria-hidden="true" className="hamburger-lines">
+                <span className="hamburger-line" />
+                <span className="hamburger-line" />
+                <span className="hamburger-line" />
+              </span>
             </button>
           </div>
         </nav>
@@ -197,18 +200,19 @@ export const Navbar = memo(function Navbar({
               exit={{ opacity: 0 }}
               initial={{ opacity: 0 }}
               onClick={() => setMenuOpen(false)}
-              transition={{ duration: motionDurations.micro, ease: motionEasings.out }}
+              transition={{ duration: prefersReducedMotion ? 0.01 : motionDurations.micro, ease: motionEasings.out }}
             />
             <m.div
-              animate={{ opacity: 1, y: 0 }}
+              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
               aria-label="Mobile navigation overlay"
               aria-modal="true"
               className="mobile-nav-overlay"
-              exit={{ opacity: 0, y: -16 }}
+              data-open="true"
+              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: '100%' }}
               id="mobile-nav-overlay"
-              initial={{ opacity: 0, y: -16 }}
+              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: '100%' }}
               role="dialog"
-              transition={{ duration: motionDurations.fast, ease: motionEasings.out }}
+              transition={{ duration: prefersReducedMotion ? 0.01 : motionDurations.fast, ease: motionEasings.out }}
             >
               <div className="mobile-nav-head">
                 <a

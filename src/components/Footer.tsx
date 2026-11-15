@@ -42,7 +42,7 @@ export const Footer = memo(function Footer() {
             <div aria-label="Social and messaging shortcuts" className="footer-actions">
               <SocialLinks variant="footer" />
               <a
-                aria-label="Message on WhatsApp"
+                aria-label="Message on WhatsApp (opens in new tab)"
                 className="icon-button footer-social-btn"
                 href={contact.whatsappUrl}
                 rel="noopener noreferrer"

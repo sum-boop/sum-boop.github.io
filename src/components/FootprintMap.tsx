@@ -234,10 +234,12 @@ export const FootprintMap = memo(function FootprintMap({ theme }: FootprintMapPr
           </p>
           <div className="footprint-details-links">
             <a href={activeNode.osmUrl} rel="noopener noreferrer" target="_blank">
-              OpenStreetMap <ArrowUpRight aria-hidden="true" size={13} />
+              OpenStreetMap <span className="sr-only">(opens in new tab)</span>
+              <ArrowUpRight aria-hidden="true" size={13} />
             </a>
             <a href={contact.mapUrl} rel="noopener noreferrer" target="_blank">
-              Google Maps <ArrowUpRight aria-hidden="true" size={13} />
+              Google Maps <span className="sr-only">(opens in new tab)</span>
+              <ArrowUpRight aria-hidden="true" size={13} />
             </a>
           </div>
         </aside>

@@ -557,9 +557,9 @@ export function PageTransition({ children, className }: PropsWithChildren<{ clas
 
   return (
     <m.div
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1 }}
       className={className ? `page-transition ${className}` : 'page-transition'}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
       transition={{ duration: motionDurations.base, ease: motionEasings.inOut }}
     >
       {children}

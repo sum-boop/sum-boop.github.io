@@ -21,16 +21,18 @@ export const CameraFeedCard = memo(function CameraFeedCard({
   isSelectedFeed = false,
   onOpen,
 }: CameraFeedCardProps) {
-  const [imgSrc, setImgSrc] = useState(deployment.cardImage);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const [hardFailed, setHardFailed] = useState(false);
   const isTouch = useIsTouch();
   const prefersReducedMotion = useReducedMotion();
   const enabled = !isTouch && !prefersReducedMotion;
 
+  const fallback = assetPath('assets/sumit-monitoring-station.jpg');
+  const imgSrc = failedSrc === deployment.cardImage ? fallback : deployment.cardImage;
+
   const handleImageError = () => {
-    const fallback = assetPath('assets/sumit-monitoring-station.jpg');
-    if (imgSrc !== fallback) {
-      setImgSrc(fallback);
+    if (failedSrc !== deployment.cardImage) {
+      setFailedSrc(deployment.cardImage);
     } else {
       setHardFailed(true);
     }

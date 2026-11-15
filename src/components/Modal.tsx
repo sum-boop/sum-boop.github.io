@@ -6,6 +6,7 @@ import { motionDurations, motionEasings, motionSprings } from '@/motion';
 interface ModalProps extends PropsWithChildren {
   isOpen: boolean;
   titleId: string;
+  descriptionId?: string;
   onClose: () => void;
   onNavigate?: (direction: 'prev' | 'next') => void;
   className?: string;
@@ -17,6 +18,7 @@ const FOCUSABLE_SELECTOR =
 export function Modal({
   isOpen,
   titleId,
+  descriptionId,
   onClose,
   onNavigate,
   className = '',
@@ -93,6 +95,7 @@ export function Modal({
         >
           <m.div
             animate={{ opacity: 1, y: 0, scale: 1 }}
+            aria-describedby={descriptionId}
             aria-labelledby={titleId}
             aria-modal="true"
             className={`modal-window ${className}`.trim()}

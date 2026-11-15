@@ -1,13 +1,11 @@
-import { Suspense, lazy, memo, useCallback, useRef } from 'react';
+import { Suspense, lazy, memo, useCallback, useRef, useState } from 'react';
 import { ArrowUpRight, MapPin } from 'lucide-react';
-import { useGSAP } from '@gsap/react';
-import { gsap } from '@/utils/animMaster';
 import { type VmsSiteFocus, useVms } from '@/context/VmsContext';
 import { contact } from '@/data/contact';
 import { careerSites } from '@/data/experience';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { ThemeMode } from '@/hooks/useTheme';
 import { ChoreoReveal } from '@/motion';
+import { useFootprintScrollStory } from '@/utils/scrollStory';
 import { FootprintMap } from './FootprintMap';
 import { SectionHeading } from './SectionHeading';
 
@@ -21,43 +19,36 @@ interface FootprintProps {
 
 export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
   const { activeSiteId, setActiveSiteId } = useVms();
+  const [corridorOverviewActive, setCorridorOverviewActive] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const innerRef = useRef<HTMLDivElement>(null);
+  const stepListRef = useRef<HTMLDivElement>(null);
 
-  // Scroll Trigger Pinning & Scrub Animation
-  useGSAP(
-    () => {
-      if (prefersReducedMotion || !sectionRef.current || !stageRef.current) return;
+  const totalCameras = careerSites.reduce((sum, site) => sum + site.cameras, 0);
 
-      const mm = gsap.matchMedia();
-
-      mm.add('(min-width: 768px)', () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: '+=120%',
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1,
-          },
-        });
-
-        tl.fromTo(
-          stageRef.current,
-          { scale: 0.94, rotationX: 8, opacity: 0.7 },
-          { scale: 1, rotationX: 0, opacity: 1, ease: 'none' },
-        );
-      });
-
-      return () => mm.revert();
+  const handleStoryStepChange = useCallback(
+    (stepIndex: number) => {
+      if (stepIndex === 1) {
+        setCorridorOverviewActive(false);
+        setActiveSiteId('ekart');
+      } else if (stepIndex === 2) {
+        setCorridorOverviewActive(true);
+        setActiveSiteId('flipkart');
+      } else {
+        setCorridorOverviewActive(false);
+        setActiveSiteId('flipkart');
+      }
     },
-    { scope: sectionRef, dependencies: [prefersReducedMotion] },
+    [setActiveSiteId],
   );
 
+  useFootprintScrollStory(sectionRef, innerRef, stepListRef, {
+    onStepChange: handleStoryStepChange,
+  });
+
   const handleSelectSite = useCallback(
-    (siteId: string) => {
+    (siteId: string, isCorridorOverview = false) => {
+      setCorridorOverviewActive(isCorridorOverview);
       const focusSite: VmsSiteFocus = siteId === 'ekart' ? 'ekart' : 'flipkart';
       setActiveSiteId(focusSite);
     },
@@ -71,7 +62,7 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
       id="footprint"
       ref={sectionRef}
     >
-      <div className="section-inner">
+      <div className="section-inner" ref={innerRef}>
         <SectionHeading
           description="Interactive Patli–NCR logistics corridor radar layered over a subtle orbital backdrop — synced with XProtect Smart Map and kept separate from the 3D workstation."
           eyebrow="Deployment footprint"
@@ -81,7 +72,7 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
           tone="lime"
         />
 
-        <div className="footprint-radar-stage" ref={stageRef}>
+        <div className="footprint-radar-stage">
           <div aria-hidden="true" className="footprint-ambient-globe">
             <Suspense fallback={null}>
               <EarthGlobe decorative theme={theme} />
@@ -95,7 +86,8 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
                   <MapPin aria-hidden="true" size={15} /> PATLI LOGISTICS CORRIDOR · HARYANA, INDIA
                 </span>
                 <a href={contact.mapUrl} rel="noopener noreferrer" target="_blank">
-                  Open Base in Google Maps <ArrowUpRight aria-hidden="true" size={14} />
+                  Open Base in Google Maps <span className="sr-only">(opens in new tab)</span>
+                  <ArrowUpRight aria-hidden="true" size={14} />
                 </a>
               </div>
               <FootprintMap theme={theme} />
@@ -103,42 +95,57 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
           </div>
         </div>
 
-        <div aria-label="Select deployment site on Smart Map" className="site-list" role="group">
+        <div
+          aria-label="Select deployment site on Smart Map"
+          className="site-list"
+          ref={stepListRef}
+          role="group"
+        >
           {careerSites.map((site, index) => {
-            const isSelected = activeSiteId === site.id;
+            const isSelected = !corridorOverviewActive && activeSiteId === site.id;
             return (
-              <ChoreoReveal
-                delay={index * 0.08}
-                direction={index % 2 === 0 ? 'left' : 'right'}
-                distance={18}
+              <button
+                aria-pressed={isSelected}
+                className={`site-row site-row-btn ${isSelected ? 'site-row--active' : ''}`}
                 key={site.id}
+                onClick={() => handleSelectSite(site.id)}
+                type="button"
               >
-                <button
-                  aria-pressed={isSelected}
-                  className={`site-row site-row-btn ${isSelected ? 'site-row--active' : ''}`}
-                  onClick={() => handleSelectSite(site.id)}
-                  type="button"
-                >
-                  <span className="site-index">0{index + 1}</span>
-                  <span className="site-row-state">
-                    <i
-                      className={
-                        site.status === 'active'
-                          ? 'status-pulse'
-                          : 'status-pulse status-pulse--muted'
-                      }
-                    />
-                    {site.status === 'active' ? 'CURRENT' : 'ARCHIVED'}
-                  </span>
-                  <strong>{site.name}</strong>
-                  <span>
-                    {site.client} · {site.period}
-                  </span>
-                  <span className="site-camera-count tabular-nums">{site.cameras} cameras</span>
-                </button>
-              </ChoreoReveal>
+                <span className="site-index">0{index + 1}</span>
+                <span className="site-row-state">
+                  <i
+                    aria-hidden="true"
+                    className={
+                      site.status === 'active'
+                        ? 'status-pulse'
+                        : 'status-pulse status-pulse--muted'
+                    }
+                  />
+                  {site.status === 'active' ? 'CURRENT' : 'ARCHIVED'}
+                </span>
+                <strong>{site.name}</strong>
+                <span>
+                  {site.client} · {site.period}
+                </span>
+                <span className="site-camera-count tabular-nums">{site.cameras} cameras</span>
+              </button>
             );
           })}
+          <button
+            aria-pressed={corridorOverviewActive}
+            className={`site-row site-row-btn ${corridorOverviewActive ? 'site-row--active' : ''}`}
+            onClick={() => handleSelectSite('flipkart', true)}
+            type="button"
+          >
+            <span className="site-index">03</span>
+            <span className="site-row-state">
+              <i aria-hidden="true" className="status-pulse" />
+              CORRIDOR
+            </span>
+            <strong>Patli–NCR Freight Corridor</strong>
+            <span>KMP Expressway · NH-48 Smart Map</span>
+            <span className="site-camera-count tabular-nums">{totalCameras} cameras</span>
+          </button>
         </div>
       </div>
     </section>

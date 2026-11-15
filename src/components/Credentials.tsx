@@ -1,14 +1,19 @@
 import { m } from 'framer-motion';
 import { Award, GraduationCap } from 'lucide-react';
+import { useRef } from 'react';
 import { certifications, education } from '@/data/certifications';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { ChoreoReveal, motionSprings, useIsTouch } from '@/motion';
+import { motionSprings, useIsTouch } from '@/motion';
+import { useStaggeredCardGroup } from '@/utils/scrollStory';
 import { SectionHeading } from './SectionHeading';
 
 export function Credentials() {
   const isTouch = useIsTouch();
   const prefersReducedMotion = useReducedMotion();
   const interactive = !isTouch && !prefersReducedMotion;
+  const layoutRef = useRef<HTMLDivElement>(null);
+
+  useStaggeredCardGroup(layoutRef, '.credential-reveal-item');
 
   return (
     <section
@@ -24,8 +29,8 @@ export function Credentials() {
           title="Verified credentials."
           tone="amber"
         />
-        <div className="credentials-layout">
-          <ChoreoReveal direction="left" distance={28}>
+        <div className="credentials-layout" ref={layoutRef}>
+          <div className="credential-reveal-item">
             <m.div
               className="education-card"
               transition={motionSprings.snappy}
@@ -38,14 +43,10 @@ export function Credentials() {
               <h3>{education}</h3>
               <span className="credential-note">Educational organization</span>
             </m.div>
-          </ChoreoReveal>
+          </div>
           <div className="certification-grid">
             {certifications.map((certification, index) => (
-              <ChoreoReveal
-                delay={0.05 + index * 0.07}
-                direction={index % 2 === 0 ? 'scale' : 'up'}
-                key={certification.title}
-              >
+              <div className="credential-reveal-item" key={certification.title}>
                 <m.article
                   className="certification-card"
                   transition={motionSprings.snappy}
@@ -58,7 +59,7 @@ export function Credentials() {
                   <h3>{certification.title}</h3>
                   <p>{certification.description}</p>
                 </m.article>
-              </ChoreoReveal>
+              </div>
             ))}
           </div>
         </div>
