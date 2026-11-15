@@ -50,12 +50,14 @@ function ScreenFrame({ width, height, position, rotation, onFocus, focusKey, chi
   const glassMat = useMemo(() => new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
     transmission: 0.9,
-    thickness: 0.3,
-    roughness: 0.05,
-    ior: 1.45,
-    clearcoat: 1,
+    roughness: 0.1,
+    thickness: 0.5,
+    ior: 1.5,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.05,
+    reflectivity: 0.9,
     transparent: true,
-    opacity: 0.8,
+    opacity: 0.88,
   }), []);
 
   return (

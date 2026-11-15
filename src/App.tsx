@@ -1,4 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
+import { AnimatePresence, m } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
@@ -22,6 +23,7 @@ import type { DeploymentBriefing } from '@/types/portfolio';
 import { assetPath } from '@/utils/assets';
 import { startSafeViewTransition } from '@/utils/viewTransition';
 import { resolveSiteFromName } from '@/utils/vmsLogic';
+import { initSmoothScroll } from '@/utils/animMaster';
 
 const VALID_PATHS = new Set([
   '',
@@ -165,6 +167,13 @@ function AppContent() {
     setIs404(false);
   }, []);
 
+  useEffect(() => {
+    const lenis = initSmoothScroll();
+    return () => {
+      lenis?.destroy();
+    };
+  }, []);
+
   const openPalette = useCallback(() => setPaletteOpen(true), []);
   const closePalette = useCallback(() => setPaletteOpen(false), []);
   const copyEmailFromPalette = useCallback(() => {
@@ -180,11 +189,23 @@ function AppContent() {
         Skip to main content
       </a>
       <Navbar onOpenPalette={openPalette} onToggleTheme={toggleTheme} theme={theme} />
-      {is404 ? (
-        <NotFound onReturn={returnHome} />
-      ) : (
-        <PortfolioSections onOpenDeployment={openDeployment} theme={theme} />
-      )}
+      
+      <AnimatePresence mode="wait">
+        <m.div
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.98 }}
+          initial={{ opacity: 0, scale: 0.98 }}
+          key={is404 ? '404' : 'portfolio'}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {is404 ? (
+            <NotFound onReturn={returnHome} />
+          ) : (
+            <PortfolioSections onOpenDeployment={openDeployment} theme={theme} />
+          )}
+        </m.div>
+      </AnimatePresence>
+
       {!is404 ? <SideSectionRail /> : null}
       <Footer />
       <BackToTop />

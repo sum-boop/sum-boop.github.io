@@ -1,8 +1,11 @@
-import { Suspense, lazy, memo, useCallback } from 'react';
+import { Suspense, lazy, memo, useCallback, useRef } from 'react';
 import { ArrowUpRight, MapPin } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from '@/utils/animMaster';
 import { type VmsSiteFocus, useVms } from '@/context/VmsContext';
 import { contact } from '@/data/contact';
 import { careerSites } from '@/data/experience';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { ThemeMode } from '@/hooks/useTheme';
 import { ChoreoReveal } from '@/motion';
 import { FootprintMap } from './FootprintMap';
@@ -18,6 +21,40 @@ interface FootprintProps {
 
 export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
   const { activeSiteId, setActiveSiteId } = useVms();
+  const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  // Scroll Trigger Pinning & Scrub Animation
+  useGSAP(
+    () => {
+      if (prefersReducedMotion || !sectionRef.current || !stageRef.current) return;
+
+      const mm = gsap.matchMedia();
+
+      mm.add('(min-width: 768px)', () => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top top',
+            end: '+=120%',
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+          },
+        });
+
+        tl.fromTo(
+          stageRef.current,
+          { scale: 0.94, rotationX: 8, opacity: 0.7 },
+          { scale: 1, rotationX: 0, opacity: 1, ease: 'none' },
+        );
+      });
+
+      return () => mm.revert();
+    },
+    { scope: sectionRef, dependencies: [prefersReducedMotion] },
+  );
 
   const handleSelectSite = useCallback(
     (siteId: string) => {
@@ -32,6 +69,7 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
       aria-labelledby="footprint-title"
       className="content-section footprint-section"
       id="footprint"
+      ref={sectionRef}
     >
       <div className="section-inner">
         <SectionHeading
@@ -43,7 +81,7 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
           tone="lime"
         />
 
-        <div className="footprint-radar-stage">
+        <div className="footprint-radar-stage" ref={stageRef}>
           <div aria-hidden="true" className="footprint-ambient-globe">
             <Suspense fallback={null}>
               <EarthGlobe decorative theme={theme} />

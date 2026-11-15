@@ -94,6 +94,16 @@ function WorkstationScene({ tab, setTab, focus, setFocus, degraded }) {
 
       <Environment preset="night" environmentIntensity={0.6} />
 
+      {/* Top-left directional light creating physical tactile shadows on 3D buttons and panel bezels */}
+      <directionalLight
+        position={[-4.5, 6.5, 3.5]}
+        intensity={2.8}
+        color="#dbeafe"
+        castShadow
+        shadow-mapSize={[1024, 1024]}
+        shadow-bias={-0.0004}
+      />
+
       {/* Key SpotLight */}
       <spotLight
         position={[0, 6, 3]}

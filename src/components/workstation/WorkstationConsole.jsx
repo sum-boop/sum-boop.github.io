@@ -8,14 +8,40 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
   const keysRef = useRef();
   const ledStripRef = useRef();
 
+  // Memoized brushed metal procedural normal map
+  const brushedMetalNormalMap = useMemo(() => {
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#8080ff';
+      ctx.fillRect(0, 0, 256, 256);
+      for (let y = 0; y < 256; y += 2) {
+        const v = Math.floor(128 + (Math.sin(y * 1.5) + (Math.random() - 0.5) * 0.4) * 35);
+        ctx.fillStyle = `rgb(${v}, 128, 255)`;
+        ctx.fillRect(0, y, 256, 1);
+      }
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(16, 6);
+    return tex;
+  }, []);
+
   // Memoized geometries and materials
   const deskMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: 0x0B1018,
-    metalness: 0.6,
-    roughness: 0.25,
-    clearcoat: 1,
-    clearcoatRoughness: 0.1,
-  }), []);
+    color: 0x0E141E,
+    metalness: 0.8,
+    roughness: 0.4,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.15,
+    reflectivity: 0.85,
+    normalMap: brushedMetalNormalMap,
+    normalScale: new THREE.Vector2(0.35, 0.35),
+  }), [brushedMetalNormalMap]);
 
   const steelMat = useMemo(() => new THREE.MeshStandardMaterial({
     color: 0x1A2230,
@@ -28,10 +54,12 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
   }), []);
 
   const keyGeom = useMemo(() => new THREE.BoxGeometry(0.016, 0.01, 0.016), []);
-  const keyMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: 0x0B1018,
-    roughness: 0.4,
-    metalness: 0.2,
+  const keyMat = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: 0x080C14,
+    roughness: 0.35,
+    metalness: 0.5,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.1,
   }), []);
 
   // Keyboard instance matrices setup
@@ -192,7 +220,7 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
             <meshStandardMaterial color="#3B82F6" metalness={0.6} roughness={0.2} />
           </mesh>
         </group>
-        {/* 8 Small Illuminated Buttons */}
+        {/* 8 Small Physical Buttons with Clearcoat and Glowing 3D LED Indicators */}
         {Array.from({ length: 8 }).map((_, i) => {
           const angle = (i / 8) * Math.PI * 2;
           const r = 0.065;
@@ -200,15 +228,29 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
           const bz = Math.sin(angle) * r;
           const isAmber = i % 2 === 0;
           return (
-            <mesh key={i} position={[bx, 0.032, bz]}>
-              <cylinderGeometry args={[0.006, 0.006, 0.008, 16]} />
-              <meshStandardMaterial
-                color={isAmber ? '#FBBF24' : '#22D3EE'}
-                emissive={isAmber ? '#FBBF24' : '#22D3EE'}
-                emissiveIntensity={2}
-                toneMapped={false}
-              />
-            </mesh>
+            <group key={i} position={[bx, 0.03, bz]}>
+              {/* Tactile Button Body with Clearcoat */}
+              <mesh castShadow receiveShadow>
+                <cylinderGeometry args={[0.007, 0.008, 0.009, 16]} />
+                <meshPhysicalMaterial
+                  color={isAmber ? '#1A140A' : '#0B1522'}
+                  clearcoat={1.0}
+                  clearcoatRoughness={0.1}
+                  metalness={0.65}
+                  roughness={0.25}
+                />
+              </mesh>
+              {/* Small 3D LED mesh next to the button */}
+              <mesh position={[Math.cos(angle) * 0.012, 0.005, Math.sin(angle) * 0.012]}>
+                <sphereGeometry args={[0.0018, 12, 12]} />
+                <meshStandardMaterial
+                  color={isAmber ? '#FBBF24' : '#22D3EE'}
+                  emissive={isAmber ? '#FBBF24' : '#22D3EE'}
+                  emissiveIntensity={3.2}
+                  toneMapped={false}
+                />
+              </mesh>
+            </group>
           );
         })}
       </group>

@@ -1,5 +1,7 @@
 import { Suspense, lazy, memo, useRef } from 'react';
 import { m, useScroll, useTransform } from 'framer-motion';
+import { useGSAP } from '@gsap/react';
+import { gsap } from '@/utils/animMaster';
 import {
   Activity,
   ArrowDownRight,
@@ -20,7 +22,6 @@ import type { ThemeMode } from '@/hooks/useTheme';
 import {
   Counter,
   Magnetic,
-  SplitText,
   StaggerGroup,
   heroItemVariants,
   motionDurations,
@@ -52,9 +53,66 @@ const VMS_MODE_ICONS: Record<VmsViewMode, typeof Monitor> = {
 export const Hero = memo(function Hero({ theme }: HeroProps) {
   const { viewMode, statusNote, setViewMode } = useVms();
   const heroRef = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const subtextRef = useRef<HTMLParagraphElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+
   const prefersReducedMotion = useReducedMotion();
   const isTouch = useIsTouch();
   const enableDepth = !prefersReducedMotion && !isTouch;
+
+  // GSAP Cinematic Reveal & Mouse Parallax
+  useGSAP(
+    () => {
+      if (prefersReducedMotion || !headlineRef.current) return;
+
+      const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+      // Split text or clip mask reveal for headline
+      tl.fromTo(
+        headlineRef.current.querySelectorAll('.hero-word'),
+        { y: 60, opacity: 0, clipPath: 'polygon(0 0, 100% 0, 100% 0%, 0 0%)' },
+        {
+          y: 0,
+          opacity: 1,
+          clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+          stagger: 0.04,
+          duration: 1.2,
+        },
+      );
+
+      // Glitch / flicker effect on subtext
+      if (subtextRef.current) {
+        gsap.fromTo(
+          subtextRef.current,
+          { opacity: 0.2, skewX: 10 },
+          { opacity: 1, skewX: 0, duration: 0.4, delay: 0.8, ease: 'rough({ template: none, strength: 1, points: 20, taper: "none", randomize: true, clamp: false })' }
+        );
+      }
+
+      // Mouse Parallax
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!heroRef.current || isTouch) return;
+        const { clientX, clientY } = e;
+        const { innerWidth, innerHeight } = window;
+        const xPos = (clientX / innerWidth - 0.5) * 20;
+        const yPos = (clientY / innerHeight - 0.5) * 20;
+
+        gsap.to(stageRef.current, {
+          x: xPos * 1.5,
+          y: yPos * 1.5,
+          rotationY: xPos * 0.08,
+          rotationX: -yPos * 0.08,
+          duration: 0.8,
+          ease: 'power2.out',
+        });
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    },
+    { scope: heroRef, dependencies: [prefersReducedMotion, isTouch] },
+  );
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -65,7 +123,6 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
   const stageY = useTransform(scrollYProgress, [0, 1], [0, -18]);
   const stageScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
-  const heroHeadline = `${profile.name} — eyes on every hub.`;
   const activePreset = VMS_WORKSPACE_PRESETS.find((preset) => preset.id === viewMode);
 
   return (
@@ -87,13 +144,17 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
               <span className="status-divider">/</span>
               <span>{profile.location}</span>
             </m.div>
-            <h1 aria-label={heroHeadline} className="hero-title" id="hero-title">
-              <SplitText text={profile.name} />
-              <span className="hero-title-accent">
-                <SplitText delay={0.14} text="— eyes on every hub." />
+
+            <h1 aria-label={`${profile.name} — eyes on every hub.`} className="hero-title" id="hero-title" ref={headlineRef}>
+              <span className="inline-block overflow-hidden pb-1">
+                <span className="hero-word inline-block">{profile.name}</span>
+              </span>{' '}
+              <span className="hero-title-accent inline-block overflow-hidden pb-1">
+                <span className="hero-word inline-block">— eyes on every hub.</span>
               </span>
             </h1>
-            <m.p className="hero-role" variants={heroItemVariants}>
+
+            <m.p className="hero-role" variants={heroItemVariants} ref={subtextRef}>
               {profile.role}
             </m.p>
             <m.p className="hero-summary" variants={heroItemVariants}>
@@ -179,6 +240,7 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
                 </a>
               </div>
             </m.div>
+
             <m.div
               aria-label="Professional profile readout"
               className="hero-readout"
@@ -221,6 +283,7 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
           animate={{ opacity: 1, scale: 1 }}
           className="hero-earth-column"
           initial={{ opacity: 0, scale: 0.96 }}
+          ref={stageRef}
           transition={{ duration: motionDurations.slow, delay: 0.16, ease: motionEasings.out }}
           {...(enableDepth ? { style: { y: stageY, scale: stageScale } } : {})}
         >
