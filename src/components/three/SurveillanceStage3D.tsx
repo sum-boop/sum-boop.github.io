@@ -32,8 +32,8 @@ const CAMERA_PRESETS: readonly CameraPreset[] = [
   {
     id: 'workstation',
     label: 'Workstation',
-    position: [3.55, 2.42, 4.2],
-    target: [0.06, 0.78, 0.02],
+    position: [3.45, 2.25, 4.1],
+    target: [0.06, 0.72, 0.02],
   },
   {
     id: 'smart-client',
@@ -130,8 +130,8 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     target: [number, number, number];
   }>({
     active: false,
-    position: CAMERA_PRESETS[0]?.position ?? [3.55, 2.42, 4.2],
-    target: CAMERA_PRESETS[0]?.target ?? [0.06, 0.78, 0.02],
+    position: CAMERA_PRESETS[0]?.position ?? [3.45, 2.25, 4.1],
+    target: CAMERA_PRESETS[0]?.target ?? [0.06, 0.72, 0.02],
   });
 
   const applyThemeCallbackRef = useRef<((nextTheme: ThemeMode) => void) | null>(null);
@@ -259,10 +259,10 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     pmremGenerator.dispose();
 
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 40);
-    camera.position.set(3.55, 2.42, 4.2);
+    camera.position.set(3.45, 2.25, 4.1);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0.06, 0.78, 0.02);
+    controls.target.set(0.06, 0.72, 0.02);
     controls.enableDamping = !isSoftwareGl;
     controls.dampingFactor = 0.06;
     controls.enablePan = false;
@@ -594,8 +594,8 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     setActivePreset('workstation');
     presetFlightRef.current = {
       active: true,
-      position: [3.55, 2.42, 4.2],
-      target: [0.06, 0.78, 0.02],
+      position: [3.45, 2.25, 4.1],
+      target: [0.06, 0.72, 0.02],
     };
     requestRenderRef.current?.();
   };
