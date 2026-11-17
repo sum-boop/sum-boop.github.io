@@ -26,8 +26,8 @@ body {
   font-size: 16px;
   line-height: 1.62;
   transition:
-    color 200ms ease,
-    background-color 220ms ease;
+    color 500ms var(--ease-out),
+    background-color 500ms var(--ease-out);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -693,7 +693,11 @@ section[id] {
   overflow: hidden;
   padding: clamp(5.5rem, 9vh, 6.8rem) var(--gutter) clamp(2.5rem, 5vh, 4rem);
   border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-background);
   scroll-margin-top: 84px;
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out);
 }
 
 .hero-section--immersive {
@@ -717,45 +721,29 @@ section[id] {
   z-index: 2;
   pointer-events: none;
   transition:
-    background 500ms ease,
-    opacity 500ms ease;
+    opacity 500ms var(--ease-out),
+    background-color 500ms var(--ease-out);
   background:
     linear-gradient(
       to bottom,
-      rgba(11, 16, 24, 0.78) 0%,
+      color-mix(in srgb, var(--color-background) 78%, transparent) 0%,
       transparent 16%,
       transparent 68%,
-      rgba(11, 16, 24, 0.82) 89%,
-      rgb(11, 16, 24) 97%
+      color-mix(in srgb, var(--color-background) 84%, transparent) 89%,
+      var(--color-background) 98%
     ),
     linear-gradient(
       96deg,
-      rgba(11, 16, 24, 0.96) 0%,
-      rgba(11, 16, 24, 0.8) 33%,
-      rgba(11, 16, 24, 0.14) 58%,
-      rgba(11, 16, 24, 0.42) 100%
+      color-mix(in srgb, var(--color-background) 96%, transparent) 0%,
+      color-mix(in srgb, var(--color-background) 80%, transparent) 33%,
+      color-mix(in srgb, var(--color-background) 10%, transparent) 58%,
+      color-mix(in srgb, var(--color-background) 38%, transparent) 100%
     ),
-    radial-gradient(circle at 60% 46%, transparent 38%, rgba(11, 16, 24, 0.78) 100%);
-}
-
-:root[data-theme='light'] .hero-edge-vignette {
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(245, 247, 250, 0.76) 0%,
-      transparent 16%,
-      transparent 68%,
-      rgba(245, 247, 250, 0.84) 89%,
-      rgb(245, 247, 250) 97%
-    ),
-    linear-gradient(
-      96deg,
-      rgba(245, 247, 250, 0.96) 0%,
-      rgba(245, 247, 250, 0.82) 33%,
-      rgba(245, 247, 250, 0.08) 58%,
-      rgba(245, 247, 250, 0.36) 100%
-    ),
-    radial-gradient(circle at 60% 46%, transparent 42%, rgba(245, 247, 250, 0.68) 100%);
+    radial-gradient(
+      circle at 60% 46%,
+      transparent 40%,
+      color-mix(in srgb, var(--color-background) 74%, transparent) 100%
+    );
 }
 
 .hero-atmosphere {
@@ -850,11 +838,11 @@ section[id] {
 .hero-readout--compact {
   pointer-events: auto;
   padding: 0.72rem 0.95rem;
-  background-color: rgba(10, 15, 26, 0.86);
-}
-
-:root[data-theme='light'] .hero-readout--compact {
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: var(--color-surface-glass);
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out),
+    box-shadow 500ms var(--ease-out);
 }
 
 .hero-readout--compact .hero-readout-head {
@@ -874,11 +862,11 @@ section[id] {
   pointer-events: auto;
   margin-bottom: 0;
   padding: 0.72rem 0.95rem;
-  background-color: rgba(10, 15, 26, 0.86);
-}
-
-:root[data-theme='light'] .vms-workspace-bar--edge {
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: var(--color-surface-glass);
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out),
+    box-shadow 500ms var(--ease-out);
 }
 
 .hero-kicker {
@@ -921,7 +909,10 @@ section[id] {
 .hero-title-name {
   display: inline-block;
   color: var(--color-foreground);
-  text-shadow: 0 12px 32px rgba(0, 229, 255, 0.14);
+  text-shadow: 0 12px 32px color-mix(in srgb, var(--color-accent-cyan) 14%, transparent);
+  transition:
+    color 500ms var(--ease-out),
+    text-shadow 500ms var(--ease-out);
 }
 
 :root[data-theme='light'] .hero-title-name {
@@ -1126,11 +1117,12 @@ section[id] {
 .hero-scroll {
   position: relative;
   z-index: 4;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  align-self: flex-start;
   gap: 0.4rem;
-  width: min(100%, var(--content-width));
-  margin: 0.75rem auto 0;
+  width: fit-content;
+  margin: 0.75rem 0 0 max(0px, calc((100% - var(--content-width)) / 2));
   color: var(--color-text-muted);
   font: 500 0.78rem var(--font-mono);
   letter-spacing: 0.08em;
@@ -3746,7 +3738,8 @@ textarea.field-success {
   }
 
   .menu-toggle {
-    display: inline-flex;
+    display: inline-grid;
+    place-items: center;
   }
 
   .nav-shell {
@@ -3823,9 +3816,9 @@ textarea.field-success {
 }
 
 @media (pointer: coarse), (max-width: 768px) {
-  button:not(.menu-toggle, .stage3d-client-tab, .stage3d-pill, .stage3d-swatch, .stage3d-reset-btn, .stage3d-dock-toggle, .briefcam-chip),
+  button:not(.menu-toggle, .nav-palette-btn, .nav-theme-btn, .stage3d-client-tab, .stage3d-pill, .stage3d-swatch, .stage3d-reset-btn, .stage3d-dock-toggle, .briefcam-chip),
   .button,
-  .icon-button,
+  .icon-button:not(.nav-palette-btn, .nav-theme-btn),
   .nav-cta,
   .mobile-nav-close,
   .feed-filter,
@@ -4099,10 +4092,12 @@ textarea.field-success {
   overflow: hidden;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
-  background-color: var(--color-background, #0b1018);
+  background-color: var(--color-background);
   box-shadow: var(--shadow-deep);
   user-select: none;
-  transition: background-color 500ms ease;
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out);
 }
 
 .stage3d-shell--hero {
@@ -4120,14 +4115,6 @@ textarea.field-success {
   opacity: 1;
 }
 
-:root[data-theme='light'] .stage3d-shell {
-  background-color: var(--color-background, #f5f7fa);
-}
-
-:root[data-theme='light'] .stage3d-shell--hero {
-  background-color: transparent;
-}
-
 .stage3d-mount {
   position: absolute;
   inset: 0;
@@ -4140,18 +4127,18 @@ textarea.field-success {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  opacity: 0.22;
-  transition: opacity 500ms ease;
+  opacity: var(--scanline-opacity, 0.08);
+  transition: opacity 500ms var(--ease-out);
   background: repeating-linear-gradient(
     to bottom,
     transparent 0px,
     transparent 2px,
-    rgba(0, 0, 0, 0.22) 3px
+    var(--scanline-tint, rgba(77, 166, 214, 0.05)) 3px
   );
 }
 
 :root[data-theme='light'] .stage3d-scanline-film {
-  opacity: 0.04;
+  opacity: 0.035;
 }
 
 .stage3d-edge-top-right {
@@ -4175,14 +4162,14 @@ textarea.field-success {
   justify-content: space-between;
   gap: 0.4rem;
   padding: 0.3rem 0.45rem;
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  border-radius: 8px;
-  background-color: rgba(9, 14, 24, 0.88);
-}
-
-:root[data-theme='light'] .stage3d-top-toolbars {
-  border-color: rgba(15, 23, 42, 0.16);
-  background-color: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-glass);
+  box-shadow: var(--shadow-card);
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out),
+    box-shadow 500ms var(--ease-out);
 }
 
 .stage3d-standard-tabs {
@@ -4197,41 +4184,26 @@ textarea.field-success {
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
-  color: #cbd5e1;
+  color: var(--color-text-secondary);
   font: 600 0.64rem/1.1 var(--font-mono);
   letter-spacing: 0.06em;
   white-space: nowrap;
   cursor: pointer;
   transition:
-    color 140ms ease,
-    border-color 140ms ease,
-    background-color 140ms ease;
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .stage3d-client-tab:hover {
-  color: #f8fafc;
-  background-color: rgba(148, 163, 184, 0.14);
+  color: var(--color-foreground);
+  background-color: var(--color-surface-elevated);
 }
 
 .stage3d-client-tab--active {
-  color: #04131f;
-  border-color: #38bdf8;
-  background-color: #38bdf8;
-}
-
-:root[data-theme='light'] .stage3d-client-tab {
-  color: #334155;
-}
-
-:root[data-theme='light'] .stage3d-client-tab:hover {
-  color: #0f172a;
-  background-color: rgba(15, 23, 42, 0.06);
-}
-
-:root[data-theme='light'] .stage3d-client-tab--active {
-  color: #ffffff;
-  border-color: #0e6796;
-  background-color: #0e6796;
+  color: var(--color-on-accent);
+  border-color: var(--color-accent-cyan);
+  background-color: var(--color-accent-cyan);
 }
 
 .stage3d-global-toolbar {
@@ -4248,8 +4220,8 @@ textarea.field-success {
 
 .briefcam-plugin-btn {
   position: relative;
-  color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.45);
+  color: var(--accent-cyan-text);
+  border-color: var(--color-border-strong);
 }
 
 .briefcam-badge-dot {
@@ -4259,8 +4231,8 @@ textarea.field-success {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: var(--color-accent-lime, #00ff9c);
-  box-shadow: 0 0 6px var(--color-accent-lime, #00ff9c);
+  background-color: var(--color-accent-lime);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-accent-lime) 70%, transparent);
 }
 
 .stage3d-spec-badge {
@@ -4270,11 +4242,16 @@ textarea.field-success {
   width: 100%;
   max-width: min(390px, calc(100vw - 2 * var(--gutter)));
   padding: 0.45rem 0.65rem;
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  border-radius: 8px;
-  color: #f1f5f9;
-  background-color: rgba(9, 14, 24, 0.88);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-foreground);
+  background-color: var(--color-surface-glass);
+  box-shadow: var(--shadow-card);
   pointer-events: none;
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out),
+    color 500ms var(--ease-out);
 }
 
 .stage3d-mobile-fallback .stage3d-spec-badge {
@@ -4282,12 +4259,6 @@ textarea.field-success {
   z-index: 4;
   top: 0.85rem;
   right: 0.85rem;
-}
-
-:root[data-theme='light'] .stage3d-spec-badge {
-  color: #0f172a;
-  background-color: rgba(255, 255, 255, 0.94);
-  border-color: rgba(15, 23, 42, 0.16);
 }
 
 .stage3d-spec-row {
@@ -4298,14 +4269,10 @@ textarea.field-success {
 }
 
 .stage3d-spec-title {
-  color: #7dd3fc;
+  color: var(--accent-cyan-text);
   font: 700 0.72rem/1.2 var(--font-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-
-:root[data-theme='light'] .stage3d-spec-title {
-  color: #0369a1;
 }
 
 .stage3d-spec-action {
@@ -4314,28 +4281,29 @@ textarea.field-success {
   align-items: center;
   gap: 0.25rem;
   padding: 0.2rem 0.48rem;
-  border: 1px solid rgba(56, 189, 248, 0.48);
+  border: 1px solid var(--color-accent-cyan);
   border-radius: 6px;
-  color: #04131f;
-  background-color: #38bdf8;
+  color: var(--color-on-accent);
+  background-color: var(--color-accent-cyan);
   font: 700 0.66rem/1.1 var(--font-mono);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
 }
 
 .stage3d-spec-action:hover {
-  background-color: #7dd3fc;
+  background-color: var(--accent-cyan-text);
+  border-color: var(--accent-cyan-text);
 }
 
 .stage3d-spec-sub {
   font-size: 0.74rem;
   line-height: 1.3;
-  color: #cbd5e1;
-}
-
-:root[data-theme='light'] .stage3d-spec-sub {
-  color: #334155;
+  color: var(--color-text-secondary);
 }
 
 .stage3d-dock-wrap {
@@ -4361,20 +4329,19 @@ textarea.field-success {
   align-items: center;
   gap: 0.3rem;
   padding: 0.26rem 0.65rem;
-  border: 1px solid rgba(148, 163, 184, 0.32);
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  color: #f1f5f9;
-  background-color: rgba(9, 14, 24, 0.9);
+  color: var(--color-foreground);
+  background-color: var(--color-surface-glass);
+  box-shadow: var(--shadow-card);
   font: 600 0.64rem var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-}
-
-:root[data-theme='light'] .stage3d-dock-toggle {
-  color: #0f172a;
-  background-color: rgba(255, 255, 255, 0.94);
-  border-color: rgba(15, 23, 42, 0.22);
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out),
+    color 500ms var(--ease-out);
 }
 
 .stage3d-dock {
@@ -4385,16 +4352,15 @@ textarea.field-success {
   gap: 0.35rem 0.55rem;
   width: 100%;
   padding: 0.42rem 0.65rem;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 10px;
-  color: #f1f5f9;
-  background-color: rgba(9, 14, 24, 0.92);
-}
-
-:root[data-theme='light'] .stage3d-dock {
-  color: #0f172a;
-  background-color: rgba(255, 255, 255, 0.96);
-  border-color: rgba(15, 23, 42, 0.16);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-foreground);
+  background-color: var(--color-surface-glass);
+  box-shadow: var(--shadow-card);
+  transition:
+    background-color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out),
+    color 500ms var(--ease-out);
 }
 
 .stage3d-slider-group {
@@ -4408,7 +4374,7 @@ textarea.field-success {
 
 .stage3d-slider-group input[type='range'] {
   width: 68px;
-  accent-color: #38bdf8;
+  accent-color: var(--color-accent-cyan);
   cursor: pointer;
 }
 
@@ -4420,36 +4386,36 @@ textarea.field-success {
 
 .stage3d-pill {
   padding: 0.28rem 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.34);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   color: inherit;
   background-color: transparent;
   font: 600 0.66rem var(--font-mono);
   cursor: pointer;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .stage3d-pill--active {
-  color: #04131f;
-  border-color: #38bdf8;
-  background-color: #38bdf8;
+  color: var(--color-on-accent);
+  border-color: var(--color-accent-cyan);
+  background-color: var(--color-accent-cyan);
 }
 
 .stage3d-swatch {
   width: 24px;
   height: 24px;
   padding: 0;
-  border: 2px solid rgba(255, 255, 255, 0.48);
+  border: 2px solid var(--color-border-strong);
   border-radius: 50%;
   cursor: pointer;
 }
 
-:root[data-theme='light'] .stage3d-swatch {
-  border-color: rgba(15, 23, 42, 0.34);
-}
-
 .stage3d-swatch--active {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.45);
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent-cyan) 42%, transparent);
 }
 
 .stage3d-dock-toggle:focus-visible,
@@ -4468,7 +4434,7 @@ textarea.field-success {
   width: 28px;
   height: 28px;
   place-items: center;
-  border: 1px solid rgba(148, 163, 184, 0.34);
+  border: 1px solid var(--color-border);
   border-radius: 7px;
   color: inherit;
   background: transparent;
@@ -4481,11 +4447,16 @@ textarea.field-success {
   bottom: 0.85rem;
   left: 0.85rem;
   padding: 0.45rem 0.75rem;
-  border-radius: 8px;
-  background-color: rgba(11, 16, 28, 0.92);
-  color: #e2e8f0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-glass);
+  color: var(--color-text-secondary);
   font: 600 0.7rem var(--font-mono);
   text-align: center;
+  transition:
+    background-color 500ms var(--ease-out),
+    color 500ms var(--ease-out),
+    border-color 500ms var(--ease-out);
 }
 
 /* =========================
@@ -4899,21 +4870,56 @@ textarea.field-success {
     padding-top: 5.5rem;
   }
 
+  .hero-copy-frame {
+    max-width: min(410px, 56vw);
+  }
+
+  .hero-edge-vignette {
+    background:
+      linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-background) 82%, transparent) 0%,
+        transparent 16%,
+        transparent 68%,
+        color-mix(in srgb, var(--color-background) 86%, transparent) 89%,
+        var(--color-background) 98%
+      ),
+      linear-gradient(
+        96deg,
+        color-mix(in srgb, var(--color-background) 97%, transparent) 0%,
+        color-mix(in srgb, var(--color-background) 88%, transparent) 44%,
+        color-mix(in srgb, var(--color-background) 22%, transparent) 66%,
+        color-mix(in srgb, var(--color-background) 38%, transparent) 100%
+      );
+  }
+
   .hero-bottom-hud {
     grid-template-columns: minmax(0, 1fr);
     margin-top: 1.5rem;
   }
 
   .stage3d-edge-top-right {
+    top: 4.9rem;
+    right: var(--gutter);
+    max-width: min(290px, 40vw);
+  }
+
+  .stage3d-standard-tabs,
+  .stage3d-spec-sub {
+    display: none;
+  }
+
+  .stage3d-dock-wrap--collapsed {
     display: none;
   }
 
   .stage3d-dock-wrap {
-    bottom: 0.65rem;
-    right: 0.65rem;
-    left: 0.65rem;
-    align-items: center;
-    max-width: none;
+    top: 10.6rem;
+    right: var(--gutter);
+    bottom: auto;
+    left: auto;
+    align-items: flex-end;
+    max-width: min(300px, 42vw);
   }
 
   .hero-stage-stack {
@@ -4944,21 +4950,16 @@ textarea.field-success {
 }
 
 @media (max-width: 767px) {
+  .hero-copy-frame {
+    max-width: 100%;
+  }
+
   .hero-edge-vignette {
     background: linear-gradient(
       to bottom,
-      rgba(11, 16, 24, 0.88) 0%,
-      rgba(11, 16, 24, 0.78) 55%,
-      rgb(11, 16, 24) 100%
-    );
-  }
-
-  :root[data-theme='light'] .hero-edge-vignette {
-    background: linear-gradient(
-      to bottom,
-      rgba(245, 247, 250, 0.92) 0%,
-      rgba(245, 247, 250, 0.84) 55%,
-      rgb(245, 247, 250) 100%
+      color-mix(in srgb, var(--color-background) 88%, transparent) 0%,
+      color-mix(in srgb, var(--color-background) 78%, transparent) 55%,
+      var(--color-background) 100%
     );
   }
 }
@@ -5009,19 +5010,11 @@ textarea.field-success {
   overflow: hidden;
   background: radial-gradient(
     circle at 50% 46%,
-    rgba(0, 229, 255, 0.08) 0%,
-    rgba(10, 16, 28, 0.96) 54%,
-    #05070b 100%
+    color-mix(in srgb, var(--color-accent-cyan) 10%, transparent) 0%,
+    color-mix(in srgb, var(--color-background) 96%, transparent) 54%,
+    var(--color-background) 100%
   );
-}
-
-:root[data-theme='light'] .stage3d-skeleton {
-  background: radial-gradient(
-    circle at 50% 46%,
-    rgba(14, 165, 233, 0.1) 0%,
-    #eef2f7 65%,
-    #e2e8f0 100%
-  );
+  transition: background-color 500ms var(--ease-out);
 }
 
 .stage-skeleton-inner {
@@ -5058,34 +5051,34 @@ textarea.field-success {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(0, 229, 255, 0.28) 0%,
-    rgba(0, 229, 255, 0.08) 46%,
+    color-mix(in srgb, var(--color-accent-cyan) 28%, transparent) 0%,
+    color-mix(in srgb, var(--color-accent-cyan) 8%, transparent) 46%,
     transparent 72%
   );
-  box-shadow: 0 0 38px rgba(0, 229, 255, 0.22);
+  box-shadow: 0 0 38px color-mix(in srgb, var(--color-accent-cyan) 22%, transparent);
   animation: radar-glow-pulse 2.2s ease-in-out infinite;
 }
 
 .stage-skeleton-radar-ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(0, 229, 255, 0.32);
+  border: 1px solid color-mix(in srgb, var(--color-accent-cyan) 32%, transparent);
 }
 
 .stage-skeleton-radar-ring--outer {
   inset: 0;
   border-style: dashed;
-  border-color: rgba(0, 229, 255, 0.36);
+  border-color: color-mix(in srgb, var(--color-accent-cyan) 36%, transparent);
 }
 
 .stage-skeleton-radar-ring--mid {
   inset: 20%;
-  border-color: rgba(0, 229, 255, 0.28);
+  border-color: color-mix(in srgb, var(--color-accent-cyan) 28%, transparent);
 }
 
 .stage-skeleton-radar-ring--inner {
   inset: 38%;
-  border-color: rgba(0, 229, 255, 0.45);
+  border-color: color-mix(in srgb, var(--color-accent-cyan) 45%, transparent);
 }
 
 .stage-skeleton-radar-sweep {
@@ -5094,8 +5087,8 @@ textarea.field-success {
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    rgba(0, 229, 255, 0.36) 0deg,
-    rgba(0, 229, 255, 0.06) 52deg,
+    color-mix(in srgb, var(--color-accent-cyan) 36%, transparent) 0deg,
+    color-mix(in srgb, var(--color-accent-cyan) 6%, transparent) 52deg,
     transparent 96deg 360deg
   );
   animation: radar-sweep-spin 2.6s linear infinite;
@@ -5106,10 +5099,10 @@ textarea.field-success {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background-color: var(--accent, #00e5ff);
+  background-color: var(--color-accent-cyan);
   box-shadow:
-    0 0 12px rgba(0, 229, 255, 0.9),
-    0 0 28px rgba(0, 229, 255, 0.45);
+    0 0 12px color-mix(in srgb, var(--color-accent-cyan) 85%, transparent),
+    0 0 28px color-mix(in srgb, var(--color-accent-cyan) 42%, transparent);
   animation: radar-core-pulse 1.8s ease-in-out infinite;
 }
 
@@ -5140,7 +5133,7 @@ textarea.field-success {
 .stage-skeleton-base {
   width: min(260px, 66vw);
   height: 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   background-color: var(--color-surface-elevated);
 }
@@ -5157,22 +5150,18 @@ textarea.field-success {
   bottom: 1rem;
   z-index: 2;
   padding: 0.35rem 0.72rem;
-  border: 1px solid rgba(0, 229, 255, 0.28);
-  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
   color: var(--color-text-muted);
-  background-color: rgba(10, 15, 24, 0.86);
+  background-color: var(--color-surface-glass);
   font: 600 0.68rem var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-:root[data-theme='light'] .stage-skeleton-label {
-  background-color: rgba(255, 255, 255, 0.92);
-  border-color: var(--color-border);
-}
-
 .stage3d-mobile-fallback {
-  background-color: #05070b;
+  background-color: var(--color-background);
+  transition: background-color 500ms var(--ease-out);
 }
 
 .stage3d-fallback-img {
@@ -5183,20 +5172,30 @@ textarea.field-success {
   object-fit: cover;
   object-position: center;
   opacity: 0.88;
+  transition: opacity 500ms var(--ease-out);
+}
+
+:root[data-theme='light'] .stage3d-mobile-fallback .stage3d-fallback-img {
+  opacity: 0.34;
 }
 
 .stage3d-fallback-scrim {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 40%, rgba(0, 229, 255, 0.14) 0%, transparent 65%),
+    radial-gradient(
+      circle at 50% 40%,
+      color-mix(in srgb, var(--color-accent-cyan) 12%, transparent) 0%,
+      transparent 65%
+    ),
     linear-gradient(
       to bottom,
-      rgba(5, 7, 11, 0.72) 0%,
-      rgba(5, 7, 11, 0.18) 45%,
-      rgba(5, 7, 11, 0.9) 100%
+      color-mix(in srgb, var(--color-background) 78%, transparent) 0%,
+      color-mix(in srgb, var(--color-background) 34%, transparent) 45%,
+      var(--color-background) 100%
     );
   pointer-events: none;
+  transition: opacity 500ms var(--ease-out);
 }
 
 @keyframes skeleton-sweep {

@@ -24,7 +24,7 @@ function applyThemeToDocument(theme: ThemeMode) {
   document.documentElement.style.colorScheme = theme;
   const meta = document.getElementById('theme-color-meta');
   if (meta) {
-    meta.setAttribute('content', theme === 'light' ? '#f6f7fa' : '#080b12');
+    meta.setAttribute('content', theme === 'light' ? '#f5f7fa' : '#0b1018');
   }
 }
 

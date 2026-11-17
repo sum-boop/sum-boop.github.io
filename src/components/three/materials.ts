@@ -812,13 +812,25 @@ export function applyInterpolatedThemeToMaterials(
 ): void {
   const t = themeState.mix;
   bundle.plinth.color.copy(themeState.plinth);
-  bundle.plinth.metalness = 0.08 + t * 0.14;
-  bundle.plinth.roughness = 0.88 - t * 0.24;
-  bundle.plinth.envMapIntensity = 0.12 + t * 0.52;
+  bundle.plinth.metalness = 0.08 + t * 0.04;
+  bundle.plinth.roughness = 0.88 - t * 0.08;
+  bundle.plinth.envMapIntensity = 0.12 + t * 0.16;
+
+  // Keep brushed metal rich and contrasted in Light Mode without mirroring overhead white IBL
   bundle.deskSlab.color.copy(themeState.deskSlab);
+  bundle.deskSlab.metalness = 0.76 - t * 0.2;
+  bundle.deskSlab.roughness = 0.28 + t * 0.08;
+  bundle.deskSlab.envMapIntensity = 1.0 - t * 0.45;
+  bundle.deskSlab.clearcoat = 0.42 - t * 0.14;
+
+  // Keep monitor glass reflective without washing dark feeds into milky grey under studio IBL
+  bundle.screenGlass.envMapIntensity = 1.0 - t * 0.58;
+  bundle.screenGlass.clearcoat = 1.0 - t * 0.28;
+  bundle.chassis.envMapIntensity = 1.0 - t * 0.24;
+
   bundle.deskGrid.color.copy(themeState.deskGrid);
   bundle.deskGrid.opacity = themeState.deskGridOpacity;
-  bundle.deskGrid.envMapIntensity = 0.12 + t * 0.52;
+  bundle.deskGrid.envMapIntensity = 0.12 + t * 0.22;
   bundle.contactShadow.opacity = themeState.contactShadowOpacity;
 
   bundle.holoWire.color.copy(themeState.holoWire);
@@ -846,10 +858,10 @@ export function applyInterpolatedThemeToMaterials(
   bundle.accentTrim.emissiveIntensity = themeState.accentTrimEmissiveIntensity;
 
   // Tone down neon bloom drivers slightly in light mode so details stay rich instead of white-hot
-  bundle.portLed.emissiveIntensity = 1.75 - t * 0.85;
-  bundle.alarmKey.emissiveIntensity = 1.25 - t * 0.55;
-  bundle.warmAccentLed.emissiveIntensity = 1.9 - t * 0.9;
-  bundle.keycap.emissiveIntensity = 0.25 - t * 0.14;
+  bundle.portLed.emissiveIntensity = 1.75 - t * 0.72;
+  bundle.alarmKey.emissiveIntensity = 1.25 - t * 0.45;
+  bundle.warmAccentLed.emissiveIntensity = 1.9 - t * 0.78;
+  bundle.keycap.emissiveIntensity = 0.25 - t * 0.1;
 }
 
 export function disposeMaterialBundle(bundle: MaterialBundle): void {

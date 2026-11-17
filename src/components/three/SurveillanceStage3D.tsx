@@ -250,6 +250,20 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       if (nextTheme !== themeRef.current) {
         themeRef.current = nextTheme;
         applyThemeCallbackRef.current?.(nextTheme);
+        screenStateRef.current = {
+          ...screenStateRef.current,
+          theme: nextTheme,
+        };
+        const bundle = materialsRef.current;
+        if (bundle) {
+          drawSmartClientPrimaryCanvas(bundle.primaryCanvas, screenStateRef.current);
+          bundle.primaryTexture.needsUpdate = true;
+          drawSmartClientAuxCanvas(bundle.auxCanvas, screenStateRef.current);
+          bundle.auxTexture.needsUpdate = true;
+          drawBriefCamCanvas(bundle.briefcamCanvas, screenStateRef.current);
+          bundle.briefcamTexture.needsUpdate = true;
+        }
+        requestRenderRef.current?.();
       }
     };
     const rootObserver = new MutationObserver(syncLiveTheme);
@@ -269,11 +283,12 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   }, []);
 
   useEffect(() => {
+    const resolvedTheme = resolveLiveTheme(theme);
     screenStateRef.current = {
       mode: viewMode,
       siteId: activeSiteId,
       feedId: selectedFeedId,
-      theme,
+      theme: resolvedTheme,
     };
     const bundle = materialsRef.current;
     if (!bundle) return;
