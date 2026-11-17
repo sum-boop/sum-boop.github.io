@@ -21,8 +21,6 @@ import type { ThemeMode } from '@/hooks/useTheme';
 import {
   Counter,
   Magnetic,
-  motionDurations,
-  motionEasings,
   useIsTouch,
 } from '@/motion';
 import workstationHeroImg from '@/assets/images/workstation_command_hero_1794781430131.jpg';
@@ -511,25 +509,71 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
   });
   const copyY = useTransform(scrollYProgress, [0, 1], [0, -28]);
   const copyOpacity = useTransform(scrollYProgress, [0, 0.85, 1], [1, 0.94, 0.72]);
-  const stageY = useTransform(scrollYProgress, [0, 1], [0, -18]);
-  const stageScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
   const activePreset = VMS_WORKSPACE_PRESETS.find((preset) => preset.id === viewMode);
 
   return (
-    <section aria-labelledby="hero-title" className="hero-section" id="hero" ref={heroRef}>
-      <div
-        aria-hidden="true"
-        className="hero-atmosphere"
-        data-parallax="true"
-        data-parallax-depth="1"
-      >
+    <section
+      aria-labelledby="hero-title"
+      className="hero-section hero-section--immersive"
+      id="hero"
+      ref={heroRef}
+    >
+      {/* Full-Screen 3D Workstation Background */}
+      <div className="hero-stage-backdrop">
+        {isMobile ? (
+          <div
+            aria-label="Milestone XProtect Smart Client workstation preview"
+            className="stage3d-shell stage3d-shell--hero stage3d-mobile-fallback"
+            data-testid="vms-stage-mobile-fallback"
+          >
+            <img
+              alt="Milestone XProtect VMS multi-monitor operator command workstation"
+              className="stage3d-fallback-img"
+              decoding="async"
+              loading="eager"
+              referrerPolicy="no-referrer"
+              src={workstationHeroImg}
+            />
+            <div aria-hidden="true" className="stage3d-fallback-scrim" />
+            <div className="stage3d-spec-badge">
+              <div className="stage3d-spec-row">
+                <span className="stage3d-spec-title">
+                  Milestone XProtect VMS + BriefCam L4
+                </span>
+              </div>
+              <span className="stage3d-spec-sub">
+                {activePreset ? `${activePreset.label} · ${statusNote}` : statusNote}
+              </span>
+            </div>
+            <span className="stage3d-caption-static">
+              Live 45+ Camera Command Desk · Desktop 3D Inspection
+            </span>
+          </div>
+        ) : (
+          <Suspense
+            fallback={<StageSkeleton label="Initializing 3D Command Room…" variant="vms" />}
+          >
+            <SurveillanceStage3D theme={theme} />
+          </Suspense>
+        )}
+      </div>
+
+      {/* Edge gradient fade so foreground copy stays readable over the luminous 3D scene */}
+      <div aria-hidden="true" className="hero-edge-vignette" />
+
+      <div aria-hidden="true" className="hero-atmosphere">
         <span className="hero-orb hero-orb--cyan" />
         <span className="hero-orb hero-orb--violet" />
         <span className="hero-grid" />
       </div>
-      <div className="hero-layout">
-        <m.div {...(enableDepth ? { style: { y: copyY, opacity: copyOpacity } } : {})}>
+
+      {/* Edge-anchored foreground copy (containers keep pointer-events: none) */}
+      <div className="hero-layout hero-layout--immersive">
+        <m.div
+          className="hero-copy-frame"
+          {...(enableDepth ? { style: { y: copyY, opacity: copyOpacity } } : {})}
+        >
           <div className="hero-copy">
             <p className="hero-kicker">
               <span className="kicker-mark">SA /</span> MILESTONE XPROTECT VMS · CCTV OPERATIONS
@@ -542,13 +586,13 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
             </div>
 
             <h1
-              aria-label={`${profile.name} — eyes on every hub.`}
+              aria-label={`${profile.name} — Eyes on every hub.`}
               className="hero-title"
               id="hero-title"
               ref={headlineRef}
             >
               <span className="hero-title-name">{profile.name}</span>{' '}
-              <span className="hero-title-accent">— eyes on every hub.</span>
+              <span className="hero-title-accent">Eyes on every hub.</span>
             </h1>
 
             <p className="hero-role">{profile.role}</p>
@@ -582,133 +626,71 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
             </div>
           </div>
         </m.div>
-
-        <m.div
-          animate={{ opacity: 1, scale: 1 }}
-          className="hero-earth-column"
-          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.96 }}
-          transition={{ duration: motionDurations.slow, delay: 0.16, ease: motionEasings.out }}
-          {...(enableDepth ? { style: { y: stageY, scale: stageScale } } : {})}
-        >
-          <div
-            className="hero-stage-stack"
-            data-parallax="true"
-            data-parallax-depth="3"
-            data-parallax-tilt="true"
-          >
-            {isMobile ? (
-              <div
-                aria-label="Milestone XProtect Smart Client workstation preview"
-                className="stage3d-shell stage3d-mobile-fallback"
-                data-testid="vms-stage-mobile-fallback"
-              >
-                <img
-                  alt="Milestone XProtect VMS multi-monitor operator command workstation"
-                  className="stage3d-fallback-img"
-                  decoding="async"
-                  loading="eager"
-                  referrerPolicy="no-referrer"
-                  src={workstationHeroImg}
-                />
-                <div aria-hidden="true" className="stage3d-fallback-scrim" />
-                <div className="stage3d-spec-badge">
-                  <div className="stage3d-spec-row">
-                    <span className="stage3d-spec-title">
-                      Milestone XProtect VMS + BriefCam L4
-                    </span>
-                  </div>
-                  <span className="stage3d-spec-sub">
-                    {activePreset ? `${activePreset.label} · ${statusNote}` : statusNote}
-                  </span>
-                </div>
-                <span className="stage3d-caption-static">
-                  Live 45+ Camera Command Desk · Desktop 3D Inspection
-                </span>
-              </div>
-            ) : (
-              <Suspense
-                fallback={<StageSkeleton label="Loading 3D VMS workstation…" variant="vms" />}
-              >
-                <SurveillanceStage3D theme={theme} />
-              </Suspense>
-            )}
-          </div>
-
-          <div
-            aria-label="Milestone XProtect VMS Smart Client modes"
-            className="vms-workspace-bar"
-            role="group"
-          >
-            <div className="vms-workspace-head">
-              <span className="vms-workspace-title">
-                <Activity aria-hidden="true" size={13} /> XPROTECT SMART CLIENT CONSOLE
-              </span>
-              <span className="vms-workspace-status">{statusNote}</span>
-            </div>
-            <div className="vms-workspace-tabs">
-              {VMS_WORKSPACE_PRESETS.map((preset) => {
-                const Icon = VMS_MODE_ICONS[preset.id];
-                const active = viewMode === preset.id;
-                return (
-                  <button
-                    aria-pressed={active}
-                    className={`vms-tab ${active ? 'vms-tab--active' : ''}`}
-                    key={preset.id}
-                    onClick={() => setViewMode(preset.id, { scrollToSection: false })}
-                    type="button"
-                  >
-                    <Icon aria-hidden="true" size={14} />
-                    <span>{preset.label}</span>
-                  </button>
-                );
-              })}
-              {activePreset ? (
-                <button
-                  className="vms-jump-btn"
-                  onClick={() => setViewMode(activePreset.id, { scrollToSection: true })}
-                  type="button"
-                >
-                  Jump to view <ArrowDownRight aria-hidden="true" size={13} />
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </m.div>
       </div>
 
-      <div
-        aria-label="Professional profile readout"
-        className="hero-readout hero-readout--wide"
-        role="group"
-      >
-        <div className="hero-readout-head">
-          <span className="hero-readout-signal">
-            <span aria-hidden="true" className="hero-readout-led" />
-            OPERATOR DOSSIER · {profile.name.toUpperCase()}
-          </span>
-          <Clock className="hero-readout-index" />
-        </div>
-        <div className="hero-readout-body">
-          <div aria-label="Career highlights" className="hero-metrics">
-            {profile.heroMetrics.map((metric) => (
-              <div className="hero-metric" key={metric.label}>
-                <Counter className="hero-metric-value" value={metric.value} />
-                <span className="hero-metric-label">{metric.label}</span>
-              </div>
-            ))}
+      {/* Bottom Edge Bar: Operator Dossier + XProtect Smart Client Console */}
+      <div className="hero-bottom-hud">
+        <div
+          aria-label="Professional profile readout"
+          className="hero-readout hero-readout--compact"
+          role="group"
+        >
+          <div className="hero-readout-head">
+            <span className="hero-readout-signal">
+              <span aria-hidden="true" className="hero-readout-led" />
+              OPERATOR DOSSIER · {profile.name.toUpperCase()}
+            </span>
+            <Clock className="hero-readout-index" />
           </div>
-          <div aria-label="Professional focus" className="hero-meta">
-            {profile.metadata.map((item, idx) => (
-              <span key={item}>
-                {idx > 0 ? (
-                  <span aria-hidden="true" className="meta-sep">
-                    {' '}
-                    ·{' '}
-                  </span>
-                ) : null}
-                {item}
-              </span>
-            ))}
+          <div className="hero-readout-body">
+            <div aria-label="Career highlights" className="hero-metrics">
+              {profile.heroMetrics.map((metric) => (
+                <div className="hero-metric" key={metric.label}>
+                  <Counter className="hero-metric-value" value={metric.value} />
+                  <span className="hero-metric-label">{metric.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div
+          aria-label="Milestone XProtect VMS Smart Client modes"
+          className="vms-workspace-bar vms-workspace-bar--edge"
+          role="group"
+        >
+          <div className="vms-workspace-head">
+            <span className="vms-workspace-title">
+              <Activity aria-hidden="true" size={13} /> XPROTECT SMART CLIENT CONSOLE
+            </span>
+            <span className="vms-workspace-status">{statusNote}</span>
+          </div>
+          <div className="vms-workspace-tabs">
+            {VMS_WORKSPACE_PRESETS.map((preset) => {
+              const Icon = VMS_MODE_ICONS[preset.id];
+              const active = viewMode === preset.id;
+              return (
+                <button
+                  aria-pressed={active}
+                  className={`vms-tab ${active ? 'vms-tab--active' : ''}`}
+                  key={preset.id}
+                  onClick={() => setViewMode(preset.id, { scrollToSection: false })}
+                  type="button"
+                >
+                  <Icon aria-hidden="true" size={14} />
+                  <span>{preset.label}</span>
+                </button>
+              );
+            })}
+            {activePreset ? (
+              <button
+                className="vms-jump-btn"
+                onClick={() => setViewMode(activePreset.id, { scrollToSection: true })}
+                type="button"
+              >
+                Jump to view <ArrowDownRight aria-hidden="true" size={13} />
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

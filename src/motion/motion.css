@@ -73,6 +73,13 @@ html[data-theme='dark'] .hero-title > .hero-title-accent {
   --hero-title-gradient: linear-gradient(115deg, #7ec2e8 4%, #d6e2f2 48%, #9aa6e8 100%);
 }
 
+.hero-title[data-split-done='true'] > .hero-title-accent {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: inherit;
+}
+
 .hero-title .split-text {
   display: contents;
 }
