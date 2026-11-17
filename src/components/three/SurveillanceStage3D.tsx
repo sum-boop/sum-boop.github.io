@@ -21,10 +21,16 @@ import {
   stepSpring3D,
 } from '@/utils/stagePhysics';
 import {
+  createInterpolatedThemeBuffer,
+  interpolateSceneTheme,
+  resolveLiveTheme,
+} from '@/utils/themeSceneConfig';
+import {
   FINISH_PRESETS,
   type FinishId,
   type MaterialBundle,
   applyFinishPreset,
+  applyInterpolatedThemeToMaterials,
   createSurveillanceMaterials,
   disposeMaterialBundle,
   drawBriefCamCanvas,
@@ -78,6 +84,8 @@ const SurveillanceFilmShader = {
     uGrainIntensity: { value: 0.032 },
     uScanlineIntensity: { value: 0.045 },
     uVignetteDarkness: { value: 0.42 },
+    uVignetteColor: { value: new THREE.Color(0x0b1018) },
+    uChromaticAmount: { value: 0.0022 },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -93,6 +101,8 @@ const SurveillanceFilmShader = {
     uniform float uGrainIntensity;
     uniform float uScanlineIntensity;
     uniform float uVignetteDarkness;
+    uniform vec3 uVignetteColor;
+    uniform float uChromaticAmount;
     varying vec2 vUv;
 
     float rand(vec2 co) {
@@ -104,7 +114,7 @@ const SurveillanceFilmShader = {
       float dist = length(centered);
 
       // Subtle optical edge chromatic aberration
-      float shift = dist * 0.0022;
+      float shift = dist * uChromaticAmount;
       float r = texture2D(tDiffuse, vUv + vec2(shift, 0.0)).r;
       float g = texture2D(tDiffuse, vUv).g;
       float b = texture2D(tDiffuse, vUv - vec2(shift, 0.0)).b;
@@ -118,9 +128,9 @@ const SurveillanceFilmShader = {
       float noise = (rand(vUv * 400.0) - 0.5) * uGrainIntensity;
       color += noise;
 
-      // Vignette
+      // Vignette blends seamlessly into the active site background color
       float vig = smoothstep(0.88, 0.34, dist);
-      color *= mix(1.0 - uVignetteDarkness, 1.0, vig);
+      color = mix(color, uVignetteColor, (1.0 - vig) * uVignetteDarkness);
 
       gl_FragColor = vec4(max(color, 0.0), 1.0);
     }
@@ -132,6 +142,7 @@ const _targetLook = new THREE.Vector3();
 const _pointer = new THREE.Vector2();
 const _spherical = new THREE.Spherical();
 const _offsetVec = new THREE.Vector3();
+const _themeBuffer = createInterpolatedThemeBuffer();
 
 interface WebGLCapability {
   supported: boolean;
@@ -191,12 +202,12 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
   const explodeTargetRef = useRef(0);
   const finishRef = useRef<FinishId>('slate');
-  const themeRef = useRef<ThemeMode>(theme);
+  const themeRef = useRef<ThemeMode>(resolveLiveTheme(theme));
   const screenStateRef = useRef({
     mode: viewMode,
     siteId: activeSiteId,
     feedId: selectedFeedId,
-    theme,
+    theme: resolveLiveTheme(theme),
   });
   const materialsRef = useRef<MaterialBundle | null>(null);
   const presetFlightRef = useRef<{
@@ -227,9 +238,35 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   }, [activeFinish]);
 
   useEffect(() => {
-    themeRef.current = theme;
-    applyThemeCallbackRef.current?.(theme);
+    const resolved = resolveLiveTheme(theme);
+    themeRef.current = resolved;
+    applyThemeCallbackRef.current?.(resolved);
   }, [theme]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const syncLiveTheme = () => {
+      const nextTheme = resolveLiveTheme(themeRef.current);
+      if (nextTheme !== themeRef.current) {
+        themeRef.current = nextTheme;
+        applyThemeCallbackRef.current?.(nextTheme);
+      }
+    };
+    const rootObserver = new MutationObserver(syncLiveTheme);
+    rootObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'class'],
+    });
+    const mediaQuery =
+      typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+        ? window.matchMedia('(prefers-color-scheme: light)')
+        : null;
+    mediaQuery?.addEventListener('change', syncLiveTheme);
+    return () => {
+      rootObserver.disconnect();
+      mediaQuery?.removeEventListener('change', syncLiveTheme);
+    };
+  }, []);
 
   useEffect(() => {
     screenStateRef.current = {
@@ -301,18 +338,20 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       return;
     }
 
-    const initialBgHex = themeRef.current === 'light' ? 0xeef3f9 : 0x070a12;
+    let currentThemeMix = themeRef.current === 'light' ? 1 : 0;
+    let targetThemeMix = currentThemeMix;
+    interpolateSceneTheme(currentThemeMix, _themeBuffer);
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    renderer.toneMappingExposure = _themeBuffer.toneMappingExposure;
     const pixelRatio = isSoftwareGl
       ? 1
       : Math.min(Math.max(window.devicePixelRatio || 1, 1), isLowCoreDevice ? 1.5 : 2);
     renderer.setPixelRatio(pixelRatio);
     renderer.shadowMap.enabled = !isSoftwareGl;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.setClearColor(initialBgHex, 1);
+    renderer.setClearColor(_themeBuffer.background, 1);
 
     const width = Math.max(320, mount.clientWidth || window.innerWidth);
     const height = Math.max(320, mount.clientHeight || window.innerHeight);
@@ -326,13 +365,13 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     renderer.domElement.style.touchAction = 'pan-y';
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(initialBgHex);
-    scene.fog = new THREE.FogExp2(initialBgHex, 0.042);
+    scene.background = _themeBuffer.background.clone();
+    scene.fog = new THREE.FogExp2(_themeBuffer.fog.getHex(), _themeBuffer.fogDensity);
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = envTexture;
-    scene.environmentIntensity = 0.85;
+    scene.environmentIntensity = _themeBuffer.environmentIntensity;
     pmremGenerator.dispose();
 
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 45);
@@ -381,11 +420,18 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     controls.addEventListener('start', onControlStart);
     controls.addEventListener('end', onControlEnd);
 
-    // Moody Dark-Blue & Cyan Palette + Warm Accent Key Light
-    const hemiLight = new THREE.HemisphereLight(0x88ccff, 0x050914, 0.85);
+    // Adaptive Lighting Rig (Dark Command Room <-> Light Architectural Studio)
+    const hemiLight = new THREE.HemisphereLight(
+      _themeBuffer.hemiSky.getHex(),
+      _themeBuffer.hemiGround.getHex(),
+      _themeBuffer.hemiIntensity,
+    );
     scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff1de, 1.95);
+    const keyLight = new THREE.DirectionalLight(
+      _themeBuffer.keyLight.getHex(),
+      _themeBuffer.keyLightIntensity,
+    );
     keyLight.position.set(4.2, 5.6, 4.4);
     keyLight.castShadow = !isSoftwareGl;
     keyLight.shadow.mapSize.set(1024, 1024);
@@ -399,21 +445,38 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     keyLight.shadow.normalBias = 0.02;
     scene.add(keyLight);
 
-    const cyanRimLight = new THREE.DirectionalLight(0x00e5ff, 1.65);
+    const cyanRimLight = new THREE.DirectionalLight(
+      _themeBuffer.rimLight.getHex(),
+      _themeBuffer.rimLightIntensity,
+    );
     cyanRimLight.position.set(-4.2, 3.0, -3.6);
     scene.add(cyanRimLight);
 
-    const screenBounceLight = new THREE.PointLight(0x38bdf8, 1.25, 5.2);
+    const screenBounceLight = new THREE.PointLight(
+      _themeBuffer.screenBounce.getHex(),
+      _themeBuffer.screenBounceIntensity,
+      5.2,
+    );
     screenBounceLight.position.set(0.0, 1.4, 0.85);
     scene.add(screenBounceLight);
 
-    const warmDeskAccentLight = new THREE.PointLight(0xf59e0b, 0.85, 4.2);
+    const warmDeskAccentLight = new THREE.PointLight(
+      _themeBuffer.warmAccent.getHex(),
+      _themeBuffer.warmAccentIntensity,
+      4.2,
+    );
     warmDeskAccentLight.position.set(0.75, 0.65, 0.95);
     scene.add(warmDeskAccentLight);
 
+    let softboxLight: THREE.RectAreaLight | null = null;
     if (!isSoftwareGl) {
       RectAreaLightUniformsLib.init();
-      const softboxLight = new THREE.RectAreaLight(0xcbe8ff, 2.5, 3.6, 1.6);
+      softboxLight = new THREE.RectAreaLight(
+        _themeBuffer.softbox.getHex(),
+        _themeBuffer.softboxIntensity,
+        3.6,
+        1.6,
+      );
       softboxLight.position.set(-2.4, 3.6, 2.8);
       softboxLight.lookAt(0, 1.0, 0);
       scene.add(softboxLight);
@@ -427,11 +490,6 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       screenStateRef.current,
     );
     materialsRef.current = materials;
-    if (themeRef.current === 'light') {
-      materials.plinth.color.setHex(0xd4dee9);
-      materials.deskSlab.color.setHex(0x283548);
-      materials.contactShadow.opacity = 0.24;
-    }
 
     const assembly = buildSurveillanceAssembly(materials);
     scene.add(assembly.root);
@@ -448,9 +506,9 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
       bloomPass = new UnrealBloomPass(
         new THREE.Vector2(width, height),
-        0.54,
-        0.46,
-        0.78,
+        _themeBuffer.bloomStrength,
+        _themeBuffer.bloomRadius,
+        _themeBuffer.bloomThreshold,
       );
       composer.addPass(bloomPass);
 
@@ -473,35 +531,87 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       }
     };
 
-    applyThemeCallbackRef.current = (nextTheme: ThemeMode) => {
-      if (isDisposed) return;
-      const isLightTheme = nextTheme === 'light';
-      const hex = isLightTheme ? 0xeef3f9 : 0x070a12;
-      renderer.setClearColor(hex, 1);
+    const applySceneThemeMix = (mix: number) => {
+      const state = interpolateSceneTheme(mix, _themeBuffer);
+      renderer.setClearColor(state.background, 1);
+      renderer.toneMappingExposure = state.toneMappingExposure;
+
       if (scene.background instanceof THREE.Color) {
-        scene.background.setHex(hex);
+        scene.background.copy(state.background);
       }
       if (scene.fog instanceof THREE.FogExp2) {
-        scene.fog.color.setHex(hex);
+        scene.fog.color.copy(state.fog);
+        scene.fog.density = state.fogDensity;
       }
-      hemiLight.groundColor.setHex(isLightTheme ? 0xcbd5e1 : 0x050914);
-      materials.plinth.color.setHex(isLightTheme ? 0xd4dee9 : 0x0b101b);
-      materials.deskSlab.color.setHex(isLightTheme ? 0x283548 : 0x151e2d);
-      materials.contactShadow.opacity = isLightTheme ? 0.24 : 0.55;
-      const vigUniform = filmPass?.material.uniforms.uVignetteDarkness;
-      if (vigUniform) {
-        vigUniform.value = isLightTheme ? 0.16 : 0.42;
+      scene.environmentIntensity = state.environmentIntensity;
+
+      hemiLight.color.copy(state.hemiSky);
+      hemiLight.groundColor.copy(state.hemiGround);
+      hemiLight.intensity = state.hemiIntensity;
+
+      keyLight.color.copy(state.keyLight);
+      keyLight.intensity = state.keyLightIntensity;
+
+      cyanRimLight.color.copy(state.rimLight);
+      cyanRimLight.intensity = state.rimLightIntensity;
+
+      screenBounceLight.color.copy(state.screenBounce);
+      screenBounceLight.intensity = state.screenBounceIntensity;
+
+      warmDeskAccentLight.color.copy(state.warmAccent);
+      warmDeskAccentLight.intensity = state.warmAccentIntensity;
+
+      if (softboxLight) {
+        softboxLight.color.copy(state.softbox);
+        softboxLight.intensity = state.softboxIntensity;
       }
+
       if (bloomPass) {
-        bloomPass.strength = isLightTheme ? 0.32 : 0.54;
+        bloomPass.strength = state.bloomStrength;
+        bloomPass.threshold = state.bloomThreshold;
+        bloomPass.radius = state.bloomRadius;
       }
-      renderScene();
+
+      if (filmPass) {
+        const uGrain = filmPass.material.uniforms.uGrainIntensity;
+        if (uGrain) uGrain.value = state.grainIntensity;
+        const uScan = filmPass.material.uniforms.uScanlineIntensity;
+        if (uScan) uScan.value = state.scanlineIntensity;
+        const uVig = filmPass.material.uniforms.uVignetteDarkness;
+        if (uVig) uVig.value = state.vignetteDarkness;
+        const uChroma = filmPass.material.uniforms.uChromaticAmount;
+        if (uChroma) uChroma.value = state.chromaticAmount;
+        const uVigColor = filmPass.material.uniforms.uVignetteColor;
+        if (uVigColor && uVigColor.value instanceof THREE.Color) {
+          uVigColor.value.copy(state.background);
+        }
+      }
+
+      applyInterpolatedThemeToMaterials(materials, state, finishRef.current);
+
+      assembly.hoverMaterial.color.copy(state.hover);
+      for (const h of assembly.hoverHighlights) {
+        const ringMat = h.ring.material as THREE.LineBasicMaterial;
+        ringMat.color.copy(state.hover);
+      }
     };
-    applyThemeCallbackRef.current(themeRef.current);
+
+    applySceneThemeMix(currentThemeMix);
+
+    applyThemeCallbackRef.current = (nextTheme: ThemeMode) => {
+      if (isDisposed) return;
+      targetThemeMix = nextTheme === 'light' ? 1 : 0;
+      requestRender();
+    };
 
     applyFinishCallbackRef.current = (nextFinish: FinishId) => {
       if (isDisposed) return;
       applyFinishPreset(materials, nextFinish);
+      applyInterpolatedThemeToMaterials(
+        materials,
+        interpolateSceneTheme(currentThemeMix, _themeBuffer),
+        nextFinish,
+      );
       renderScene();
     };
 
@@ -748,6 +858,15 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       lastTickTime = now;
       elapsed += delta;
 
+      // Smooth ~0.5s transition between Dark & Light scene themes
+      if (Math.abs(currentThemeMix - targetThemeMix) > 0.0008) {
+        currentThemeMix = THREE.MathUtils.damp(currentThemeMix, targetThemeMix, 8.0, delta);
+        if (Math.abs(currentThemeMix - targetThemeMix) <= 0.0008) {
+          currentThemeMix = targetThemeMix;
+        }
+        applySceneThemeMix(currentThemeMix);
+      }
+
       // Explode layers
       const targetExplode = explodeTargetRef.current;
       currentExplode = THREE.MathUtils.damp(currentExplode, targetExplode, 9, delta);
@@ -892,11 +1011,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       }
     }
 
-    // Mark frame 0 ready immediately and start continuous animation loop
-    notifiedReady = true;
-    queueMicrotask(() => {
-      if (!isDisposed) setSceneReady(true);
-    });
+    // Start animation loop (tick sets stage ready cleanly after frame 0 draws)
     requestRender();
 
     return () => {

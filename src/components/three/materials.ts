@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { VmsSiteFocus, VmsViewMode } from '@/context/VmsContext';
 import type { ThemeMode } from '@/hooks/useTheme';
+import type { InterpolatedSceneTheme } from '@/utils/themeSceneConfig';
 
 export type FinishId = 'slate' | 'titanium' | 'alabaster';
 
@@ -95,19 +96,18 @@ function createDeskGridTexture(maxAnisotropy: number): THREE.CanvasTexture {
   if (ctx) {
     const cx = size / 2;
     const cy = size / 2;
-    ctx.fillStyle = '#090e18';
-    ctx.fillRect(0, 0, size, size);
+    ctx.clearRect(0, 0, size, size);
 
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.16)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.78)';
+    ctx.lineWidth = 2.4;
     for (let r = 130; r <= 470; r += 85) {
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.stroke();
     }
 
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.11)';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.42)';
+    ctx.lineWidth = 1.6;
     for (let i = 0; i < 24; i++) {
       const a = (i * Math.PI) / 12;
       ctx.beginPath();
@@ -178,10 +178,10 @@ function createDustTexture(): THREE.CanvasTexture {
   if (ctx) {
     const c = size / 2;
     const grad = ctx.createRadialGradient(c, c, 0, c, c, c);
-    grad.addColorStop(0, 'rgba(224, 247, 255, 1)');
-    grad.addColorStop(0.32, 'rgba(0, 229, 255, 0.72)');
-    grad.addColorStop(0.7, 'rgba(56, 189, 248, 0.18)');
-    grad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.72)');
+    grad.addColorStop(0.72, 'rgba(255, 255, 255, 0.18)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
   }
@@ -617,8 +617,12 @@ export function createSurveillanceMaterials(
 
   const deskGrid = new THREE.MeshStandardMaterial({
     map: deskGridTex,
-    metalness: 0.28,
-    roughness: 0.62,
+    color: 0x00e5ff,
+    transparent: true,
+    opacity: 0.44,
+    metalness: 0.25,
+    roughness: 0.55,
+    depthWrite: false,
     polygonOffset: true,
     polygonOffsetFactor: -1,
     polygonOffsetUnits: -1,
@@ -797,6 +801,55 @@ export function applyFinishPreset(bundle: MaterialBundle, finishId: FinishId): v
   bundle.armMetal.color.setHex(preset.armColor);
   bundle.accentTrim.color.setHex(preset.trimColor);
   bundle.accentTrim.emissive.setHex(preset.trimColor);
+}
+
+const _trimBaseColor = new THREE.Color();
+
+export function applyInterpolatedThemeToMaterials(
+  bundle: MaterialBundle,
+  themeState: InterpolatedSceneTheme,
+  finishId: FinishId,
+): void {
+  const t = themeState.mix;
+  bundle.plinth.color.copy(themeState.plinth);
+  bundle.plinth.metalness = 0.08 + t * 0.14;
+  bundle.plinth.roughness = 0.88 - t * 0.24;
+  bundle.plinth.envMapIntensity = 0.12 + t * 0.52;
+  bundle.deskSlab.color.copy(themeState.deskSlab);
+  bundle.deskGrid.color.copy(themeState.deskGrid);
+  bundle.deskGrid.opacity = themeState.deskGridOpacity;
+  bundle.deskGrid.envMapIntensity = 0.12 + t * 0.52;
+  bundle.contactShadow.opacity = themeState.contactShadowOpacity;
+
+  bundle.holoWire.color.copy(themeState.holoWire);
+  bundle.holoWire.opacity = themeState.holoWireOpacity;
+
+  bundle.dustParticle.color.copy(themeState.dust);
+  bundle.dustParticle.opacity = themeState.dustOpacity;
+  const targetBlending = themeState.dustUseNormalBlending
+    ? THREE.NormalBlending
+    : THREE.AdditiveBlending;
+  if (bundle.dustParticle.blending !== targetBlending) {
+    bundle.dustParticle.blending = targetBlending;
+    bundle.dustParticle.needsUpdate = true;
+  }
+
+  // Keep finish selection respected while ensuring strong light-mode trim contrast
+  if (finishId === 'slate') {
+    bundle.accentTrim.color.copy(themeState.accentTrim);
+    bundle.accentTrim.emissive.copy(themeState.accentTrimEmissive);
+  } else {
+    _trimBaseColor.setHex(FINISH_PRESETS[finishId].trimColor);
+    bundle.accentTrim.color.copy(_trimBaseColor).lerp(themeState.accentTrim, themeState.mix * 0.65);
+    bundle.accentTrim.emissive.copy(bundle.accentTrim.color);
+  }
+  bundle.accentTrim.emissiveIntensity = themeState.accentTrimEmissiveIntensity;
+
+  // Tone down neon bloom drivers slightly in light mode so details stay rich instead of white-hot
+  bundle.portLed.emissiveIntensity = 1.75 - t * 0.85;
+  bundle.alarmKey.emissiveIntensity = 1.25 - t * 0.55;
+  bundle.warmAccentLed.emissiveIntensity = 1.9 - t * 0.9;
+  bundle.keycap.emissiveIntensity = 0.25 - t * 0.14;
 }
 
 export function disposeMaterialBundle(bundle: MaterialBundle): void {

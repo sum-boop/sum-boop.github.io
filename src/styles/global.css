@@ -702,6 +702,7 @@ section[id] {
   justify-content: space-between;
   min-height: clamp(680px, 94vh, 920px);
   padding: clamp(5.2rem, 8vh, 6.2rem) var(--gutter) clamp(1.35rem, 2.8vh, 2rem);
+  border-bottom-color: transparent;
 }
 
 .hero-stage-backdrop {
@@ -715,41 +716,46 @@ section[id] {
   inset: 0;
   z-index: 2;
   pointer-events: none;
+  transition:
+    background 500ms ease,
+    opacity 500ms ease;
   background:
     linear-gradient(
-      96deg,
-      rgba(7, 10, 18, 0.94) 0%,
-      rgba(7, 10, 18, 0.78) 34%,
-      rgba(7, 10, 18, 0.14) 58%,
-      rgba(7, 10, 18, 0.28) 100%
-    ),
-    radial-gradient(circle at 60% 46%, transparent 38%, rgba(7, 10, 18, 0.72) 100%),
-    linear-gradient(
       to bottom,
-      rgba(7, 10, 18, 0.65) 0%,
+      rgba(11, 16, 24, 0.78) 0%,
       transparent 16%,
-      transparent 74%,
-      rgba(7, 10, 18, 0.9) 100%
-    );
+      transparent 68%,
+      rgba(11, 16, 24, 0.82) 89%,
+      rgb(11, 16, 24) 97%
+    ),
+    linear-gradient(
+      96deg,
+      rgba(11, 16, 24, 0.96) 0%,
+      rgba(11, 16, 24, 0.8) 33%,
+      rgba(11, 16, 24, 0.14) 58%,
+      rgba(11, 16, 24, 0.42) 100%
+    ),
+    radial-gradient(circle at 60% 46%, transparent 38%, rgba(11, 16, 24, 0.78) 100%);
 }
 
 :root[data-theme='light'] .hero-edge-vignette {
   background:
     linear-gradient(
-      96deg,
-      rgba(238, 243, 249, 0.94) 0%,
-      rgba(238, 243, 249, 0.8) 34%,
-      rgba(238, 243, 249, 0.12) 58%,
-      rgba(238, 243, 249, 0.22) 100%
-    ),
-    radial-gradient(circle at 60% 46%, transparent 42%, rgba(238, 243, 249, 0.54) 100%),
-    linear-gradient(
       to bottom,
-      rgba(238, 243, 249, 0.65) 0%,
+      rgba(245, 247, 250, 0.76) 0%,
       transparent 16%,
-      transparent 76%,
-      rgba(238, 243, 249, 0.88) 100%
-    );
+      transparent 68%,
+      rgba(245, 247, 250, 0.84) 89%,
+      rgb(245, 247, 250) 97%
+    ),
+    linear-gradient(
+      96deg,
+      rgba(245, 247, 250, 0.96) 0%,
+      rgba(245, 247, 250, 0.82) 33%,
+      rgba(245, 247, 250, 0.08) 58%,
+      rgba(245, 247, 250, 0.36) 100%
+    ),
+    radial-gradient(circle at 60% 46%, transparent 42%, rgba(245, 247, 250, 0.68) 100%);
 }
 
 .hero-atmosphere {
@@ -916,6 +922,10 @@ section[id] {
   display: inline-block;
   color: var(--color-foreground);
   text-shadow: 0 12px 32px rgba(0, 229, 255, 0.14);
+}
+
+:root[data-theme='light'] .hero-title-name {
+  text-shadow: none;
 }
 
 .hero-role {
@@ -4089,9 +4099,10 @@ textarea.field-success {
   overflow: hidden;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
-  background-color: #070a12;
+  background-color: var(--color-background, #0b1018);
   box-shadow: var(--shadow-deep);
   user-select: none;
+  transition: background-color 500ms ease;
 }
 
 .stage3d-shell--hero {
@@ -4105,11 +4116,16 @@ textarea.field-success {
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  background-color: transparent;
   opacity: 1;
 }
 
 :root[data-theme='light'] .stage3d-shell {
-  background-color: #eef3f9;
+  background-color: var(--color-background, #f5f7fa);
+}
+
+:root[data-theme='light'] .stage3d-shell--hero {
+  background-color: transparent;
 }
 
 .stage3d-mount {
@@ -4125,6 +4141,7 @@ textarea.field-success {
   z-index: 2;
   pointer-events: none;
   opacity: 0.22;
+  transition: opacity 500ms ease;
   background: repeating-linear-gradient(
     to bottom,
     transparent 0px,
@@ -4134,7 +4151,7 @@ textarea.field-success {
 }
 
 :root[data-theme='light'] .stage3d-scanline-film {
-  opacity: 0.08;
+  opacity: 0.04;
 }
 
 .stage3d-edge-top-right {
@@ -4930,18 +4947,18 @@ textarea.field-success {
   .hero-edge-vignette {
     background: linear-gradient(
       to bottom,
-      rgba(7, 10, 18, 0.88) 0%,
-      rgba(7, 10, 18, 0.78) 55%,
-      rgba(7, 10, 18, 0.94) 100%
+      rgba(11, 16, 24, 0.88) 0%,
+      rgba(11, 16, 24, 0.78) 55%,
+      rgb(11, 16, 24) 100%
     );
   }
 
   :root[data-theme='light'] .hero-edge-vignette {
     background: linear-gradient(
       to bottom,
-      rgba(238, 243, 249, 0.92) 0%,
-      rgba(238, 243, 249, 0.84) 55%,
-      rgba(238, 243, 249, 0.96) 100%
+      rgba(245, 247, 250, 0.92) 0%,
+      rgba(245, 247, 250, 0.84) 55%,
+      rgb(245, 247, 250) 100%
     );
   }
 }
