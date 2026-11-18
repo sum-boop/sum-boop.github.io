@@ -18,10 +18,22 @@ export const Footer = memo(function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-inner">
-        <ChoreoReveal direction="draw-x">
-          <span aria-hidden="true" className="footer-top-rule" />
-        </ChoreoReveal>
         <ChoreoReveal direction="up">
+          <div className="footer-centered-links">
+            {footerLinks.map((link, idx) => (
+              <span className="footer-pipe-group" key={link.href}>
+                {idx > 0 ? (
+                  <span aria-hidden="true" className="footer-pipe">
+                    |
+                  </span>
+                ) : null}
+                <a className="footer-pipe-link" href={link.href}>
+                  {link.label}
+                </a>
+              </span>
+            ))}
+          </div>
+
           <div className="footer-main">
             <a className="footer-signature" href="#hero">
               <span className="footer-symbol">
@@ -34,13 +46,7 @@ export const Footer = memo(function Footer() {
                 <small>{profile.role}</small>
               </span>
             </a>
-            <nav aria-label="Footer navigation" className="footer-nav">
-              {footerLinks.map((link) => (
-                <a href={link.href} key={link.href}>
-                  {link.label}
-                </a>
-              ))}
-            </nav>
+
             <div aria-label="Social and messaging shortcuts" className="footer-actions">
               <SocialLinks variant="footer" />
               <a
@@ -63,6 +69,7 @@ export const Footer = memo(function Footer() {
               </a>
             </div>
           </div>
+
           <div className="footer-bottom">
             <span>© 2026 {profile.name}. All rights reserved.</span>
             <span aria-hidden="true" className="footer-divider-bar">
@@ -73,7 +80,7 @@ export const Footer = memo(function Footer() {
               |
             </span>
             <a href="#hero">
-              Back to top <ArrowUp aria-hidden="true" size={14} />
+              Back to top <ArrowUp aria-hidden="true" size={13} />
             </a>
           </div>
         </ChoreoReveal>

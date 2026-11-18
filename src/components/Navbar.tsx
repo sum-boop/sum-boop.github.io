@@ -1,10 +1,10 @@
-import { AnimatePresence, LayoutGroup, m, useMotionValueEvent, useScroll } from 'framer-motion';
+import { AnimatePresence, m, useMotionValueEvent, useScroll } from 'framer-motion';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Command, Moon, Sun, X } from 'lucide-react';
+import { Command, Moon, Sun, X } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useScrollSpy } from '@/hooks/useScrollSpy';
 import type { ThemeMode } from '@/hooks/useTheme';
-import { ScrollProgress, motionDurations, motionEasings, motionSprings } from '@/motion';
+import { ScrollProgress, motionDurations, motionEasings } from '@/motion';
 import { Clock } from './Clock';
 
 interface NavbarProps {
@@ -14,16 +14,35 @@ interface NavbarProps {
 }
 
 const links = [
+  { href: '#operations', label: 'Deployments' },
   { href: '#about', label: 'Expertise' },
   { href: '#footprint', label: 'Footprint' },
-  { href: '#operations', label: 'Deployments' },
   { href: '#experience', label: 'Logbook' },
   { href: '#contact', label: 'Contact' },
 ] as const;
 
-const sectionIds = ['hero', 'about', 'footprint', 'operations', 'experience', 'contact'] as const;
+const mobileLinks = [
+  { href: '#hero', label: 'Home' },
+  { href: '#operations', label: 'Deployments' },
+  { href: '#about', label: 'Expertise' },
+  { href: '#footprint', label: 'Footprint' },
+  { href: '#experience', label: 'Logbook' },
+  { href: '#certifications', label: 'Credentials' },
+  { href: '#contact', label: 'Contact' },
+] as const;
 
-function SparkLogo({ size = 18 }: { size?: number }) {
+const sectionIds = [
+  'hero',
+  'about',
+  'skills',
+  'footprint',
+  'operations',
+  'experience',
+  'certifications',
+  'contact',
+] as const;
+
+function SparkLogo({ size = 20 }: { size?: number }) {
   return (
     <svg
       aria-hidden="true"
@@ -43,7 +62,7 @@ export const Navbar = memo(function Navbar({
   onOpenPalette,
 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
-  const [navTone, setNavTone] = useState<'dark' | 'light'>('dark');
+  const [navTone, setNavTone] = useState<'hero' | 'light' | 'contact'>('hero');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
   const closeMenuRef = useRef<HTMLButtonElement>(null);
@@ -51,29 +70,31 @@ export const Navbar = memo(function Navbar({
   const { scrollY } = useScroll();
 
   const updateNavTone = useCallback(() => {
-    const headerSampleY = 36;
+    const headerSampleY = 40;
     const curtainEl = document.querySelector<HTMLElement>('.hero-curtain');
     const contactEl = document.getElementById('contact');
-
-    if (theme === 'dark') {
-      setNavTone('dark');
-      return;
-    }
+    const footerEl = document.querySelector<HTMLElement>('.site-footer');
 
     if (curtainEl) {
       const curtainRect = curtainEl.getBoundingClientRect();
       if (curtainRect.bottom > headerSampleY) {
-        setNavTone('dark');
+        setNavTone('hero');
         return;
       }
     }
 
-    if (contactEl) {
-      const contactRect = contactEl.getBoundingClientRect();
-      if (contactRect.top <= headerSampleY) {
-        setNavTone('dark');
+    if (contactEl || footerEl) {
+      const contactTop = contactEl ? contactEl.getBoundingClientRect().top : Infinity;
+      const footerTop = footerEl ? footerEl.getBoundingClientRect().top : Infinity;
+      if (Math.min(contactTop, footerTop) <= headerSampleY) {
+        setNavTone('contact');
         return;
       }
+    }
+
+    if (theme === 'dark') {
+      setNavTone('contact');
+      return;
     }
 
     setNavTone('light');
@@ -123,7 +144,7 @@ export const Navbar = memo(function Navbar({
         menuToggleRef.current?.focus();
       }
     };
-    const mq = window.matchMedia('(min-width: 900px)');
+    const mq = window.matchMedia('(min-width: 768px)');
     const onViewportChange = (event: MediaQueryListEvent) => {
       if (event.matches) setMenuOpen(false);
     };
@@ -135,17 +156,6 @@ export const Navbar = memo(function Navbar({
       mq.removeEventListener('change', onViewportChange);
     };
   }, [menuOpen]);
-
-  const scrollToContact = useCallback(() => {
-    setMenuOpen(false);
-    const contactEl = document.getElementById('contact');
-    if (contactEl) {
-      contactEl.scrollIntoView({ behavior: 'smooth' });
-      const heading = document.getElementById('contact-title');
-      heading?.setAttribute('tabindex', '-1');
-      heading?.focus({ preventScroll: true });
-    }
-  }, []);
 
   const handleThemeClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -168,91 +178,50 @@ export const Navbar = memo(function Navbar({
       <header
         className={`site-header ${scrolled ? 'site-header--scrolled' : ''}`}
         data-nav-tone={navTone}
+        id="site-navigation"
       >
         <nav aria-label="Primary navigation" className="nav-shell">
           <a aria-label="Sumit Anand — Home" className="brand-mark" href="#hero">
             <span aria-hidden="true" className="brand-symbol">
-              <SparkLogo size={17} />
+              <SparkLogo size={20} />
             </span>
-            <span>
+            <span className="brand-text">
               Sumit<span className="brand-surname"> Anand</span>
             </span>
           </a>
 
-          <LayoutGroup id="primary-navbar">
-            <div className="desktop-nav">
-              {links.map((link) => {
-                const active = activeSection === link.href.slice(1);
-                return (
-                  <a
-                    aria-current={active ? 'location' : undefined}
-                    className="nav-link"
-                    href={link.href}
-                    key={link.href}
-                  >
-                    {link.label}
-                    {active ? (
-                      <m.span
-                        aria-hidden="true"
-                        className="nav-active-indicator"
-                        layoutId="active-nav-indicator"
-                        transition={motionSprings.snappy}
-                      />
-                    ) : null}
-                  </a>
-                );
-              })}
-            </div>
-          </LayoutGroup>
-
-          <div className="nav-actions">
-            <Clock variant="nav" />
-            <button
-              aria-label="Open command palette (Ctrl+K)"
-              className="icon-button nav-utility-btn nav-palette-btn"
-              onClick={onOpenPalette}
-              title="Command palette (Ctrl+K / ⌘K)"
-              type="button"
-            >
-              <Command aria-hidden="true" size={16} />
-            </button>
-            <button
-              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-              className="icon-button nav-theme-btn"
-              onClick={handleThemeClick}
-              title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
-              type="button"
-            >
-              {theme === 'dark' ? (
-                <Sun aria-hidden="true" size={16} />
-              ) : (
-                <Moon aria-hidden="true" size={16} />
-              )}
-            </button>
-            <button
-              aria-label="Let's talk — jump to contact section"
-              className="nav-cta"
-              onClick={scrollToContact}
-              type="button"
-            >
-              Let&apos;s talk <ArrowUpRight aria-hidden="true" size={14} />
-            </button>
-            <button
-              aria-controls="mobile-nav-overlay"
-              aria-expanded={menuOpen}
-              aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              className="menu-toggle"
-              onClick={() => setMenuOpen((prev) => !prev)}
-              ref={menuToggleRef}
-              type="button"
-            >
-              <span aria-hidden="true" className="hamburger-lines">
-                <span className="hamburger-line" />
-                <span className="hamburger-line" />
-                <span className="hamburger-line" />
-              </span>
-            </button>
+          <div className="desktop-nav">
+            {links.map((link) => {
+              const active = activeSection === link.href.slice(1);
+              return (
+                <a
+                  aria-current={active ? 'location' : undefined}
+                  className={`nav-link hover-underline-animation ${active ? 'nav-link--active' : ''}`}
+                  href={link.href}
+                  key={link.href}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
           </div>
+
+          <button
+            aria-controls="mobile-nav-overlay"
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            className="menu-toggle"
+            id="hamburger-btn"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            ref={menuToggleRef}
+            type="button"
+          >
+            <svg aria-hidden="true" className="hamburger-svg" viewBox="0 0 64 64">
+              <line stroke="currentColor" strokeWidth="2.5" x1="14" x2="50" y1="22" y2="22" />
+              <line stroke="currentColor" strokeWidth="2.5" x1="26" x2="50" y1="32" y2="32" />
+              <line stroke="currentColor" strokeWidth="2.5" x1="34" x2="50" y1="42" y2="42" />
+            </svg>
+          </button>
         </nav>
       </header>
 
@@ -272,53 +241,88 @@ export const Navbar = memo(function Navbar({
               }}
             />
             <m.div
-              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+              animate={{ opacity: 1 }}
               aria-label="Mobile navigation overlay"
               aria-modal="true"
               className="mobile-nav-overlay"
               data-open="true"
-              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: '100%' }}
+              exit={{ opacity: 0 }}
               id="mobile-nav-overlay"
-              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: '100%' }}
+              initial={{ opacity: 0 }}
               role="dialog"
               transition={{
                 duration: prefersReducedMotion ? 0.01 : motionDurations.fast,
                 ease: motionEasings.out,
               }}
             >
+              {/* 5Lab Faint Dotted Orbital Rings Backdrop in Mobile Modal */}
+              <svg aria-hidden="true" className="mobile-modal-rings" viewBox="0 0 400 400">
+                <circle
+                  cx="330"
+                  cy="70"
+                  fill="none"
+                  r="110"
+                  stroke="rgba(255,255,255,0.2)"
+                  strokeDasharray="2 7"
+                  strokeWidth="1.2"
+                />
+                <circle
+                  cx="330"
+                  cy="70"
+                  fill="none"
+                  r="142"
+                  stroke="rgba(255,34,58,0.28)"
+                  strokeDasharray="2 7"
+                  strokeWidth="1.2"
+                />
+                <circle
+                  cx="330"
+                  cy="70"
+                  fill="none"
+                  r="174"
+                  stroke="rgba(255,255,255,0.16)"
+                  strokeDasharray="2 8"
+                  strokeWidth="1.2"
+                />
+                <circle
+                  cx="330"
+                  cy="70"
+                  fill="none"
+                  r="206"
+                  stroke="rgba(62,61,179,0.28)"
+                  strokeDasharray="2 8"
+                  strokeWidth="1.2"
+                />
+              </svg>
+
               <div className="mobile-nav-head">
                 <a
                   aria-label="Sumit Anand — Home"
-                  className="brand-mark"
+                  className="brand-mark brand-mark--modal"
                   href="#hero"
                   onClick={() => setMenuOpen(false)}
                 >
                   <span aria-hidden="true" className="brand-symbol">
-                    <SparkLogo size={16} />
+                    <SparkLogo size={20} />
                   </span>
-                  <span>
-                    Sumit<span className="brand-surname"> Anand</span>
-                  </span>
+                  <span className="brand-text">Sumit Anand</span>
                 </a>
-                <div className="mobile-nav-head-actions">
-                  <Clock className="mobile-nav-clock" variant="nav" />
-                  <button
-                    aria-label="Close navigation menu"
-                    className="icon-button mobile-nav-close"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      menuToggleRef.current?.focus();
-                    }}
-                    ref={closeMenuRef}
-                    type="button"
-                  >
-                    <X aria-hidden="true" size={18} />
-                  </button>
-                </div>
+                <button
+                  aria-label="Close navigation menu"
+                  className="mobile-nav-close-circle"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    menuToggleRef.current?.focus();
+                  }}
+                  ref={closeMenuRef}
+                  type="button"
+                >
+                  <X aria-hidden="true" size={22} />
+                </button>
               </div>
 
               <nav aria-label="Mobile sections" className="mobile-nav-links">
-                {links.map((link, index) => {
+                {mobileLinks.map((link) => {
                   const active = activeSection === link.href.slice(1);
                   return (
                     <a
@@ -328,47 +332,35 @@ export const Navbar = memo(function Navbar({
                       key={link.href}
                       onClick={() => setMenuOpen(false)}
                     >
-                      <span className="mobile-nav-link-main">
-                        <span className="mobile-nav-index">0{index + 1}</span>
-                        <span>{link.label}</span>
-                      </span>
-                      <ArrowUpRight aria-hidden="true" size={15} />
+                      <span>{link.label}</span>
                     </a>
                   );
                 })}
               </nav>
 
               <div className="mobile-nav-utilities">
-                <button
-                  className="button button--primary mobile-nav-util-btn"
-                  onClick={scrollToContact}
-                  type="button"
-                >
-                  Let&apos;s talk <ArrowUpRight aria-hidden="true" size={15} />
-                </button>
-                <button
-                  className="button button--quiet mobile-nav-util-btn"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onOpenPalette();
-                  }}
-                  type="button"
-                >
-                  <Command aria-hidden="true" size={15} />
-                  Quick search
-                </button>
-                <button
-                  className="button button--quiet mobile-nav-util-btn"
-                  onClick={handleThemeClick}
-                  type="button"
-                >
-                  {theme === 'dark' ? (
-                    <Sun aria-hidden="true" size={15} />
-                  ) : (
-                    <Moon aria-hidden="true" size={15} />
-                  )}
-                  {theme === 'dark' ? 'Light theme' : 'Dark theme'}
-                </button>
+                <Clock className="mobile-nav-clock" variant="nav" />
+                <div className="mobile-nav-util-row">
+                  <button
+                    className="mobile-nav-util-btn"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onOpenPalette();
+                    }}
+                    type="button"
+                  >
+                    <Command aria-hidden="true" size={14} />
+                    Quick search
+                  </button>
+                  <button className="mobile-nav-util-btn" onClick={handleThemeClick} type="button">
+                    {theme === 'dark' ? (
+                      <Sun aria-hidden="true" size={14} />
+                    ) : (
+                      <Moon aria-hidden="true" size={14} />
+                    )}
+                    {theme === 'dark' ? 'Light theme' : 'Dark theme'}
+                  </button>
+                </div>
               </div>
             </m.div>
           </>

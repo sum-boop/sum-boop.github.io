@@ -1,11 +1,20 @@
 import { useRef, useState } from 'react';
-import { Activity, Fingerprint, MapPin, ShieldCheck } from 'lucide-react';
+import {
+  Activity,
+  ArrowRight,
+  Eye,
+  Fingerprint,
+  MapPin,
+  MessageCircle,
+  ShieldCheck,
+} from 'lucide-react';
+import { contact } from '@/data/contact';
 import { careerSites } from '@/data/experience';
 import { profile } from '@/data/profile';
-import { ChoreoReveal, Counter } from '@/motion';
+import { ChoreoReveal, Counter, Magnetic } from '@/motion';
 import { assetPath } from '@/utils/assets';
 import { useStaggeredCardGroup } from '@/utils/scrollStory';
-import { SectionHeading } from './SectionHeading';
+import { SocialLinks } from './SocialLinks';
 
 export function About() {
   const [imageFailed, setImageFailed] = useState(false);
@@ -19,32 +28,44 @@ export function About() {
     <section aria-labelledby="about-title" className="content-section about-section" id="about">
       <div aria-hidden="true" className="editorial-diagonal-line editorial-diagonal-line--top" />
       <div className="section-inner">
-        <SectionHeading
-          eyebrow="Security profile"
-          highlightWord="Clear records."
-          id="about-title"
-          number="01"
-          title="Calm eyes. Clear records."
-          tone="cyan"
-        />
+        {/* 5Lab #scene-2 Overlapping Conic Crimson + Indigo Circles Manifesto Diagram */}
+        <div className="about-venn-stage" id="about-venn">
+          <div className="about-venn-diagram">
+            <div className="venn-label venn-label--left">
+              <span className="venn-word venn-word--crimson">Operations</span>
+              <small>24/7 Control Room</small>
+            </div>
+            <div aria-hidden="true" className="venn-circles">
+              <span className="venn-circle venn-circle--crimson" id="red-cir" />
+              <span className="venn-circle venn-circle--indigo" id="blue-cir" />
+              <span className="venn-crosshair" />
+            </div>
+            <div className="venn-label venn-label--right">
+              <span className="venn-word venn-word--indigo">Systems</span>
+              <small>Milestone XProtect</small>
+            </div>
+          </div>
+          <div className="venn-cta-row">
+            <a className="lab-underline-link" href="#skills">
+              Our capabilities
+            </a>
+          </div>
+        </div>
 
-        {/* 5Lab Signature Dual Overlapping Crimson & Indigo Circles Diagram */}
-        <ChoreoReveal className="about-venn-diagram" direction="up">
-          <div className="venn-label venn-label--left">
-            <span className="venn-word venn-word--crimson">Operations</span>
-            <small>24/7 Control Room</small>
-          </div>
-          <div aria-hidden="true" className="venn-circles">
-            <span className="venn-circle venn-circle--crimson" />
-            <span className="venn-circle venn-circle--core" />
-            <span className="venn-circle venn-circle--indigo" />
-          </div>
-          <div className="venn-label venn-label--right">
-            <span className="venn-word venn-word--indigo">Systems</span>
-            <small>Milestone XProtect</small>
-          </div>
-        </ChoreoReveal>
+        {/* 5Lab #designer-header Giant 10vw Indigo + Sharp Knockout Statement */}
+        <header className="designer-header" id="designer-header">
+          <ChoreoReveal as="p" className="section-eyebrow" direction="left" distance={20}>
+            <span>01</span> / Security profile
+          </ChoreoReveal>
+          <ChoreoReveal delay={0.05} direction="up" distance={24}>
+            <h2 className="designer-headline" id="about-title">
+              <span>Calm eyes. </span>
+              <mark className="editorial-highlight">Clear records.</mark>
+            </h2>
+          </ChoreoReveal>
+        </header>
 
+        {/* Asymmetric Operator Dossier & Summary Split (#scene-3) */}
         <div className="about-layout">
           <ChoreoReveal className="identity-panel" direction="up">
             {!imageFailed ? (
@@ -62,7 +83,7 @@ export function About() {
             ) : null}
             <div className="identity-overlay" />
             <div className="identity-label">
-              <Fingerprint aria-hidden="true" size={15} /> IDENTITY / OPERATOR
+              <Fingerprint aria-hidden="true" size={14} /> IDENTITY / OPERATOR
             </div>
             <div aria-hidden="true" className="identity-monogram">
               SA
@@ -80,22 +101,58 @@ export function About() {
           </ChoreoReveal>
 
           <div className="about-copy">
-            <ChoreoReveal direction="right" distance={28}>
-              <p className="eyebrow-line">Operating profile</p>
+            <ChoreoReveal direction="right" distance={24}>
+              <div className="about-role-status">
+                <span aria-hidden="true" className="status-pulse" />
+                <span>Available for logistics &amp; industrial security roles</span>
+                <span aria-hidden="true">·</span>
+                <span>{profile.location}</span>
+              </div>
+              <p className="eyebrow-line">Operating profile · {profile.role}</p>
               <h3>{profile.aboutHeading}</h3>
+              <p className="body-copy body-copy--lead">{profile.heroSummary}</p>
             </ChoreoReveal>
+
             {profile.aboutParagraphs.map((paragraph, index) => (
               <ChoreoReveal
                 as="p"
                 className="body-copy"
                 delay={0.06 + index * 0.06}
                 direction="right"
-                distance={24}
+                distance={20}
                 key={paragraph}
               >
                 {paragraph}
               </ChoreoReveal>
             ))}
+
+            <div className="about-cta-strip">
+              <Magnetic>
+                <a className="button button--primary magnetic-button" href="#contact">
+                  <ShieldCheck aria-hidden="true" size={16} />
+                  Message Directly
+                  <ArrowRight aria-hidden="true" className="button-arrow" size={15} />
+                </a>
+              </Magnetic>
+              <a className="button button--quiet" href="#operations">
+                <Eye aria-hidden="true" size={16} />
+                View Deployments
+              </a>
+              <div aria-label="Social and messaging links" className="about-socials">
+                <SocialLinks variant="hero" />
+                <a
+                  aria-label="Chat with Sumit Anand on WhatsApp (opens in new tab)"
+                  className="icon-button"
+                  href={contact.whatsappUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  title="Chat on WhatsApp"
+                >
+                  <MessageCircle aria-hidden="true" size={16} />
+                </a>
+              </div>
+            </div>
+
             <div aria-label="Career sites" className="about-employers" ref={employersRef}>
               {careerSites.map((site) => (
                 <div className="about-employer-item" key={site.id}>
@@ -118,9 +175,11 @@ export function About() {
                 </div>
               ))}
             </div>
+
             <div className="about-metrics" ref={metricsRef}>
               {profile.careerMetrics.map((metric, index) => {
-                const MetricIcon = index === 0 ? Activity : index === 1 ? ShieldCheck : Fingerprint;
+                const MetricIcon =
+                  index === 0 ? Activity : index === 1 ? ShieldCheck : Fingerprint;
                 return (
                   <div className="about-metric" key={metric.label}>
                     <MetricIcon aria-hidden="true" size={16} />

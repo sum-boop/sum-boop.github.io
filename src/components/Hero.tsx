@@ -1,29 +1,26 @@
-import { Suspense, lazy, memo, useEffect, useRef } from 'react';
+import { Suspense, lazy, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { m, useScroll, useTransform } from 'framer-motion';
 import {
   Activity,
   ArrowDownRight,
-  ArrowRight,
   BellRing,
   ChevronDown,
-  Eye,
+  Command,
   Film,
   Map as MapIcon,
-  MessageCircle,
   Monitor,
-  ShieldCheck,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { VMS_WORKSPACE_PRESETS, type VmsViewMode, useVms } from '@/context/VmsContext';
-import { contact } from '@/data/contact';
 import { profile } from '@/data/profile';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { ThemeMode } from '@/hooks/useTheme';
-import { Counter, Magnetic, useIsTouch } from '@/motion';
+import { Counter, useIsTouch } from '@/motion';
 import workstationHeroImg from '@/assets/images/workstation_command_hero_1794781430131.jpg';
 import { splitText } from '@/utils/heroSplitText';
 import { Clock } from './Clock';
-import { SocialLinks } from './SocialLinks';
 import { StageSkeleton } from './StageSkeleton';
 
 const SurveillanceStage3D = lazy(() =>
@@ -34,6 +31,8 @@ const SurveillanceStage3D = lazy(() =>
 
 interface HeroProps {
   theme: ThemeMode;
+  onToggleTheme: (origin?: { x: number; y: number }) => void;
+  onOpenPalette: () => void;
 }
 
 const VMS_MODE_ICONS: Record<VmsViewMode, typeof Monitor> = {
@@ -43,16 +42,47 @@ const VMS_MODE_ICONS: Record<VmsViewMode, typeof Monitor> = {
   alarms: BellRing,
 };
 
-export const Hero = memo(function Hero({ theme }: HeroProps) {
+const PROMPT_TEXT = 'CCTV Operator & Surveillance Specialist · Patli, Haryana';
+
+export const Hero = memo(function Hero({ theme, onToggleTheme, onOpenPalette }: HeroProps) {
   const { viewMode, statusNote, setViewMode } = useVms();
   const heroRef = useRef<HTMLElement>(null);
+  const curtainRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const revealedDispatchedRef = useRef(false);
+  const [typedLength, setTypedLength] = useState(PROMPT_TEXT.length);
 
   const prefersReducedMotion = useReducedMotion();
   const isTouch = useIsTouch();
   const isMobile = useMediaQuery('(max-width: 767px)');
   const enableDepth = !prefersReducedMotion && !isTouch;
+
+  const handleCurtainPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const el = curtainRef.current;
+    if (!el || event.pointerType === 'touch') return;
+    const rect = el.getBoundingClientRect();
+    const xPct = ((event.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((event.clientY - rect.top) / rect.height) * 100;
+    el.style.setProperty('--spotlight-x', `${xPct.toFixed(1)}%`);
+    el.style.setProperty('--spotlight-y', `${yPct.toFixed(1)}%`);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setTypedLength(PROMPT_TEXT.length);
+      return;
+    }
+    let idx = 0;
+    setTypedLength(0);
+    const timer = window.setInterval(() => {
+      idx += 1;
+      setTypedLength(idx);
+      if (idx >= PROMPT_TEXT.length) {
+        window.clearInterval(timer);
+      }
+    }, 22);
+    return () => window.clearInterval(timer);
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     const heroEl = heroRef.current;
@@ -83,112 +113,35 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
 
     const runReveal = () => {
       if (cancelled) return;
-
-      const isMobileOrCoarse =
-        window.matchMedia('(pointer: coarse)').matches ||
-        window.matchMedia('(max-width: 767px)').matches;
-      const unitMode = isMobileOrCoarse ? 'words' : 'letters';
-      const duration = isMobileOrCoarse ? 520 : 840;
+      const units = splitText(headlineEl, { mode: 'words', depth3D: true });
+      const duration = 680;
       const easing = 'cubic-bezier(0.16, 1, 0.3, 1)';
-      const maxDelayBudget = Math.max(0, 1450 - duration);
+      const step = units.length > 1 ? Math.min(45, 360 / (units.length - 1)) : 0;
 
-      const kickerEl = heroEl.querySelector<HTMLElement>('.hero-kicker');
-      const roleEl = heroEl.querySelector<HTMLElement>('.hero-role');
-      const kickerUnits = splitText(kickerEl, { mode: 'words', depth3D: true });
-      const headlineUnits = splitText(headlineEl, { mode: unitMode, depth3D: true });
-      const roleUnits = splitText(roleEl, { mode: 'words', depth3D: true });
-
-      const kickerStep =
-        kickerUnits.length > 1
-          ? Math.min(isMobileOrCoarse ? 34 : 24, (maxDelayBudget * 0.35) / (kickerUnits.length - 1))
-          : 0;
-
-      for (let i = 0; i < kickerUnits.length; i += 1) {
-        const unit = kickerUnits[i];
+      const headlineAnimations: Animation[] = [];
+      for (let i = 0; i < units.length; i += 1) {
+        const unit = units[i];
         if (!unit) continue;
         const anim = unit.animate(
           [
             {
-              transform: 'perspective(1100px) translate3d(0, 22px, -48px) rotateX(-64deg)',
+              transform: 'perspective(1100px) translate3d(0, 32px, -48px) rotateX(-40deg)',
               opacity: 0,
-              filter: 'blur(3px)',
             },
             {
               transform: 'perspective(1100px) translate3d(0, 0, 0) rotateX(0deg)',
               opacity: 1,
-              filter: 'blur(0px)',
-            },
-          ],
-          {
-            duration: Math.round(duration * 0.78),
-            delay: i * kickerStep,
-            easing,
-            fill: 'both',
-          },
-        );
-        activeAnimations.push(anim);
-      }
-
-      const headlineBaseDelay = kickerUnits.length > 0 ? (isMobileOrCoarse ? 45 : 80) : 0;
-      const headlineBudget = Math.max(0, maxDelayBudget - headlineBaseDelay);
-      const headlineStep =
-        headlineUnits.length > 1
-          ? Math.min(isMobileOrCoarse ? 52 : 22, headlineBudget / (headlineUnits.length - 1))
-          : 0;
-
-      const headlineAnimations: Animation[] = [];
-      for (let i = 0; i < headlineUnits.length; i += 1) {
-        const unit = headlineUnits[i];
-        if (!unit) continue;
-        const anim = unit.animate(
-          [
-            {
-              transform:
-                'perspective(1100px) translate3d(0, 38px, -85px) rotateX(-72deg) scale(0.9)',
-              opacity: 0,
-              filter: 'blur(5px)',
-            },
-            {
-              transform: 'perspective(1100px) translate3d(0, 0, 0) rotateX(0deg) scale(1)',
-              opacity: 1,
-              filter: 'blur(0px)',
             },
           ],
           {
             duration,
-            delay: headlineBaseDelay + i * headlineStep,
+            delay: i * step,
             easing,
             fill: 'both',
           },
         );
         activeAnimations.push(anim);
         headlineAnimations.push(anim);
-      }
-
-      const roleBaseDelay = headlineBaseDelay + (isMobileOrCoarse ? 130 : 210);
-      const roleStep = roleUnits.length > 1 ? Math.min(34, 180 / (roleUnits.length - 1)) : 0;
-      for (let i = 0; i < roleUnits.length; i += 1) {
-        const unit = roleUnits[i];
-        if (!unit) continue;
-        const anim = unit.animate(
-          [
-            {
-              transform: 'perspective(1100px) translate3d(0, 24px, -50px) rotateX(-60deg)',
-              opacity: 0,
-            },
-            {
-              transform: 'perspective(1100px) translate3d(0, 0, 0) rotateX(0deg)',
-              opacity: 1,
-            },
-          ],
-          {
-            duration: isMobileOrCoarse ? 400 : 640,
-            delay: roleBaseDelay + i * roleStep,
-            easing,
-            fill: 'both',
-          },
-        );
-        activeAnimations.push(anim);
       }
 
       if (headlineAnimations.length > 0) {
@@ -200,28 +153,6 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
       } else {
         dispatchRevealed();
       }
-
-      const detailBlocks = heroEl.querySelectorAll<HTMLElement>(
-        '.hero-status-line, .hero-summary, .hero-actions',
-      );
-      const detailDuration = isMobileOrCoarse ? 400 : 640;
-      const detailBaseDelay = isMobileOrCoarse ? 160 : 240;
-
-      detailBlocks.forEach((el, index) => {
-        const anim = el.animate(
-          [
-            { transform: 'translate3d(0, 24px, 0)', opacity: 0 },
-            { transform: 'translate3d(0, 0, 0)', opacity: 1 },
-          ],
-          {
-            duration: detailDuration,
-            delay: detailBaseDelay + index * 85,
-            easing,
-            fill: 'both',
-          },
-        );
-        activeAnimations.push(anim);
-      });
     };
 
     const bootOverlayPresent = Boolean(document.querySelector('.boot-screen'));
@@ -252,10 +183,21 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
     target: heroRef,
     offset: ['start start', 'end start'],
   });
-  const orbScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.12]);
-  const copyY = useTransform(scrollYProgress, [0, 0.45], [0, -26]);
+  const orbScale = useTransform(scrollYProgress, [0, 0.45], [1, 1.12]);
 
   const activePreset = VMS_WORKSPACE_PRESETS.find((preset) => preset.id === viewMode);
+
+  const handleThemeToggleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (event.clientX > 0 || event.clientY > 0) {
+        onToggleTheme({ x: event.clientX, y: event.clientY });
+      } else {
+        const rect = event.currentTarget.getBoundingClientRect();
+        onToggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+      }
+    },
+    [onToggleTheme],
+  );
 
   return (
     <section
@@ -264,8 +206,13 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
       id="hero"
       ref={heroRef}
     >
-      {/* ACT 1: 5Lab Crimson Radial Hero + Illuminated Cobalt-Violet-Crimson Sphere Orb */}
-      <div className="hero-curtain">
+      {/* ACT 1: Exact 5Lab #scene-1 Crimson Sphere Curtain */}
+      <div
+        className="hero-curtain mouse-cursor-gradient-tracking"
+        id="scene-1"
+        onPointerMove={handleCurtainPointerMove}
+        ref={curtainRef}
+      >
         <div aria-hidden="true" className="hero-curtain-grain" />
         <div aria-hidden="true" className="hero-orb-stage">
           <m.span
@@ -274,82 +221,53 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
           />
         </div>
 
+        {/* Centered monumental staggered 5Lab H1 (Desktop/Tablet staggered 2-line; Mobile 3-line under sphere) */}
         <div className="hero-layout hero-layout--editorial">
-          <m.div
-            className="hero-copy-frame"
-            {...(enableDepth ? { style: { y: copyY } } : {})}
+          <h1
+            aria-label={`${profile.name} — Eyes on every hub.`}
+            className="hero-title"
+            id="hero-title"
+            ref={headlineRef}
           >
-            <div className="hero-copy">
-              <p className="hero-kicker">
-                <span className="kicker-mark">SA /</span> MILESTONE XPROTECT VMS · CCTV OPERATIONS
-              </p>
-              <div className="hero-status-line">
-                <span aria-hidden="true" className="status-pulse" />
-                <span>Available for logistics &amp; industrial security roles</span>
-                <span className="status-divider">·</span>
-                <span>{profile.location}</span>
-              </div>
-
-              <h1
-                aria-label={`${profile.name} — Eyes on every hub.`}
-                className="hero-title"
-                id="hero-title"
-                ref={headlineRef}
-              >
-                <span className="hero-title-name">{profile.name}</span>{' '}
-                <em className="hero-title-accent">Eyes on every hub.</em>
-              </h1>
-
-              <p className="hero-role">{profile.role}</p>
-              <p className="hero-summary">{profile.heroSummary}</p>
-
-              <div className="hero-actions">
-                <Magnetic>
-                  <a className="button button--primary magnetic-button" href="#contact">
-                    <ShieldCheck aria-hidden="true" size={17} />
-                    Message Directly
-                    <ArrowRight aria-hidden="true" className="button-arrow" size={16} />
-                  </a>
-                </Magnetic>
-                <a className="button button--quiet" href="#operations">
-                  <Eye aria-hidden="true" size={17} />
-                  View Deployments
-                </a>
-                <div aria-label="Social and messaging links" className="hero-socials">
-                  <SocialLinks variant="hero" />
-                  <a
-                    aria-label="Chat with Sumit Anand on WhatsApp (opens in new tab)"
-                    className="icon-button"
-                    href={contact.whatsappUrl}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    title="Chat on WhatsApp"
-                  >
-                    <MessageCircle aria-hidden="true" size={16} />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </m.div>
+            <span className="hero-title-row hero-title-row--top">
+              <span className="hero-title-name">Sumit</span>{' '}
+              <em className="hero-title-accent">Anand</em>
+            </span>
+            <span className="hero-title-row hero-title-row--bottom">
+              <span>Eyes on </span>
+              <span className="hero-mobile-break">every hub.</span>
+            </span>
+          </h1>
         </div>
 
-        <a aria-label="Scroll to interactive 3D command workstation" className="hero-scroll" href="#hero-workstation">
-          <span>Scroll to explore</span>
-          <ChevronDown aria-hidden="true" size={20} />
+        {/* Bottom-left typewriter role prompt (Desktop & Tablet >= 768px) */}
+        <div aria-label={PROMPT_TEXT} className="hero-prompt-left" id="control-bar-left-text">
+          <span aria-hidden="true">&gt;</span>
+          <span>{PROMPT_TEXT.slice(0, typedLength)}</span>
+          <span aria-hidden="true" className="hero-prompt-caret" />
+        </div>
+
+        {/* Bottom-center bouncing thin white chevron */}
+        <a
+          aria-label="Scroll to interactive 3D command workstation"
+          className="hero-scroll"
+          href="#hero-workstation"
+        >
+          <ChevronDown aria-hidden="true" size={28} strokeWidth={1.3} />
         </a>
 
-        {/* Signature 5Lab Rotating Circular Stamp Badge anchored bottom-right */}
+        {/* Bottom-right quarter-cropped rotating crimson stamp */}
         <a aria-label="Jump to contact section" className="hero-stamp-badge" href="#contact">
-          <svg aria-hidden="true" className="hero-stamp-svg" viewBox="0 0 120 120">
+          <svg aria-hidden="true" className="hero-stamp-svg" viewBox="0 0 180 180">
             <defs>
               <path
-                d="M 60, 60 m -42, 0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0"
+                d="M 90, 90 m -68, 0 a 68,68 0 1,1 136,0 a 68,68 0 1,1 -136,0"
                 id="hero-stamp-circle"
               />
             </defs>
             <text className="hero-stamp-ring-text">
               <textPath href="#hero-stamp-circle" startOffset="0%">
-                SUMIT ANAND • PATLI HARYANA • CCTV &amp; VMS •
+                SUMIT ANAND • PATLI HARYANA • CCTV &amp; VMS • &nbsp;
               </textPath>
             </text>
           </svg>
@@ -357,19 +275,49 @@ export const Hero = memo(function Hero({ theme }: HeroProps) {
         </a>
       </div>
 
-      {/* ACT 2 TOP BAND: Framed Interactive 3D XProtect Workstation + Dossier + Smart Client Console */}
+      {/* ACT 2 BAND 0: Framed 3D XProtect Smart Client Workstation + Operator Dossier */}
       <div className="hero-workstation-band" id="hero-workstation">
         <div className="section-inner workstation-band-inner">
           <div className="workstation-band-header">
             <div>
               <p className="workstation-eyebrow">
-                <span>00</span> / LIVE COMMAND WORKSTATION
+                <span>00</span> / LIVE COMMAND WORKSTATION · SA / MILESTONE XPROTECT VMS · CCTV
+                OPERATIONS
               </p>
               <h2 className="workstation-title">3D XProtect Smart Client Workstation</h2>
             </div>
-            <p className="workstation-note">
-              Drag anywhere to orbit 360° · Scroll to pan · Click any monitor or deck to zoom in
-            </p>
+            <div className="workstation-utility-strip">
+              <p className="workstation-note">
+                Drag anywhere to orbit 360° · Scroll to pan · Click any monitor or deck to zoom in
+              </p>
+              <div className="workstation-actions">
+                <Clock className="workstation-clock" variant="nav" />
+                <button
+                  aria-label="Open command palette (Ctrl+K)"
+                  className="workstation-util-btn"
+                  onClick={onOpenPalette}
+                  title="Command palette (Ctrl+K / ⌘K)"
+                  type="button"
+                >
+                  <Command aria-hidden="true" size={14} />
+                  <span>Ctrl+K</span>
+                </button>
+                <button
+                  aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+                  className="workstation-util-btn"
+                  onClick={handleThemeToggleClick}
+                  title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+                  type="button"
+                >
+                  {theme === 'dark' ? (
+                    <Sun aria-hidden="true" size={14} />
+                  ) : (
+                    <Moon aria-hidden="true" size={14} />
+                  )}
+                  <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="workstation-frame">

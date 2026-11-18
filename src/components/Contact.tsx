@@ -40,24 +40,64 @@ export function Contact() {
       className="content-section contact-section contact-section--obsidian"
       id="contact"
     >
+      {/* 5Lab Signature Diagonal Light Beam + Ambient Galaxy Gradient */}
+      <svg aria-hidden="true" className="contact-galaxy-beam" viewBox="0 0 1200 1000">
+        <defs>
+          <linearGradient id="beam-grad" x1="0%" x2="100%" y1="0%" y2="100%">
+            <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+            <stop offset="50%" stopColor="rgba(255,255,255,0.28)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+          </linearGradient>
+        </defs>
+        <line stroke="url(#beam-grad)" strokeWidth="1" x1="1080" x2="120" y1="180" y2="920" />
+      </svg>
+      <div aria-hidden="true" className="contact-galaxy-gradient" id="galaxy-gradient" />
+
       <div className="section-inner">
         <div className="contact-hero-bar">
           <div className="contact-hero-heading">
             <SectionHeading
               eyebrow="Open a channel"
               id="contact-title"
+              italicAccent="talk"
               number="07"
               title="Let's talk about a role."
               tone="cyan"
             />
           </div>
           <button className="contact-lets-chat-link" onClick={focusComposer} type="button">
-            Let&apos;s chat
+            <span>Let&apos;s chat</span>
           </button>
         </div>
 
+        {/* 5Lab Signature Uppercase Wide-Tracked Direct Line Strip */}
+        <div className="contact-inline-strip">
+          <a className="contact-inline-item" href={`mailto:${contact.email}`}>
+            <Mail aria-hidden="true" size={16} />
+            <span>{contact.email.toUpperCase()}</span>
+          </a>
+          <span aria-hidden="true" className="contact-inline-sep">
+            |
+          </span>
+          <a className="contact-inline-item" href={`tel:${contact.phone.replace(/\s+/g, '')}`}>
+            <Phone aria-hidden="true" size={16} />
+            <span>{contact.phone}</span>
+          </a>
+        </div>
+        <a
+          className="contact-location"
+          href={contact.mapUrl}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <MapPin aria-hidden="true" size={15} /> {contact.location.toUpperCase()} · OPEN ON GOOGLE
+          MAPS
+          <span className="sr-only"> (opens in new tab)</span>
+          <ArrowUpRight aria-hidden="true" size={13} />
+        </a>
+
         <div className="contact-layout">
-          <ChoreoReveal className="contact-copy" direction="left" distance={30}>
+          <ChoreoReveal className="contact-copy" direction="left" distance={24}>
             <p className="eyebrow-line">Direct line · No intermediaries</p>
             <p className="contact-intro">{contact.availability}</p>
             <div className="contact-terminal">
@@ -162,18 +202,8 @@ export function Contact() {
                 </a>
               </div>
             </div>
-
-            <a
-              className="contact-location"
-              href={contact.mapUrl}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <MapPin aria-hidden="true" size={15} /> {contact.location} · Open on Google Maps
-              <span className="sr-only"> (opens in new tab)</span>
-              <ArrowUpRight aria-hidden="true" size={13} />
-            </a>
           </ChoreoReveal>
+
           <ChoreoReveal
             className="contact-form-panel sweep-border-panel"
             delay={0.08}

@@ -13,12 +13,13 @@ export function startSafeViewTransition(
   }
 
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const hasActiveCanvas = Boolean(document.querySelector('canvas'));
   const startTransition =
     'startViewTransition' in document && typeof document.startViewTransition === 'function'
       ? document.startViewTransition.bind(document)
       : null;
 
-  if (reducedMotion || !startTransition) {
+  if (reducedMotion || hasActiveCanvas || !startTransition) {
     update();
     return;
   }
@@ -40,9 +41,13 @@ export function startSafeViewTransition(
     const transition = startTransition(() => {
       update();
     });
-    void transition.finished.finally(() => {
-      root.removeAttribute('data-vt-kind');
-    });
+    void transition.ready?.catch(() => undefined);
+    void transition.updateCallbackDone?.catch(() => undefined);
+    void transition.finished
+      .catch(() => undefined)
+      .finally(() => {
+        root.removeAttribute('data-vt-kind');
+      });
   } catch {
     root.removeAttribute('data-vt-kind');
     update();

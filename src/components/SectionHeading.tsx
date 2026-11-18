@@ -8,6 +8,7 @@ interface SectionHeadingProps {
   tone?: 'cyan' | 'violet' | 'lime' | 'amber';
   highlightWord?: string;
   id: string;
+  italicAccent?: string;
 }
 
 export function SectionHeading({
@@ -17,9 +18,22 @@ export function SectionHeading({
   description,
   tone = 'cyan',
   highlightWord,
+  italicAccent,
   id,
 }: SectionHeadingProps) {
   const renderTitle = () => {
+    if (italicAccent) {
+      const idx = title.indexOf(italicAccent);
+      if (idx !== -1) {
+        return (
+          <>
+            {title.slice(0, idx)}
+            <em className="hero-title-accent">{italicAccent}</em>
+            {title.slice(idx + italicAccent.length)}
+          </>
+        );
+      }
+    }
     if (!highlightWord) return title;
     const idx = title.indexOf(highlightWord);
     if (idx === -1) return title;
@@ -36,24 +50,21 @@ export function SectionHeading({
 
   return (
     <header className={`section-heading section-heading--${tone}`}>
-      <ChoreoReveal as="p" className="section-eyebrow" direction="left" distance={24}>
+      <ChoreoReveal as="p" className="section-eyebrow" direction="left" distance={20}>
         <span>{number}</span> / {eyebrow}
       </ChoreoReveal>
       <div className="section-title-mask">
-        <ChoreoReveal delay={0.05} direction="up" distance={28}>
+        <ChoreoReveal delay={0.05} direction="up" distance={24}>
           <h2 id={id}>{renderTitle()}</h2>
         </ChoreoReveal>
       </div>
-      <ChoreoReveal delay={0.08} direction="draw-x">
-        <span aria-hidden="true" className="section-rule" />
-      </ChoreoReveal>
       {description ? (
         <ChoreoReveal
           as="p"
           className="section-description"
-          delay={0.1}
+          delay={0.08}
           direction="up"
-          distance={22}
+          distance={18}
         >
           {description}
         </ChoreoReveal>

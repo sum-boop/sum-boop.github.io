@@ -14,16 +14,20 @@ import type { DeploymentBriefing } from '@/types/portfolio';
 interface PortfolioSectionsProps {
   theme: ThemeMode;
   onOpenDeployment: (deployment: DeploymentBriefing) => void;
+  onToggleTheme: (origin?: { x: number; y: number }) => void;
+  onOpenPalette: () => void;
 }
 
 export const PortfolioSections = memo(function PortfolioSections({
   theme,
   onOpenDeployment,
+  onToggleTheme,
+  onOpenPalette,
 }: PortfolioSectionsProps) {
   return (
     <PageTransition>
       <main id="main-content" tabIndex={-1}>
-        <Hero theme={theme} />
+        <Hero onOpenPalette={onOpenPalette} onToggleTheme={onToggleTheme} theme={theme} />
         <About />
         <Skills />
         <Footprint theme={theme} />

@@ -17,7 +17,7 @@ import { VmsProvider, useVms } from '@/context/VmsContext';
 import { contact } from '@/data/contact';
 import { deployments } from '@/data/projects';
 import { useTheme } from '@/hooks/useTheme';
-import { BackToTop, SideSectionRail } from '@/motion';
+import { BackToTop } from '@/motion';
 import { PortfolioSections } from '@/sections/PortfolioSections';
 import type { DeploymentBriefing } from '@/types/portfolio';
 import { assetPath } from '@/utils/assets';
@@ -200,12 +200,16 @@ function AppContent() {
           {is404 ? (
             <NotFound onReturn={returnHome} />
           ) : (
-            <PortfolioSections onOpenDeployment={openDeployment} theme={theme} />
+            <PortfolioSections
+              onOpenDeployment={openDeployment}
+              onOpenPalette={openPalette}
+              onToggleTheme={toggleTheme}
+              theme={theme}
+            />
           )}
         </m.div>
       </AnimatePresence>
 
-      {!is404 ? <SideSectionRail /> : null}
       <Footer />
       <BackToTop />
       {paletteOpen ? (
