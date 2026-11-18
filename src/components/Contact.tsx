@@ -12,10 +12,8 @@ import {
   Radio,
 } from 'lucide-react';
 import { contact, socialLinks } from '@/data/contact';
-import { ChoreoReveal } from '@/motion';
 import { assetPath } from '@/utils/assets';
 import { ContactForm } from './ContactForm';
-import { SectionHeading } from './SectionHeading';
 import { SocialIcon } from './SocialIcon';
 
 export function Contact() {
@@ -37,187 +35,175 @@ export function Contact() {
   return (
     <section
       aria-labelledby="contact-title"
-      className="content-section contact-section contact-section--obsidian"
+      className="content-section-5lab contact-section-5lab"
       id="contact"
     >
-      {/* 5Lab Signature Diagonal Light Beam + Ambient Galaxy Gradient */}
-      <svg aria-hidden="true" className="contact-galaxy-beam" viewBox="0 0 1200 1000">
-        <defs>
-          <linearGradient id="beam-grad" x1="0%" x2="100%" y1="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-            <stop offset="50%" stopColor="rgba(255,255,255,0.28)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </linearGradient>
-        </defs>
-        <line stroke="url(#beam-grad)" strokeWidth="1" x1="1080" x2="120" y1="180" y2="920" />
-      </svg>
-      <div aria-hidden="true" className="contact-galaxy-gradient" id="galaxy-gradient" />
-
       <div className="section-inner">
-        <div className="contact-hero-bar">
-          <div className="contact-hero-heading">
-            <SectionHeading
-              eyebrow="Open a channel"
-              id="contact-title"
-              italicAccent="talk"
-              number="07"
-              title="Let's talk about a role."
-              tone="cyan"
-            />
+        {/* 5Lab Closing CTA Hero Area ("Ready to spark something?" equivalent) */}
+        <div className="contact-cta-hero-5lab">
+          <p className="section-eyebrow">
+            <span>07</span> / OPEN A CHANNEL
+          </p>
+
+          <div className="contact-headline-row-5lab">
+            <h2 className="contact-giant-title-5lab" id="contact-title">
+              <span>Let&apos;s </span>
+              <em className="hero-italic-accent">talk</em>
+              <span> about a role.</span>
+            </h2>
+
+            <button
+              aria-label="Scroll to message composer form"
+              className="contact-lets-chat-btn-5lab"
+              onClick={focusComposer}
+              type="button"
+            >
+              <span>Let&apos;s chat</span>
+            </button>
           </div>
-          <button className="contact-lets-chat-link" onClick={focusComposer} type="button">
-            <span>Let&apos;s chat</span>
-          </button>
+
+          {/* Large underlined direct communication links with red hover */}
+          <div className="contact-big-links-5lab">
+            <a className="contact-big-link" href={`mailto:${contact.email}`}>
+              <Mail aria-hidden="true" size={20} />
+              <span>{contact.email.toUpperCase()}</span>
+            </a>
+            <span aria-hidden="true" className="contact-link-sep">|</span>
+            <a className="contact-big-link" href={`tel:${contact.phone.replace(/\s+/g, '')}`}>
+              <Phone aria-hidden="true" size={20} />
+              <span>{contact.phone}</span>
+            </a>
+            <span aria-hidden="true" className="contact-link-sep">|</span>
+            <a
+              className="contact-big-link"
+              href={contact.whatsappUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <MessageCircle aria-hidden="true" size={20} />
+              <span>WHATSAPP CHAT</span>
+              <ArrowUpRight aria-hidden="true" size={16} />
+            </a>
+          </div>
+
+          <a
+            className="contact-location-link-5lab"
+            href={contact.mapUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <MapPin aria-hidden="true" size={14} />
+            <span>{contact.location.toUpperCase()} · OPEN ON GOOGLE MAPS</span>
+            <ArrowUpRight aria-hidden="true" size={13} />
+          </a>
         </div>
 
-        {/* 5Lab Signature Uppercase Wide-Tracked Direct Line Strip */}
-        <div className="contact-inline-strip">
-          <a className="contact-inline-item" href={`mailto:${contact.email}`}>
-            <Mail aria-hidden="true" size={16} />
-            <span>{contact.email.toUpperCase()}</span>
-          </a>
-          <span aria-hidden="true" className="contact-inline-sep">
-            |
-          </span>
-          <a className="contact-inline-item" href={`tel:${contact.phone.replace(/\s+/g, '')}`}>
-            <Phone aria-hidden="true" size={16} />
-            <span>{contact.phone}</span>
-          </a>
-        </div>
-        <a
-          className="contact-location"
-          href={contact.mapUrl}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <MapPin aria-hidden="true" size={15} /> {contact.location.toUpperCase()} · OPEN ON GOOGLE
-          MAPS
-          <span className="sr-only"> (opens in new tab)</span>
-          <ArrowUpRight aria-hidden="true" size={13} />
-        </a>
-
-        <div className="contact-layout">
-          <ChoreoReveal className="contact-copy" direction="left" distance={24}>
+        {/* Direct Channels & Message Composer */}
+        <div className="contact-layout-5lab">
+          <div className="contact-channels-column-5lab">
             <p className="eyebrow-line">Direct line · No intermediaries</p>
-            <p className="contact-intro">{contact.availability}</p>
-            <div className="contact-terminal">
-              <div className="terminal-heading">
+            <p className="contact-intro-5lab">{contact.availability}</p>
+
+            <div className="contact-terminal-5lab">
+              <div className="terminal-heading-5lab">
                 <span>
-                  <Radio aria-hidden="true" size={15} /> DIRECT CHANNELS
+                  <Radio aria-hidden="true" size={14} /> DIRECT CHANNELS
                 </span>
-                <span>READY</span>
+                <span className="terminal-ready-badge">READY</span>
               </div>
-              <a href={`mailto:${contact.email}`}>
-                <Mail aria-hidden="true" size={17} />
-                <span>
-                  <small>EMAIL</small>
-                  {contact.email}
-                </span>
-                <ArrowUpRight aria-hidden="true" size={15} />
-              </a>
-              <a href={contact.whatsappUrl} rel="noopener noreferrer" target="_blank">
-                <MessageCircle aria-hidden="true" size={17} />
-                <span>
-                  <small>WHATSAPP</small>Chat directly on WhatsApp
-                  <span className="sr-only"> (opens in new tab)</span>
-                </span>
-                <ArrowUpRight aria-hidden="true" size={15} />
-              </a>
-              <a href={contact.smsUrl}>
-                <MessageSquare aria-hidden="true" size={17} />
-                <span>
-                  <small>SMS / TEXT MESSAGE</small>Send a quick text
-                </span>
-                <ArrowUpRight aria-hidden="true" size={15} />
-              </a>
-              <a href={`tel:${contact.phone.replace(/\s+/g, '')}`}>
-                <Phone aria-hidden="true" size={17} />
-                <span>
-                  <small>PHONE</small>
-                  {contact.phone}
-                </span>
-                <ArrowUpRight aria-hidden="true" size={15} />
-              </a>
-              <div className="terminal-actions">
+
+              <div className="terminal-links-list-5lab">
+                <a className="terminal-row-link" href={`mailto:${contact.email}`}>
+                  <Mail aria-hidden="true" size={16} />
+                  <span>
+                    <small>EMAIL</small>
+                    {contact.email}
+                  </span>
+                  <ArrowUpRight aria-hidden="true" size={15} />
+                </a>
+
+                <a
+                  className="terminal-row-link"
+                  href={contact.whatsappUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <MessageCircle aria-hidden="true" size={16} />
+                  <span>
+                    <small>WHATSAPP</small>Chat directly on WhatsApp
+                  </span>
+                  <ArrowUpRight aria-hidden="true" size={15} />
+                </a>
+
+                <a className="terminal-row-link" href={contact.smsUrl}>
+                  <MessageSquare aria-hidden="true" size={16} />
+                  <span>
+                    <small>SMS / TEXT MESSAGE</small>Send a quick text
+                  </span>
+                  <ArrowUpRight aria-hidden="true" size={15} />
+                </a>
+
+                <a className="terminal-row-link" href={`tel:${contact.phone.replace(/\s+/g, '')}`}>
+                  <Phone aria-hidden="true" size={16} />
+                  <span>
+                    <small>PHONE</small>
+                    {contact.phone}
+                  </span>
+                  <ArrowUpRight aria-hidden="true" size={15} />
+                </a>
+              </div>
+
+              <div className="terminal-actions-5lab">
                 <button
-                  className="copy-email"
-                  data-copy={contact.email}
+                  className="copy-email-btn-5lab"
                   onClick={markCopied}
                   type="button"
                 >
-                  {copied ? (
-                    <Check aria-hidden="true" size={15} />
-                  ) : (
-                    <Copy aria-hidden="true" size={15} />
-                  )}
-                  {copied ? 'Copied email' : 'Copy email'}
+                  {copied ? <Check aria-hidden="true" size={14} /> : <Copy aria-hidden="true" size={14} />}
+                  <span>{copied ? 'Copied email' : 'Copy email'}</span>
                 </button>
-                <a className="resume-link" download href={assetPath(contact.resumePath)}>
-                  <FileDown aria-hidden="true" size={15} /> Download Résumé PDF
+                <a className="resume-download-btn-5lab" download href={assetPath(contact.resumePath)}>
+                  <FileDown aria-hidden="true" size={14} />
+                  <span>Download Résumé PDF</span>
                 </a>
               </div>
             </div>
 
-            <div aria-label="Developer and direct profiles" className="social-profiles-block">
-              <p className="eyebrow-line social-heading">Verified profile &amp; instant chat</p>
-              <div className="social-grid">
+            <div aria-label="Developer and direct profiles" className="social-profiles-5lab">
+              <p className="eyebrow-line">Verified profile &amp; instant chat</p>
+              <div className="social-links-grid-5lab">
                 {socialLinks.map((social) => (
                   <a
-                    className="social-card"
+                    className="social-pill-5lab"
                     href={social.href}
                     key={social.id}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    <span className="social-card-icon">
-                      <SocialIcon platform={social.id} size={17} />
-                    </span>
-                    <span className="social-card-meta">
-                      <strong>
-                        {social.label}
-                        <span className="sr-only"> (opens in new tab)</span>
-                      </strong>
+                    <SocialIcon platform={social.id} size={15} />
+                    <span>
+                      <strong>{social.label}</strong>
                       <small>{social.handle}</small>
                     </span>
-                    <ArrowUpRight aria-hidden="true" className="social-card-arrow" size={14} />
+                    <ArrowUpRight aria-hidden="true" size={13} />
                   </a>
                 ))}
-                <a
-                  className="social-card"
-                  href={contact.whatsappUrl}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <span className="social-card-icon">
-                    <MessageCircle aria-hidden="true" size={17} />
-                  </span>
-                  <span className="social-card-meta">
-                    <strong>
-                      WhatsApp
-                      <span className="sr-only"> (opens in new tab)</span>
-                    </strong>
-                    <small>{contact.phone}</small>
-                  </span>
-                  <ArrowUpRight aria-hidden="true" className="social-card-arrow" size={14} />
-                </a>
               </div>
             </div>
-          </ChoreoReveal>
+          </div>
 
-          <ChoreoReveal
-            className="contact-form-panel sweep-border-panel"
-            delay={0.08}
-            direction="scale"
-          >
-            <div className="contact-form-heading">
-              <span className="mono-label">DIRECT MESSAGE COMPOSER</span>
-              <span className="availability-chip">
-                <i aria-hidden="true" /> AVAILABLE
-              </span>
+          <div className="contact-composer-column-5lab">
+            <div className="composer-card-5lab">
+              <div className="composer-card-header-5lab">
+                <span className="composer-mono-label">DIRECT MESSAGE COMPOSER</span>
+                <span className="composer-live-status">
+                  <span className="status-pulse" /> AVAILABLE
+                </span>
+              </div>
+              <p className="composer-note-5lab">{contact.hireAvailability}</p>
+              <ContactForm />
             </div>
-            <p>{contact.hireAvailability}</p>
-            <ContactForm />
-          </ChoreoReveal>
+          </div>
         </div>
       </div>
     </section>

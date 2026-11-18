@@ -1,66 +1,46 @@
-import { m } from 'framer-motion';
 import { Award, GraduationCap } from 'lucide-react';
-import { useRef } from 'react';
 import { certifications, education } from '@/data/certifications';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { motionSprings, useIsTouch } from '@/motion';
-import { useStaggeredCardGroup } from '@/utils/scrollStory';
 import { SectionHeading } from './SectionHeading';
 
 export function Credentials() {
-  const isTouch = useIsTouch();
-  const prefersReducedMotion = useReducedMotion();
-  const interactive = !isTouch && !prefersReducedMotion;
-  const layoutRef = useRef<HTMLDivElement>(null);
-
-  useStaggeredCardGroup(layoutRef, '.credential-reveal-item');
-
   return (
     <section
       aria-labelledby="credentials-title"
-      className="content-section credentials-section"
+      className="content-section-5lab credentials-section-5lab"
       id="certifications"
     >
       <div className="section-inner">
         <SectionHeading
-          eyebrow="Certifications & training"
+          eyebrow="Certifications & Training"
           highlightWord="credentials."
           id="credentials-title"
           number="06"
           title="Verified credentials."
           tone="amber"
         />
-        <div className="credentials-layout" ref={layoutRef}>
-          <div className="credential-reveal-item">
-            <m.div
-              className="education-card"
-              transition={motionSprings.snappy}
-              {...(interactive ? { whileHover: { y: -4 } } : {})}
-            >
-              <span className="credential-icon">
-                <GraduationCap aria-hidden="true" size={21} />
-              </span>
-              <span className="mono-label">EDUCATION</span>
-              <h3>{education}</h3>
-              <span className="credential-note">Educational organization</span>
-            </m.div>
-          </div>
-          <div className="certification-grid">
+
+        <div className="credentials-layout-5lab">
+          {/* Education Card */}
+          <article className="credential-card-5lab credential-card-5lab--featured">
+            <div className="credential-card-header-5lab">
+              <span className="credential-mono-tag">00 / EDUCATION</span>
+              <GraduationCap aria-hidden="true" size={20} />
+            </div>
+            <h3 className="credential-card-title-5lab">{education}</h3>
+            <p className="credential-card-desc-5lab">Senior Secondary Education · Panchitthri</p>
+          </article>
+
+          {/* Certifications Grid */}
+          <div className="certifications-grid-5lab">
             {certifications.map((certification, index) => (
-              <div className="credential-reveal-item" key={certification.title}>
-                <m.article
-                  className="certification-card"
-                  transition={motionSprings.snappy}
-                  {...(interactive ? { whileHover: { y: -4 } } : {})}
-                >
-                  <div className="certification-topline">
-                    <Award aria-hidden="true" size={18} />
-                    <span>0{index + 1} / CERTIFIED</span>
-                  </div>
-                  <h3>{certification.title}</h3>
-                  <p>{certification.description}</p>
-                </m.article>
-              </div>
+              <article className="credential-card-5lab" key={certification.title}>
+                <div className="credential-card-header-5lab">
+                  <span className="credential-mono-tag">0{index + 1} / CERTIFIED</span>
+                  <Award aria-hidden="true" size={18} />
+                </div>
+                <h3 className="credential-card-title-5lab">{certification.title}</h3>
+                <p className="credential-card-desc-5lab">{certification.description}</p>
+              </article>
             ))}
           </div>
         </div>

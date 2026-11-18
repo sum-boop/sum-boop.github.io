@@ -1,10 +1,8 @@
-import { memo, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { memo, useRef } from 'react';
 import { ArrowUpRight, Cpu, Network, ScanEye, ShieldCheck } from 'lucide-react';
 import { type VmsViewMode, useVms } from '@/context/VmsContext';
 import { skillCategories, skillTicker } from '@/data/skills';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { VelocityMarquee, useIsTouch } from '@/motion';
-import { useStaggeredCardGroup } from '@/utils/scrollStory';
+import { VelocityMarquee } from '@/motion';
 import { SectionHeading } from './SectionHeading';
 
 const icons = [ScanEye, Network, Cpu, ShieldCheck] as const;
@@ -13,72 +11,66 @@ const CATEGORY_VMS_MODES: readonly VmsViewMode[] = ['live', 'playback', 'smart-m
 export const Skills = memo(function Skills() {
   const { viewMode, setViewMode } = useVms();
   const gridRef = useRef<HTMLDivElement>(null);
-  const isTouch = useIsTouch();
-  const prefersReducedMotion = useReducedMotion();
-  const interactive = !isTouch && !prefersReducedMotion;
-
-  useStaggeredCardGroup(gridRef, '.skill-card');
-
-  const handleSpotlightMove = (event: ReactPointerEvent<HTMLElement>) => {
-    if (!interactive || event.pointerType === 'touch') return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty('--spotlight-x', `${event.clientX - rect.left}px`);
-    event.currentTarget.style.setProperty('--spotlight-y', `${event.clientY - rect.top}px`);
-  };
 
   return (
-    <section aria-labelledby="skills-title" className="content-section skills-section" id="skills">
+    <section aria-labelledby="skills-title" className="content-section-5lab skills-section-5lab" id="skills">
       <div className="section-inner">
         <SectionHeading
           description="A working toolkit across Milestone XProtect Smart Client consoles, connectivity, gate operations, and safety response."
-          eyebrow="Capabilities / signal map"
+          eyebrow="Capabilities / Signal Map"
           highlightWord="in sync."
           id="skills-title"
           number="02"
           title="Systems in sync."
-          tone="violet"
+          tone="amber"
         />
-        <div className="skills-grid" ref={gridRef}>
+
+        {/* 5Lab Notable Clients style clean grid (4 columns desktop, 2 on mobile) */}
+        <div className="skills-grid-5lab" ref={gridRef}>
           {skillCategories.map((category, index) => {
             const Icon = icons[index] ?? ScanEye;
             const mappedMode = CATEGORY_VMS_MODES[index] ?? 'live';
             const isVmsSynced = viewMode === mappedMode;
             return (
               <article
-                className={`skill-card skill-card--${category.accent} spotlight-card ${
-                  isVmsSynced ? 'skill-card--vms-active' : ''
-                }`}
+                className={`skill-cell-5lab ${isVmsSynced ? 'skill-cell-5lab--active' : ''}`}
                 key={category.name}
-                onPointerMove={handleSpotlightMove}
               >
-                <div className="skill-card-header">
-                  <span className="skill-icon">
-                    <Icon aria-hidden="true" size={19} />
-                  </span>
-                  <span className="mono-label">SKILL GROUP / 0{index + 1}</span>
+                <div className="skill-cell-header-5lab">
+                  <span className="skill-cell-mono">0{index + 1} / {category.name.toUpperCase()}</span>
                   <button
                     aria-label={`Sync VMS workstation to ${category.name}`}
                     aria-pressed={isVmsSynced}
-                    className="skill-card-trigger"
+                    className="skill-cell-action-btn"
                     onClick={() => setViewMode(mappedMode, { scrollToSection: false })}
                     type="button"
                   >
-                    <ArrowUpRight aria-hidden="true" className="skill-arrow" size={16} />
+                    <ArrowUpRight aria-hidden="true" size={16} />
                   </button>
                 </div>
-                <h3>{category.name}</h3>
-                <ul className="skill-list">
-                  {category.skills.map((skill) => (
-                    <li key={skill}>{skill}</li>
-                  ))}
-                </ul>
-                <span aria-hidden="true" className="skill-card-accent-bar" />
+
+                <div className="skill-cell-body-5lab">
+                  <div className="skill-cell-title-row">
+                    <span className="skill-cell-icon-wrap">
+                      <Icon aria-hidden="true" size={20} />
+                    </span>
+                    <h3>{category.name}</h3>
+                  </div>
+
+                  <ul className="skill-cell-list-5lab">
+                    {category.skills.map((skill) => (
+                      <li key={skill}>{skill}</li>
+                    ))}
+                  </ul>
+                </div>
               </article>
             );
           })}
         </div>
       </div>
-      <div aria-hidden="true" className="skill-ticker-wrap">
+
+      {/* Marquee ticker as a thin minimalist monochrome strip */}
+      <div aria-hidden="true" className="skill-ticker-wrap-5lab">
         <VelocityMarquee items={skillTicker} />
       </div>
     </section>

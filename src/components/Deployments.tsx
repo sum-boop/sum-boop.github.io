@@ -55,7 +55,7 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
   return (
     <section
       aria-labelledby="operations-title"
-      className="content-section operations-section"
+      className="content-section-5lab operations-section-5lab"
       id="operations"
     >
       <div className="section-inner">
@@ -93,13 +93,13 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
           </div>
         </ChoreoReveal>
 
-        {/* 5Lab #highlight-scroller Asymmetric Tilted Works Showcase (>= 768px) + Upright Editorial Stack (< 768px) */}
-        <div className="works-showcase-split" id="highlight-scroller">
-          <div className="feed-bento-grid works-gallery-column" ref={gridRef}>
+        {/* 5Lab Category Showcase 2-Column Grid with zero tilt and smooth hover */}
+        <div className="works-showcase-5lab" id="highlight-scroller">
+          <div className="feed-bento-grid-5lab works-gallery-column" ref={gridRef}>
             {visibleDeployments.map((deployment, visibleIdx) => (
               <m.div
                 animate={{ opacity: 1, y: 0 }}
-                className="feed-bento-cell works-card-slot"
+                className="feed-bento-cell-5lab works-card-slot"
                 initial={{ opacity: 0, y: 14 }}
                 key={`${deploymentFilter}-${deployment.id}`}
                 onFocus={() => setFocusedId(deployment.id)}

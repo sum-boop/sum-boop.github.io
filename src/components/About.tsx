@@ -25,47 +25,25 @@ export function About() {
   useStaggeredCardGroup(metricsRef, '.about-metric');
 
   return (
-    <section aria-labelledby="about-title" className="content-section about-section" id="about">
-      <div aria-hidden="true" className="editorial-diagonal-line editorial-diagonal-line--top" />
+    <section aria-labelledby="about-title" className="content-section-5lab" id="about">
       <div className="section-inner">
-        {/* 5Lab #scene-2 Overlapping Conic Crimson + Indigo Circles Manifesto Diagram */}
-        <div className="about-venn-stage" id="about-venn">
-          <div className="about-venn-diagram">
-            <div className="venn-label venn-label--left">
-              <span className="venn-word venn-word--crimson">Operations</span>
-              <small>24/7 Control Room</small>
-            </div>
-            <div aria-hidden="true" className="venn-circles">
-              <span className="venn-circle venn-circle--crimson" id="red-cir" />
-              <span className="venn-circle venn-circle--indigo" id="blue-cir" />
-              <span className="venn-crosshair" />
-            </div>
-            <div className="venn-label venn-label--right">
-              <span className="venn-word venn-word--indigo">Systems</span>
-              <small>Milestone XProtect</small>
-            </div>
-          </div>
-          <div className="venn-cta-row">
-            <a className="lab-underline-link" href="#skills">
-              Our capabilities
-            </a>
-          </div>
-        </div>
-
-        {/* 5Lab #designer-header Giant 10vw Indigo + Sharp Knockout Statement */}
-        <header className="designer-header" id="designer-header">
+        {/* Statement-style intro + tagline area matching 5lab.co */}
+        <header className="about-statement-header" id="designer-header">
           <ChoreoReveal as="p" className="section-eyebrow" direction="left" distance={20}>
-            <span>01</span> / Security profile
+            <span>01</span> / About &amp; Security Profile
           </ChoreoReveal>
           <ChoreoReveal delay={0.05} direction="up" distance={24}>
-            <h2 className="designer-headline" id="about-title">
+            <h2 className="about-statement-text" id="about-title">
               <span>Calm eyes. </span>
-              <mark className="editorial-highlight">Clear records.</mark>
+              <em className="hero-italic-accent">Clear records. </em>
+              <span className="about-dimmed-text">
+                Precision monitoring, gate control, and loss prevention across India&apos;s largest logistics hubs.
+              </span>
             </h2>
           </ChoreoReveal>
         </header>
 
-        {/* Asymmetric Operator Dossier & Summary Split (#scene-3) */}
+        {/* Asymmetric Operator Dossier & Summary Split */}
         <div className="about-layout">
           <ChoreoReveal className="identity-panel" direction="up">
             {!imageFailed ? (
@@ -192,7 +170,6 @@ export function About() {
           </div>
         </div>
       </div>
-      <div aria-hidden="true" className="editorial-diagonal-line editorial-diagonal-line--bottom" />
     </section>
   );
 }

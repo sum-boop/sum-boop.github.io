@@ -4,7 +4,6 @@ import { type VmsSiteFocus, useVms } from '@/context/VmsContext';
 import { contact } from '@/data/contact';
 import { careerSites } from '@/data/experience';
 import type { ThemeMode } from '@/hooks/useTheme';
-import { ChoreoReveal } from '@/motion';
 import { useFootprintScrollStory } from '@/utils/scrollStory';
 import { FootprintMap } from './FootprintMap';
 import { SectionHeading } from './SectionHeading';
@@ -58,19 +57,19 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
   return (
     <section
       aria-labelledby="footprint-title"
-      className="content-section footprint-section"
+      className="content-section-5lab footprint-section-5lab"
       id="footprint"
       ref={sectionRef}
     >
       <div className="section-inner" ref={innerRef}>
         <SectionHeading
-          description="Interactive Patli–NCR logistics corridor radar layered over a subtle orbital backdrop — synced with XProtect Smart Map and kept separate from the 3D workstation."
-          eyebrow="Deployment footprint"
+          description="Interactive Patli–NCR logistics corridor radar layered over a subtle orbital backdrop — synced with XProtect Smart Map."
+          eyebrow="Deployment Footprint"
           highlightWord="watch from."
           id="footprint-title"
           number="03"
           title="Where I watch from."
-          tone="lime"
+          tone="amber"
         />
 
         <div className="footprint-radar-stage">
@@ -81,8 +80,8 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
           </div>
 
           <div className="footprint-layout footprint-layout--clean">
-            <ChoreoReveal className="footprint-gmap-card" direction="scale">
-              <div className="footprint-gmap-header">
+            <div className="footprint-gmap-card-5lab">
+              <div className="footprint-gmap-header-5lab">
                 <span>
                   <MapPin aria-hidden="true" size={15} /> PATLI LOGISTICS CORRIDOR · HARYANA, INDIA
                 </span>
@@ -92,13 +91,13 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
                 </a>
               </div>
               <FootprintMap theme={theme} />
-            </ChoreoReveal>
+            </div>
           </div>
         </div>
 
         <div
           aria-label="Select deployment site on Smart Map"
-          className="site-list"
+          className="site-list-5lab"
           ref={stepListRef}
           role="group"
         >
@@ -107,13 +106,13 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
             return (
               <button
                 aria-pressed={isSelected}
-                className={`site-row site-row-btn ${isSelected ? 'site-row--active' : ''}`}
+                className={`site-row-5lab ${isSelected ? 'site-row-5lab--active' : ''}`}
                 key={site.id}
                 onClick={() => handleSelectSite(site.id)}
                 type="button"
               >
-                <span className="site-index">0{index + 1}</span>
-                <span className="site-row-state">
+                <span className="site-index-5lab">0{index + 1}</span>
+                <span className="site-row-state-5lab">
                   <i
                     aria-hidden="true"
                     className={
@@ -124,28 +123,28 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
                   />
                   {site.status === 'active' ? 'CURRENT' : 'ARCHIVED'}
                 </span>
-                <strong>{site.name}</strong>
-                <span>
+                <strong className="site-name-5lab">{site.name}</strong>
+                <span className="site-client-5lab">
                   {site.client} · {site.period}
                 </span>
-                <span className="site-camera-count tabular-nums">{site.cameras} cameras</span>
+                <span className="site-camera-count-5lab tabular-nums">{site.cameras} cameras</span>
               </button>
             );
           })}
           <button
             aria-pressed={corridorOverviewActive}
-            className={`site-row site-row-btn ${corridorOverviewActive ? 'site-row--active' : ''}`}
+            className={`site-row-5lab ${corridorOverviewActive ? 'site-row-5lab--active' : ''}`}
             onClick={() => handleSelectSite('flipkart', true)}
             type="button"
           >
-            <span className="site-index">03</span>
-            <span className="site-row-state">
+            <span className="site-index-5lab">03</span>
+            <span className="site-row-state-5lab">
               <i aria-hidden="true" className="status-pulse" />
               CORRIDOR
             </span>
-            <strong>Patli–NCR Freight Corridor</strong>
-            <span>KMP Expressway · NH-48 Smart Map</span>
-            <span className="site-camera-count tabular-nums">{totalCameras} cameras</span>
+            <strong className="site-name-5lab">Patli–NCR Freight Corridor</strong>
+            <span className="site-client-5lab">KMP Expressway · NH-48 Smart Map</span>
+            <span className="site-camera-count-5lab tabular-nums">{totalCameras} cameras</span>
           </button>
         </div>
       </div>

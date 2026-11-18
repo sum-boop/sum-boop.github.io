@@ -18,17 +18,9 @@ html[data-theme='dark'] {
   --color-crimson: #ff223a;
   --color-crimson-spotlight: #d5204a;
   --color-crimson-stamp: #ff4e4e;
-  --color-crimson-deep: #7a0b2c;
-  --color-crimson-mid: #4d0419;
-  --color-crimson-dark: #160208;
   --color-obsidian: #000000;
   --color-obsidian-raised: #0a0a0e;
   --color-grid-dashed: rgba(255, 255, 255, 0.12);
-  --sphere-still:
-    radial-gradient(circle at 72% 58%, #ff223aeb 0%, #ff223a00 27%),
-    radial-gradient(circle at 31% 32%, #681edef2 0%, #681ede00 36%),
-    radial-gradient(circle at 56% 60%, #ff1c8cbf 0%, #ff1c8c00 42%),
-    radial-gradient(circle closest-side, #b8166a 0%, #83125c 58%, #45093c 92%, #45093c00 100%);
 
   /* Semantic Surface & Ink Tokens (Obsidian #000000 Base) */
   --color-background: #000000;
@@ -68,18 +60,15 @@ html[data-theme='dark'] {
   --shadow-deep: 0 24px 64px rgba(0, 0, 0, 0.8);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --theme-transition: 450ms var(--ease-out);
-  --hero-title-accent-gradient: none;
-  --scanline-line-color: rgba(255, 255, 255, 0.04);
-  --scanline-overlay-opacity: 0.08;
 
-  /* 5Lab Fonts (GT Walsheim Pro -> Instrument Sans + Plus Jakarta Sans + Newsreader) */
+  /* 5Lab Fonts */
   --font-display: 'Plus Jakarta Sans', 'Instrument Sans', system-ui, sans-serif;
   --font-body: 'Plus Jakarta Sans', 'Instrument Sans', system-ui, sans-serif;
   --font-serif: 'Newsreader', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-display-wide: 'Plus Jakarta Sans', 'Instrument Sans', system-ui, sans-serif;
 
-  /* Exact 5Lab Sharp 0px Editorial Corners & Architectural Gutters */
+  /* Architectural Gutters & 0px Corners */
   --gutter: clamp(1rem, 3.4vw, 3.5rem);
   --content-width: 1440px;
   --radius-sm: 0px;
@@ -92,13 +81,7 @@ html[data-theme='dark'] {
   --cta-primary-bg-hover: #ff476e;
   --cta-primary-bg-active: #d51f35;
   --cta-primary-border: transparent;
-  --cta-primary-border-top: transparent;
-  --cta-primary-border-bottom: transparent;
-  --cta-primary-shadow: none;
   --cta-quiet-border: rgba(255, 255, 255, 0.3);
-  --cta-quiet-border-top: rgba(255, 255, 255, 0.3);
-  --cta-quiet-border-bottom: rgba(255, 255, 255, 0.3);
-  --cta-quiet-shadow: none;
 
   /* Compatibility Aliases */
   --ink: var(--color-background);
@@ -111,39 +94,12 @@ html[data-theme='dark'] {
   --muted: var(--color-text-muted);
   --line: var(--color-border);
   --line-strong: var(--color-border-strong);
-  --cyan: var(--color-accent-cyan);
-  --lime: var(--color-accent-lime);
-  --violet: var(--color-accent-violet);
-  --amber: var(--color-accent-amber);
-  --coral: var(--color-accent-danger);
 }
 
-/* Operating modes compatibility tokens */
 :root {
   --accent-rgb: 255, 34, 58;
   --secondary-rgb: 255, 255, 255;
   --status-rgb: 74, 222, 128;
-  --scanline-tint: rgba(255, 255, 255, 0.04);
-  --scanline-opacity: 0.05;
-  --grain-opacity: 0.025;
   --mode-transition-duration: 450ms;
   --mode-transition-ease: var(--ease-out);
-
-  --fs-hero-xl: clamp(2.8rem, 6.2vw, 5.75rem);
-  --fs-readout: clamp(0.72rem, 0.85vw, 0.82rem);
-  --fs-label: clamp(0.68rem, 0.78vw, 0.76rem);
-  --tracking-wide: 0.08em;
-  --tracking-mono: 0.14em;
-  --lh-tight: 1.04;
-  --lh-body: 1.65;
-
-  --shadow-inset-recess: inset 0 1px 4px rgba(0, 0, 0, 0.4);
-  --shadow-key-raised: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-key-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-  --blur-glass: 14px;
-  --border-bevel-light: 1px solid rgba(255, 255, 255, 0.15);
-  --border-bevel-dark: 1px solid rgba(0, 0, 0, 0.8);
-  --glow-emissive-sm: none;
-  --glow-emissive-md: none;
-  --glow-emissive-lg: none;
 }

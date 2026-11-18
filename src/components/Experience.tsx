@@ -1,28 +1,13 @@
-import { AnimatePresence, m, useScroll, useTransform } from 'framer-motion';
-import { useRef, useState } from 'react';
-import { ArrowUpRight, BriefcaseBusiness, ChevronDown, Shield } from 'lucide-react';
+import { AnimatePresence, m } from 'framer-motion';
+import { useState } from 'react';
+import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { useVms } from '@/context/VmsContext';
 import { experience } from '@/data/experience';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { motionDurations, motionEasings, useIsTouch } from '@/motion';
-import { useStaggeredCardGroup } from '@/utils/scrollStory';
+import { motionDurations, motionEasings } from '@/motion';
 import { SectionHeading } from './SectionHeading';
 
 export function Experience() {
   const { activeSiteId, setActiveSiteId, viewMode } = useVms();
-  const sectionRef = useRef<HTMLElement>(null);
-  const timelineRef = useRef<HTMLOListElement>(null);
-  const prefersReducedMotion = useReducedMotion();
-  const isTouch = useIsTouch();
-  const trackProgress = !prefersReducedMotion && !isTouch;
-
-  useStaggeredCardGroup(timelineRef, '.experience-entry');
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start 0.75', 'end 0.55'],
-  });
-  const railScaleY = useTransform(scrollYProgress, [0, 1], [0.06, 1]);
 
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -39,9 +24,8 @@ export function Experience() {
   return (
     <section
       aria-labelledby="experience-title"
-      className="content-section experience-section"
+      className="content-section-5lab experience-section-5lab"
       id="experience"
-      ref={sectionRef}
     >
       <div className="section-inner">
         <SectionHeading
@@ -50,151 +34,92 @@ export function Experience() {
           id="experience-title"
           number="05"
           title="Operational logbook."
-          tone="violet"
+          tone="amber"
         />
-        <div className="experience-story-layout">
-          <aside aria-label="Career progression index" className="experience-sticky-aside">
-            <div className="experience-story-card">
-              <div className="experience-story-head">
-                <Shield aria-hidden="true" size={16} />
-                <span className="mono-label">ACTIVE PROGRESSION</span>
-              </div>
-              <p className="experience-story-lead">
-                2+ years of continuous CCTV control room and gate verification duties across major
-                NCR logistics hubs.
-              </p>
-              <div className="experience-story-meter">
-                <span aria-hidden="true" className="experience-story-rail">
-                  <m.i
-                    style={
-                      trackProgress
-                        ? { scaleY: railScaleY, transformOrigin: 'top center' }
-                        : { scaleY: 1, transformOrigin: 'top center' }
-                    }
-                  />
-                </span>
-                <ol className="experience-story-steps">
-                  {experience.map((entry, idx) => (
-                    <li
-                      className={`experience-story-step experience-story-step--${entry.status}`}
-                      key={entry.id}
-                    >
-                      <span className="mono-label">
-                        0{idx + 1} /{' '}
-                        <time dateTime={String(entry.startYear)}>{entry.startYear}</time>–
-                        <time dateTime={String(entry.endYear)}>{entry.endYear}</time>
-                      </span>
-                      <strong>{entry.site}</strong>
-                      <small>{entry.company}</small>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </aside>
 
-          <ol className="experience-timeline" ref={timelineRef}>
-            {experience.map((entry, index) => {
-              const entrySiteId = entry.site === 'Ekart Logistics' ? 'ekart' : 'flipkart';
-              const isSiteHighlighted = viewMode === 'alarms' || activeSiteId === entrySiteId;
-              const isExpanded = Boolean(expandedIds[entry.id]);
-              const panelId = `experience-panel-${entry.id}`;
-              return (
-                <li
-                  className={`experience-entry experience-entry--${entry.status} ${
-                    isSiteHighlighted ? 'experience-entry--vms-focus' : ''
-                  }`}
-                  key={entry.id}
-                >
-                  <div aria-hidden="true" className="experience-rail">
-                    <span />
-                    <m.i
-                      initial={{ scaleY: 0 }}
-                      transition={{ duration: motionDurations.slow, ease: motionEasings.out }}
-                      viewport={{ once: true, amount: 0.15 }}
-                      whileInView={{ scaleY: 1 }}
-                    />
-                  </div>
-                  <div className="experience-content">
-                    <div className="experience-topline">
-                      <span className="experience-date tabular-nums">
-                        <time dateTime={String(entry.startYear)}>{entry.startYear}</time> —{' '}
-                        <time dateTime={String(entry.endYear)}>{entry.endYear}</time>
-                      </span>
-                      <span className={`experience-status experience-status--${entry.status}`}>
-                        <i aria-hidden="true" />{' '}
-                        {entry.status === 'active' ? 'Active post' : 'Archived'}
-                      </span>
-                    </div>
-                    <div className="experience-header-row">
-                      <div>
-                        <h3>{entry.role}</h3>
-                        <div className="experience-meta-row">
-                          <p className="experience-company">
-                            <BriefcaseBusiness aria-hidden="true" size={15} /> {entry.company}
-                          </p>
-                          <a
-                            className="experience-site"
-                            href="#footprint"
-                            onClick={() => setActiveSiteId(entrySiteId)}
-                          >
-                            {entry.site} <ArrowUpRight aria-hidden="true" size={13} />
-                          </a>
-                        </div>
+        {/* 5Lab Large Editorial Experience List */}
+        <div className="experience-editorial-list-5lab">
+          {experience.map((entry, index) => {
+            const entrySiteId = entry.site === 'Ekart Logistics' ? 'ekart' : 'flipkart';
+            const isSiteHighlighted = viewMode === 'alarms' || activeSiteId === entrySiteId;
+            const isExpanded = Boolean(expandedIds[entry.id]);
+            const panelId = `experience-panel-${entry.id}`;
+
+            return (
+              <article
+                className={`experience-editorial-row-5lab ${
+                  isSiteHighlighted ? 'experience-editorial-row--active' : ''
+                }`}
+                key={entry.id}
+              >
+                <div className="experience-row-main-5lab">
+                  <div className="experience-row-left-5lab">
+                    <span className="experience-row-index-5lab">0{index + 1}</span>
+                    <div>
+                      <h3 className="experience-row-role-5lab">{entry.role}</h3>
+                      <div className="experience-row-company-wrap">
+                        <span className="experience-row-company-5lab">{entry.company}</span>
+                        <a
+                          className="experience-row-site-link"
+                          href="#footprint"
+                          onClick={() => setActiveSiteId(entrySiteId)}
+                        >
+                          {entry.site} <ArrowUpRight aria-hidden="true" size={14} />
+                        </a>
                       </div>
-                      <m.button
-                        aria-controls={panelId}
-                        aria-expanded={isExpanded}
-                        className="experience-toggle"
-                        onClick={() => toggleEntry(entry.id)}
-                        type="button"
-                        whileTap={{ scale: 0.97 }}
-                      >
-                        <span>{isExpanded ? 'Hide duties' : 'View duties'}</span>
-                        <m.span
-                          animate={{ rotate: isExpanded ? 180 : 0 }}
-                          className="experience-chevron"
-                          transition={{ duration: motionDurations.fast, ease: motionEasings.out }}
-                        >
-                          <ChevronDown aria-hidden="true" size={16} />
-                        </m.span>
-                      </m.button>
                     </div>
-
-                    <AnimatePresence initial={false}>
-                      {isExpanded ? (
-                        <m.div
-                          animate={{ opacity: 1, y: 0 }}
-                          className="experience-accordion-body"
-                          exit={{ opacity: 0, y: -6 }}
-                          id={panelId}
-                          initial={{ opacity: 0, y: -6 }}
-                          transition={{ duration: motionDurations.fast, ease: motionEasings.out }}
-                        >
-                          <ul className="responsibility-list">
-                            {entry.responsibilities.map((responsibility) => (
-                              <li key={responsibility}>{responsibility}</li>
-                            ))}
-                          </ul>
-                          <ul
-                            aria-label={`Skills used at ${entry.company}`}
-                            className="experience-tags"
-                          >
-                            {entry.skills.map((skill) => (
-                              <li key={skill}>{skill}</li>
-                            ))}
-                          </ul>
-                        </m.div>
-                      ) : null}
-                    </AnimatePresence>
                   </div>
-                  <span aria-hidden="true" className="experience-index">
-                    LOG / 0{index + 1}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+
+                  <div className="experience-row-right-5lab">
+                    <span className="experience-row-dates-5lab">
+                      {entry.startYear} — {entry.endYear}
+                    </span>
+                    <button
+                      aria-controls={panelId}
+                      aria-expanded={isExpanded}
+                      className="experience-row-toggle-btn"
+                      onClick={() => toggleEntry(entry.id)}
+                      type="button"
+                    >
+                      <span>{isExpanded ? 'Hide duties' : 'View duties'}</span>
+                      <ChevronDown
+                        aria-hidden="true"
+                        className={`experience-row-chevron ${isExpanded ? 'experience-row-chevron--open' : ''}`}
+                        size={16}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {isExpanded ? (
+                    <m.div
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="experience-editorial-accordion-5lab"
+                      exit={{ opacity: 0, height: 0 }}
+                      id={panelId}
+                      initial={{ opacity: 0, height: 0 }}
+                      transition={{ duration: motionDurations.fast, ease: motionEasings.out }}
+                    >
+                      <ul className="responsibility-list-5lab">
+                        {entry.responsibilities.map((responsibility) => (
+                          <li key={responsibility}>{responsibility}</li>
+                        ))}
+                      </ul>
+                      <ul
+                        aria-label={`Skills used at ${entry.company}`}
+                        className="experience-tags-5lab"
+                      >
+                        {entry.skills.map((skill) => (
+                          <li key={skill}>{skill}</li>
+                        ))}
+                      </ul>
+                    </m.div>
+                  ) : null}
+                </AnimatePresence>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
