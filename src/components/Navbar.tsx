@@ -14,18 +14,17 @@ interface NavbarProps {
 }
 
 const links = [
-  { href: '#operations', label: 'Deployments' },
-  { href: '#about', label: 'Expertise' },
-  { href: '#footprint', label: 'Footprint' },
-  { href: '#experience', label: 'Logbook' },
+  { href: '#operations', label: 'Works' },
+  { href: '#about', label: 'Services' },
+  { href: '#footprint', label: 'About' },
   { href: '#contact', label: 'Contact' },
 ] as const;
 
 const mobileLinks = [
   { href: '#hero', label: 'Home' },
-  { href: '#operations', label: 'Deployments' },
-  { href: '#about', label: 'Expertise' },
-  { href: '#footprint', label: 'Footprint' },
+  { href: '#operations', label: 'Works' },
+  { href: '#about', label: 'Services' },
+  { href: '#footprint', label: 'About' },
   { href: '#experience', label: 'Logbook' },
   { href: '#certifications', label: 'Credentials' },
   { href: '#contact', label: 'Contact' },
@@ -62,67 +61,16 @@ export const Navbar = memo(function Navbar({
   onOpenPalette,
 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
-  const [navTone, setNavTone] = useState<'hero' | 'light' | 'contact'>('hero');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
   const closeMenuRef = useRef<HTMLButtonElement>(null);
   const activeSection = useScrollSpy(sectionIds);
   const { scrollY } = useScroll();
 
-  const updateNavTone = useCallback(() => {
-    const headerSampleY = 40;
-    const curtainEl = document.querySelector<HTMLElement>('.hero-curtain');
-    const contactEl = document.getElementById('contact');
-    const footerEl = document.querySelector<HTMLElement>('.site-footer');
-
-    if (curtainEl) {
-      const curtainRect = curtainEl.getBoundingClientRect();
-      if (curtainRect.bottom > headerSampleY) {
-        setNavTone('hero');
-        return;
-      }
-    }
-
-    if (contactEl || footerEl) {
-      const contactTop = contactEl ? contactEl.getBoundingClientRect().top : Infinity;
-      const footerTop = footerEl ? footerEl.getBoundingClientRect().top : Infinity;
-      if (Math.min(contactTop, footerTop) <= headerSampleY) {
-        setNavTone('contact');
-        return;
-      }
-    }
-
-    if (theme === 'dark') {
-      setNavTone('contact');
-      return;
-    }
-
-    setNavTone('light');
-  }, [theme]);
-
   useMotionValueEvent(scrollY, 'change', (latest) => {
     const isScrolled = latest > 24;
     setScrolled((prev) => (prev === isScrolled ? prev : isScrolled));
-    updateNavTone();
   });
-
-  useEffect(() => {
-    const syncScrollState = () => {
-      const isScrolled = window.scrollY > 24;
-      setScrolled((prev) => (prev === isScrolled ? prev : isScrolled));
-      updateNavTone();
-    };
-    const rafId = window.requestAnimationFrame(syncScrollState);
-    window.addEventListener('scroll', syncScrollState, { passive: true, capture: true });
-    window.addEventListener('scrollend', syncScrollState, { passive: true });
-    window.addEventListener('resize', syncScrollState, { passive: true });
-    return () => {
-      window.cancelAnimationFrame(rafId);
-      window.removeEventListener('scroll', syncScrollState, { capture: true });
-      window.removeEventListener('scrollend', syncScrollState);
-      window.removeEventListener('resize', syncScrollState);
-    };
-  }, [updateNavTone]);
 
   useEffect(() => {
     document.body.classList.toggle('menu-open', menuOpen);
@@ -135,7 +83,6 @@ export const Navbar = memo(function Navbar({
 
   useEffect(() => {
     if (!menuOpen) return;
-
     closeMenuRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -177,7 +124,6 @@ export const Navbar = memo(function Navbar({
       <ScrollProgress />
       <header
         className={`site-header ${scrolled ? 'site-header--scrolled' : ''}`}
-        data-nav-tone={navTone}
         id="site-navigation"
       >
         <nav aria-label="Primary navigation" className="nav-shell">
@@ -255,46 +201,6 @@ export const Navbar = memo(function Navbar({
                 ease: motionEasings.out,
               }}
             >
-              {/* 5Lab Faint Dotted Orbital Rings Backdrop in Mobile Modal */}
-              <svg aria-hidden="true" className="mobile-modal-rings" viewBox="0 0 400 400">
-                <circle
-                  cx="330"
-                  cy="70"
-                  fill="none"
-                  r="110"
-                  stroke="rgba(255,255,255,0.2)"
-                  strokeDasharray="2 7"
-                  strokeWidth="1.2"
-                />
-                <circle
-                  cx="330"
-                  cy="70"
-                  fill="none"
-                  r="142"
-                  stroke="rgba(255,34,58,0.28)"
-                  strokeDasharray="2 7"
-                  strokeWidth="1.2"
-                />
-                <circle
-                  cx="330"
-                  cy="70"
-                  fill="none"
-                  r="174"
-                  stroke="rgba(255,255,255,0.16)"
-                  strokeDasharray="2 8"
-                  strokeWidth="1.2"
-                />
-                <circle
-                  cx="330"
-                  cy="70"
-                  fill="none"
-                  r="206"
-                  stroke="rgba(62,61,179,0.28)"
-                  strokeDasharray="2 8"
-                  strokeWidth="1.2"
-                />
-              </svg>
-
               <div className="mobile-nav-head">
                 <a
                   aria-label="Sumit Anand — Home"
