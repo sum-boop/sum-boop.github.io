@@ -46,6 +46,7 @@ export function Experience() {
       <div className="section-inner">
         <SectionHeading
           eyebrow="Duty history"
+          highlightWord="logbook."
           id="experience-title"
           number="05"
           title="Operational logbook."

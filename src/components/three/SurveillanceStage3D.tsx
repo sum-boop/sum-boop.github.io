@@ -739,10 +739,11 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     };
 
     const onScroll = () => {
-      const heroEl = stageRef.current?.closest('.hero-section');
-      if (!heroEl) return;
-      const rect = heroEl.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, -rect.top / Math.max(360, rect.height * 0.85)));
+      const stageEl = stageRef.current;
+      if (!stageEl) return;
+      const rect = stageEl.getBoundingClientRect();
+      const vh = window.innerHeight || 900;
+      const progress = Math.min(1, Math.max(0, (vh - rect.top) / Math.max(420, vh + rect.height)));
       targetScrollProgress = progress;
     };
 
@@ -787,13 +788,15 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       }
       const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
       gl.flush();
+      let polls = 0;
       const poll = () => {
         if (isDisposed) {
           if (sync) gl.deleteSync(sync);
           return;
         }
+        polls += 1;
         const state = sync ? gl.getSyncParameter(sync, gl.SYNC_STATUS) : gl.SIGNALED;
-        if (state === gl.UNSIGNALED) {
+        if (state === gl.UNSIGNALED && polls < 10) {
           frameId = window.setTimeout(poll, 5);
         } else {
           if (sync) gl.deleteSync(sync);
@@ -864,8 +867,8 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
 
-    function tick() {
-      if (isDisposed || !isVisible || !isTabVisible) return;
+    function tick(forceInitial = false) {
+      if (isDisposed || (!forceInitial && (!isVisible || !isTabVisible))) return;
       isRenderingTick = true;
 
       const now = performance.now();
@@ -1026,8 +1029,8 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       }
     }
 
-    // Start animation loop (tick sets stage ready cleanly after frame 0 draws)
-    requestRender();
+    // Draw initial Frame 0 immediately so the workstation is visible as soon as the user scrolls into view
+    tick(true);
 
     return () => {
       isDisposed = true;
@@ -1093,7 +1096,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
   if (webglFailed) {
     return (
-      <div className="stage3d-shell stage3d-shell--hero stage3d-skeleton">
+      <div className="stage3d-shell stage3d-shell--framed stage3d-skeleton">
         <div className="stage-skeleton-inner">
           <div className="stage-skeleton-grid" />
           <div className="stage-skeleton-console">
@@ -1108,7 +1111,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
   return (
     <div
-      className={`stage3d-shell stage3d-shell--hero ${sceneReady ? 'stage3d-shell--ready' : ''}`}
+      className={`stage3d-shell stage3d-shell--framed ${sceneReady ? 'stage3d-shell--ready' : ''}`}
       data-hovered-part={hoveredPartLabel ?? ''}
       data-testid="vms-stage-3d"
       ref={stageRef}

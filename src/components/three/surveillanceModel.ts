@@ -644,11 +644,11 @@ export function buildSurveillanceAssembly(materials: MaterialBundle): Surveillan
   // 9. Floating Holographic Reticle Nodes & Surveillance Icons around Workstation
   const holoNodesGroup = new THREE.Group();
   const holoNodePositions: Array<[number, number, number]> = [
-    [-1.65, 1.55, 0.45],
-    [1.68, 1.48, 0.5],
+    [-1.78, 1.52, 0.35],
+    [1.76, 1.48, 0.42],
     [0.05, 2.08, -0.25],
-    [-1.18, 0.85, 0.95],
-    [1.22, 0.92, 0.92],
+    [-1.24, 0.85, 0.92],
+    [1.24, 0.92, 0.92],
   ];
   const icoGeo = new THREE.OctahedronGeometry(0.07, 0);
   const frameRingGeo = new THREE.RingGeometry(0.11, 0.125, 4);

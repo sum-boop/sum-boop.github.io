@@ -1,4 +1,4 @@
-import { AnimatePresence, LayoutGroup, m } from 'framer-motion';
+import { LayoutGroup, m } from 'framer-motion';
 import { memo, useCallback, useMemo, useRef } from 'react';
 import { useVms } from '@/context/VmsContext';
 import { deployments } from '@/data/projects';
@@ -49,6 +49,7 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
         <SectionHeading
           description="Illustrative feed imagery is not footage from the listed client sites. Filter synced directly with the Hero XProtect Smart Client console."
           eyebrow="Key deployments"
+          highlightWord="deployments."
           id="operations-title"
           number="04"
           title="Camera feed deployments."
@@ -90,37 +91,32 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
           </LayoutGroup>
         </ChoreoReveal>
 
-        <LayoutGroup id="deployment-bento">
-          <m.div className="feed-bento-grid" layout ref={gridRef}>
-            <AnimatePresence mode="popLayout">
-              {visibleDeployments.map((deployment, visibleIdx) => (
-                <m.div
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  className={`feed-bento-cell ${visibleIdx === 0 && deploymentFilter === 'All deployments' ? 'feed-bento-cell--featured' : ''}`}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  initial={{ opacity: 0, y: 16 }}
-                  key={deployment.id}
-                  layout
-                  transition={{
-                    duration: motionDurations.fast,
-                    ease: motionEasings.out,
-                    layout: motionSprings.snappy,
-                  }}
-                >
-                  <div className="feed-card-choreo-wrap">
-                    <CameraFeedCard
-                      deployment={deployment}
-                      featured={visibleIdx === 0 && deploymentFilter === 'All deployments'}
-                      index={deployments.indexOf(deployment)}
-                      isSelectedFeed={selectedFeedId === deployment.id}
-                      onOpen={onOpen}
-                    />
-                  </div>
-                </m.div>
-              ))}
-            </AnimatePresence>
-          </m.div>
-        </LayoutGroup>
+        <div className="feed-bento-grid" ref={gridRef}>
+          {visibleDeployments.map((deployment, visibleIdx) => (
+            <m.div
+              animate={{ opacity: 1, y: 0 }}
+              className={`feed-bento-cell ${
+                visibleIdx % 2 === 1 ? 'feed-bento-cell--offset' : 'feed-bento-cell--tilt-left'
+              }`}
+              initial={{ opacity: 0, y: 14 }}
+              key={`${deploymentFilter}-${deployment.id}`}
+              transition={{
+                duration: motionDurations.fast,
+                ease: motionEasings.out,
+                delay: Math.min(visibleIdx * 0.04, 0.2),
+              }}
+            >
+              <div className="feed-card-choreo-wrap">
+                <CameraFeedCard
+                  deployment={deployment}
+                  index={deployments.indexOf(deployment)}
+                  isSelectedFeed={selectedFeedId === deployment.id}
+                  onOpen={onOpen}
+                />
+              </div>
+            </m.div>
+          ))}
+        </div>
       </div>
     </section>
   );

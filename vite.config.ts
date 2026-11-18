@@ -5,8 +5,17 @@ import react from '@vitejs/plugin-react';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
+function resolveBasePath(rawBase: string | undefined): string {
+  const trimmed = rawBase?.trim();
+  if (!trimmed || trimmed === '/') {
+    return '/';
+  }
+  const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  return withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`;
+}
+
 export default defineConfig({
-  base: './',
+  base: resolveBasePath(process.env.VITE_BASE_PATH),
   plugins: [react()],
   resolve: {
     alias: {

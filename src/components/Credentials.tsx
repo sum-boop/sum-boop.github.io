@@ -24,6 +24,7 @@ export function Credentials() {
       <div className="section-inner">
         <SectionHeading
           eyebrow="Certifications & training"
+          highlightWord="credentials."
           id="credentials-title"
           number="06"
           title="Verified credentials."

@@ -32,6 +32,7 @@ export const Skills = memo(function Skills() {
         <SectionHeading
           description="A working toolkit across Milestone XProtect Smart Client consoles, connectivity, gate operations, and safety response."
           eyebrow="Capabilities / signal map"
+          highlightWord="in sync."
           id="skills-title"
           number="02"
           title="Systems in sync."

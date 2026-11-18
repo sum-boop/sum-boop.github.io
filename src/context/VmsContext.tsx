@@ -6,7 +6,6 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { startSafeViewTransition } from '@/utils/viewTransition';
 import { resolveVmsModeForCategory } from '@/utils/vmsLogic';
 
 export type VmsViewMode = 'live' | 'playback' | 'smart-map' | 'alarms';
@@ -92,20 +91,15 @@ export function VmsProvider({ children }: PropsWithChildren) {
   const setViewMode = useCallback(
     (mode: VmsViewMode, options?: { scrollToSection?: boolean }) => {
       const preset = VMS_WORKSPACE_PRESETS.find((item) => item.id === mode);
-      startSafeViewTransition(
-        () => {
-          setViewModeState(mode);
-          if (preset) {
-            setDeploymentFilterState(preset.deploymentCategory);
-            setActiveSiteId(preset.siteFocus);
-          }
-          if (mode === 'playback') setSelectedFeedId('op4');
-          else if (mode === 'alarms') setSelectedFeedId('op3');
-          else if (mode === 'smart-map') setSelectedFeedId('op5');
-          else setSelectedFeedId('op1');
-        },
-        { kind: 'layout' },
-      );
+      setViewModeState(mode);
+      if (preset) {
+        setDeploymentFilterState(preset.deploymentCategory);
+        setActiveSiteId(preset.siteFocus);
+      }
+      if (mode === 'playback') setSelectedFeedId('op4');
+      else if (mode === 'alarms') setSelectedFeedId('op3');
+      else if (mode === 'smart-map') setSelectedFeedId('op5');
+      else setSelectedFeedId('op1');
 
       if (options?.scrollToSection && preset) {
         window.setTimeout(() => scrollToElement(preset.sectionId), 60);
@@ -115,13 +109,8 @@ export function VmsProvider({ children }: PropsWithChildren) {
   );
 
   const setDeploymentFilter = useCallback((category: string) => {
-    startSafeViewTransition(
-      () => {
-        setDeploymentFilterState(category);
-        setViewModeState(resolveVmsModeForCategory(category));
-      },
-      { kind: 'layout' },
-    );
+    setDeploymentFilterState(category);
+    setViewModeState(resolveVmsModeForCategory(category));
   }, []);
 
   const focusSectionFromVms = useCallback(

@@ -21,16 +21,19 @@ import { BackToTop, SideSectionRail } from '@/motion';
 import { PortfolioSections } from '@/sections/PortfolioSections';
 import type { DeploymentBriefing } from '@/types/portfolio';
 import { assetPath } from '@/utils/assets';
-import { startSafeViewTransition } from '@/utils/viewTransition';
 import { resolveSiteFromName } from '@/utils/vmsLogic';
 import { initSmoothScroll } from '@/utils/animMaster';
 import { useMicroInteractions } from '@/utils/microInteractions';
 import { scheduleIdle } from '@/utils/yieldToMain';
 
+const NORMALIZED_BASE_PATH = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '') || '/';
+
 const VALID_PATHS = new Set([
   '',
   '/',
   '/index.html',
+  NORMALIZED_BASE_PATH,
+  `${NORMALIZED_BASE_PATH === '/' ? '' : NORMALIZED_BASE_PATH}/index.html`,
   '/sum-boob.github.io',
   '/sum-boob.github.io/',
   '/sum-boob.github.io/index.html',
@@ -70,59 +73,44 @@ function AppContent() {
     (deployment: DeploymentBriefing) => {
       setSelectedFeedId(deployment.id);
       setActiveSiteId(resolveSiteFromName(deployment.site));
-      startSafeViewTransition(
-        () => {
-          setGalleryIndex(0);
-          setImageFailed(false);
-          setActiveDeployment(deployment);
-          const nextHash = `#deployment-${deployment.id}`;
-          if (window.location.hash !== nextHash) {
-            window.history.replaceState(null, '', nextHash);
-          }
-        },
-        { kind: 'layout' },
-      );
+      setGalleryIndex(0);
+      setImageFailed(false);
+      setActiveDeployment(deployment);
+      const nextHash = `#deployment-${deployment.id}`;
+      if (window.location.hash !== nextHash) {
+        window.history.replaceState(null, '', nextHash);
+      }
     },
     [setActiveSiteId, setSelectedFeedId],
   );
 
   const closeDialog = useCallback(() => {
-    startSafeViewTransition(
-      () => {
-        setActiveDeployment((current) => {
-          if (current && window.location.hash.startsWith('#deployment-')) {
-            window.history.replaceState(
-              null,
-              '',
-              `${window.location.pathname}${window.location.search}`,
-            );
-          }
-          return null;
-        });
-      },
-      { kind: 'layout' },
-    );
+    setActiveDeployment((current) => {
+      if (current && window.location.hash.startsWith('#deployment-')) {
+        window.history.replaceState(
+          null,
+          '',
+          `${window.location.pathname}${window.location.search}`,
+        );
+      }
+      return null;
+    });
   }, []);
 
   const navigateDeployment = useCallback((direction: 'prev' | 'next') => {
-    startSafeViewTransition(
-      () => {
-        setActiveDeployment((current) => {
-          if (!current) return current;
-          const currentIndex = deployments.findIndex((d) => d.id === current.id);
-          if (currentIndex === -1) return current;
-          const delta = direction === 'prev' ? -1 : 1;
-          const nextIndex = (currentIndex + delta + deployments.length) % deployments.length;
-          const nextDeployment = deployments[nextIndex];
-          if (!nextDeployment) return current;
-          setGalleryIndex(0);
-          setImageFailed(false);
-          window.history.replaceState(null, '', `#deployment-${nextDeployment.id}`);
-          return nextDeployment;
-        });
-      },
-      { kind: 'layout' },
-    );
+    setActiveDeployment((current) => {
+      if (!current) return current;
+      const currentIndex = deployments.findIndex((d) => d.id === current.id);
+      if (currentIndex === -1) return current;
+      const delta = direction === 'prev' ? -1 : 1;
+      const nextIndex = (currentIndex + delta + deployments.length) % deployments.length;
+      const nextDeployment = deployments[nextIndex];
+      if (!nextDeployment) return current;
+      setGalleryIndex(0);
+      setImageFailed(false);
+      window.history.replaceState(null, '', `#deployment-${nextDeployment.id}`);
+      return nextDeployment;
+    });
   }, []);
 
   const handleCopyEmail = useCallback(async () => {
@@ -163,9 +151,13 @@ function AppContent() {
   }, []);
 
   const returnHome = useCallback(() => {
-    const base = window.location.pathname.startsWith('/sum-boob.github.io')
-      ? '/sum-boob.github.io/'
-      : '/';
+    const envBase = import.meta.env.BASE_URL || '/';
+    const base =
+      envBase !== '/'
+        ? envBase
+        : window.location.pathname.startsWith('/sum-boob.github.io')
+          ? '/sum-boob.github.io/'
+          : '/';
     window.history.replaceState(null, '', base);
     setIs404(false);
   }, []);

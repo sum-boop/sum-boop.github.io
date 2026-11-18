@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { ArrowUp, Mail, MessageCircle, Radio } from 'lucide-react';
+import { ArrowUp, Mail, MessageCircle } from 'lucide-react';
 import { contact } from '@/data/contact';
 import { profile } from '@/data/profile';
 import { ChoreoReveal } from '@/motion';
@@ -25,7 +25,9 @@ export const Footer = memo(function Footer() {
           <div className="footer-main">
             <a className="footer-signature" href="#hero">
               <span className="footer-symbol">
-                <Radio aria-hidden="true" size={17} />
+                <svg aria-hidden="true" fill="none" height="17" viewBox="0 0 24 28" width="15">
+                  <path d="M13.5 1.5L3 15h8.2L9.4 26.5L21 12.2h-8.3l.8-10.7Z" fill="currentColor" />
+                </svg>
               </span>
               <span>
                 <strong>{profile.name}</strong>
@@ -63,7 +65,13 @@ export const Footer = memo(function Footer() {
           </div>
           <div className="footer-bottom">
             <span>© 2026 {profile.name}. All rights reserved.</span>
+            <span aria-hidden="true" className="footer-divider-bar">
+              |
+            </span>
             <span>Patli, Haryana, India</span>
+            <span aria-hidden="true" className="footer-divider-bar">
+              |
+            </span>
             <a href="#hero">
               Back to top <ArrowUp aria-hidden="true" size={14} />
             </a>

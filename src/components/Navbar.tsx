@@ -1,6 +1,6 @@
 import { AnimatePresence, LayoutGroup, m, useMotionValueEvent, useScroll } from 'framer-motion';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowUpRight, Command, Moon, Radio, Sun, X } from 'lucide-react';
+import { ArrowUpRight, Command, Moon, Sun, X } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useScrollSpy } from '@/hooks/useScrollSpy';
 import type { ThemeMode } from '@/hooks/useTheme';
@@ -23,22 +23,85 @@ const links = [
 
 const sectionIds = ['hero', 'about', 'footprint', 'operations', 'experience', 'contact'] as const;
 
+function SparkLogo({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height={size}
+      viewBox="0 0 24 28"
+      width={Math.round((size * 24) / 28)}
+    >
+      <path d="M13.5 1.5L3 15h8.2L9.4 26.5L21 12.2h-8.3l.8-10.7Z" fill="currentColor" />
+    </svg>
+  );
+}
+
 export const Navbar = memo(function Navbar({
   theme,
   onToggleTheme,
   onOpenPalette,
 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
+  const [navTone, setNavTone] = useState<'dark' | 'light'>('dark');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
   const closeMenuRef = useRef<HTMLButtonElement>(null);
   const activeSection = useScrollSpy(sectionIds);
   const { scrollY } = useScroll();
 
+  const updateNavTone = useCallback(() => {
+    const headerSampleY = 36;
+    const curtainEl = document.querySelector<HTMLElement>('.hero-curtain');
+    const contactEl = document.getElementById('contact');
+
+    if (theme === 'dark') {
+      setNavTone('dark');
+      return;
+    }
+
+    if (curtainEl) {
+      const curtainRect = curtainEl.getBoundingClientRect();
+      if (curtainRect.bottom > headerSampleY) {
+        setNavTone('dark');
+        return;
+      }
+    }
+
+    if (contactEl) {
+      const contactRect = contactEl.getBoundingClientRect();
+      if (contactRect.top <= headerSampleY) {
+        setNavTone('dark');
+        return;
+      }
+    }
+
+    setNavTone('light');
+  }, [theme]);
+
   useMotionValueEvent(scrollY, 'change', (latest) => {
-    const isScrolled = latest > 8;
+    const isScrolled = latest > 24;
     setScrolled((prev) => (prev === isScrolled ? prev : isScrolled));
+    updateNavTone();
   });
+
+  useEffect(() => {
+    const syncScrollState = () => {
+      const isScrolled = window.scrollY > 24;
+      setScrolled((prev) => (prev === isScrolled ? prev : isScrolled));
+      updateNavTone();
+    };
+    const rafId = window.requestAnimationFrame(syncScrollState);
+    window.addEventListener('scroll', syncScrollState, { passive: true, capture: true });
+    window.addEventListener('scrollend', syncScrollState, { passive: true });
+    window.addEventListener('resize', syncScrollState, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', syncScrollState, { capture: true });
+      window.removeEventListener('scrollend', syncScrollState);
+      window.removeEventListener('resize', syncScrollState);
+    };
+  }, [updateNavTone]);
 
   useEffect(() => {
     document.body.classList.toggle('menu-open', menuOpen);
@@ -102,11 +165,14 @@ export const Navbar = memo(function Navbar({
   return (
     <>
       <ScrollProgress />
-      <header className={`site-header ${scrolled ? 'site-header--scrolled' : ''}`}>
+      <header
+        className={`site-header ${scrolled ? 'site-header--scrolled' : ''}`}
+        data-nav-tone={navTone}
+      >
         <nav aria-label="Primary navigation" className="nav-shell">
           <a aria-label="Sumit Anand — Home" className="brand-mark" href="#hero">
             <span aria-hidden="true" className="brand-symbol">
-              <Radio size={18} strokeWidth={1.8} />
+              <SparkLogo size={17} />
             </span>
             <span>
               Sumit<span className="brand-surname"> Anand</span>
@@ -200,7 +266,10 @@ export const Navbar = memo(function Navbar({
               exit={{ opacity: 0 }}
               initial={{ opacity: 0 }}
               onClick={() => setMenuOpen(false)}
-              transition={{ duration: prefersReducedMotion ? 0.01 : motionDurations.micro, ease: motionEasings.out }}
+              transition={{
+                duration: prefersReducedMotion ? 0.01 : motionDurations.micro,
+                ease: motionEasings.out,
+              }}
             />
             <m.div
               animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
@@ -212,7 +281,10 @@ export const Navbar = memo(function Navbar({
               id="mobile-nav-overlay"
               initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: '100%' }}
               role="dialog"
-              transition={{ duration: prefersReducedMotion ? 0.01 : motionDurations.fast, ease: motionEasings.out }}
+              transition={{
+                duration: prefersReducedMotion ? 0.01 : motionDurations.fast,
+                ease: motionEasings.out,
+              }}
             >
               <div className="mobile-nav-head">
                 <a
@@ -222,7 +294,7 @@ export const Navbar = memo(function Navbar({
                   onClick={() => setMenuOpen(false)}
                 >
                   <span aria-hidden="true" className="brand-symbol">
-                    <Radio size={17} strokeWidth={1.8} />
+                    <SparkLogo size={16} />
                   </span>
                   <span>
                     Sumit<span className="brand-surname"> Anand</span>
@@ -267,6 +339,13 @@ export const Navbar = memo(function Navbar({
               </nav>
 
               <div className="mobile-nav-utilities">
+                <button
+                  className="button button--primary mobile-nav-util-btn"
+                  onClick={scrollToContact}
+                  type="button"
+                >
+                  Let&apos;s talk <ArrowUpRight aria-hidden="true" size={15} />
+                </button>
                 <button
                   className="button button--quiet mobile-nav-util-btn"
                   onClick={() => {

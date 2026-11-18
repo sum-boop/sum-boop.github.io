@@ -12,7 +12,7 @@ export const StageSkeleton = memo(function StageSkeleton({ label }: StageSkeleto
     <div
       aria-busy="true"
       aria-label={label}
-      className="stage3d-shell stage3d-skeleton"
+      className="stage3d-shell stage3d-shell--framed stage3d-skeleton"
       data-testid="vms-stage-3d"
       role="status"
     >

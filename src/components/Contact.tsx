@@ -26,20 +26,36 @@ export function Contact() {
     window.setTimeout(() => setCopied(false), 1800);
   }
 
+  function focusComposer() {
+    const nameInput = document.getElementById('contact-name') as HTMLInputElement | null;
+    if (nameInput) {
+      nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => nameInput.focus(), 220);
+    }
+  }
+
   return (
     <section
       aria-labelledby="contact-title"
-      className="content-section contact-section"
+      className="content-section contact-section contact-section--obsidian"
       id="contact"
     >
       <div className="section-inner">
-        <SectionHeading
-          eyebrow="Open a channel"
-          id="contact-title"
-          number="07"
-          title="Let's talk about a role."
-          tone="cyan"
-        />
+        <div className="contact-hero-bar">
+          <div className="contact-hero-heading">
+            <SectionHeading
+              eyebrow="Open a channel"
+              id="contact-title"
+              number="07"
+              title="Let's talk about a role."
+              tone="cyan"
+            />
+          </div>
+          <button className="contact-lets-chat-link" onClick={focusComposer} type="button">
+            Let&apos;s chat
+          </button>
+        </div>
+
         <div className="contact-layout">
           <ChoreoReveal className="contact-copy" direction="left" distance={30}>
             <p className="eyebrow-line">Direct line · No intermediaries</p>

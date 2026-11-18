@@ -66,6 +66,7 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
         <SectionHeading
           description="Interactive Patli–NCR logistics corridor radar layered over a subtle orbital backdrop — synced with XProtect Smart Map and kept separate from the 3D workstation."
           eyebrow="Deployment footprint"
+          highlightWord="watch from."
           id="footprint-title"
           number="03"
           title="Where I watch from."

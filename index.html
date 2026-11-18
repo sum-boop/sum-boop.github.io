@@ -1,10 +1,11 @@
+<!-- Design reference: https://www.5lab.co/ -->
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#080b12" id="theme-color-meta" />
-    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#56061a" id="theme-color-meta" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="format-detection" content="telephone=no" />
     <title>Sumit Anand — CCTV Operator &amp; Surveillance Specialist</title>
     <meta
@@ -26,19 +27,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       as="style"
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
       onload="this.onload=null;this.rel='stylesheet'"
       rel="preload"
     />
     <noscript>
       <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet"
       />
     </noscript>
     <style>
-      html{background:#0b1018;color:#f2f7ff;font-family:'Space Grotesk',system-ui,-apple-system,sans-serif}
-      html[data-theme="light"]{background:#f5f7fa;color:#0f172a}
+      html{background:#fcfbf9;color:#0e0e0e;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif}
+      html[data-theme="dark"]{background:#0d0d11;color:#f5f3ef}
       body{margin:0;background:inherit;color:inherit}
     </style>
     <meta property="og:type" content="website" />
@@ -66,27 +67,18 @@
     />
     <script>
       (function () {
-        var theme = 'dark';
+        var theme = 'light';
         try {
           var stored = window.localStorage.getItem('sumit-portfolio-theme');
           if (stored === 'light' || stored === 'dark') {
             theme = stored;
-          } else if (
-            window.matchMedia &&
-            window.matchMedia('(prefers-color-scheme: light)').matches
-          ) {
-            theme = 'light';
           }
-        } catch (e) {
-          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-            theme = 'light';
-          }
-        }
+        } catch (e) {}
         document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.style.colorScheme = theme;
         var meta = document.getElementById('theme-color-meta');
         if (meta) {
-          meta.setAttribute('content', theme === 'light' ? '#f5f7fa' : '#0b1018');
+          meta.setAttribute('content', theme === 'light' ? '#56061a' : '#0d0d11');
         }
       })();
     </script>

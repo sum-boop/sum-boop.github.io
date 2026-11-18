@@ -17,14 +17,34 @@ export function About() {
 
   return (
     <section aria-labelledby="about-title" className="content-section about-section" id="about">
+      <div aria-hidden="true" className="editorial-diagonal-line editorial-diagonal-line--top" />
       <div className="section-inner">
         <SectionHeading
           eyebrow="Security profile"
+          highlightWord="Clear records."
           id="about-title"
           number="01"
           title="Calm eyes. Clear records."
           tone="cyan"
         />
+
+        {/* 5Lab Signature Dual Overlapping Crimson & Indigo Circles Diagram */}
+        <ChoreoReveal className="about-venn-diagram" direction="up">
+          <div className="venn-label venn-label--left">
+            <span className="venn-word venn-word--crimson">Operations</span>
+            <small>24/7 Control Room</small>
+          </div>
+          <div aria-hidden="true" className="venn-circles">
+            <span className="venn-circle venn-circle--crimson" />
+            <span className="venn-circle venn-circle--core" />
+            <span className="venn-circle venn-circle--indigo" />
+          </div>
+          <div className="venn-label venn-label--right">
+            <span className="venn-word venn-word--indigo">Systems</span>
+            <small>Milestone XProtect</small>
+          </div>
+        </ChoreoReveal>
+
         <div className="about-layout">
           <ChoreoReveal className="identity-panel" direction="up">
             {!imageFailed ? (
@@ -113,6 +133,7 @@ export function About() {
           </div>
         </div>
       </div>
+      <div aria-hidden="true" className="editorial-diagonal-line editorial-diagonal-line--bottom" />
     </section>
   );
 }

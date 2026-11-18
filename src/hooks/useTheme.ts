@@ -15,8 +15,7 @@ function getStoredTheme(): ThemeMode | null {
 }
 
 function getSystemTheme(): ThemeMode {
-  if (typeof window === 'undefined' || !window.matchMedia) return 'dark';
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  return 'light';
 }
 
 function applyThemeToDocument(theme: ThemeMode) {
@@ -24,7 +23,7 @@ function applyThemeToDocument(theme: ThemeMode) {
   document.documentElement.style.colorScheme = theme;
   const meta = document.getElementById('theme-color-meta');
   if (meta) {
-    meta.setAttribute('content', theme === 'light' ? '#f5f7fa' : '#0b1018');
+    meta.setAttribute('content', theme === 'light' ? '#56061a' : '#0d0d11');
   }
 }
 

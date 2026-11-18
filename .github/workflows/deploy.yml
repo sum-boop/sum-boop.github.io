@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.19.0
+          node-version-file: .nvmrc
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -31,8 +31,19 @@ jobs:
         run: npm run lint
       - name: Type-check
         run: npm run typecheck
+      - name: Detect GitHub Pages base path
+        run: |
+          REPO_OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [ "${REPO_NAME,,}" = "${REPO_OWNER,,}.github.io" ]; then
+            echo "VITE_BASE_PATH=/" >> "$GITHUB_ENV"
+          else
+            echo "VITE_BASE_PATH=/${REPO_NAME}/" >> "$GITHUB_ENV"
+          fi
       - name: Build
         run: npm run build
+      - name: Create SPA 404 fallback
+        run: cp dist/index.html dist/404.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
