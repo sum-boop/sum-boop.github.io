@@ -200,3 +200,34 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 7. Check on a light section that no text is white on off-white (invisible). Known risk: `Footprint` still gets `theme="dark"` and may draw a dark map. Do not fix it now, just report what you see.
 8. Do not touch Lenis settings, `animMaster.ts` logic, the 3D stage, data files or section content.
 9. Run `npm run build` and `npm run lint`, append a "## Gemini" entry (files changed, real section ids, selectors changed, any invisible-text or contrast problems left, build status), commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
+
+---
+
+## Gemini, 2026-11-19 (TASK 5)
+- **Files changed:** `src/utils/pagePalette.ts` (new), `src/App.tsx`, `src/styles/tokens.css`, `src/styles/global.css`, `AI_CHAT.md`. (`animMaster.ts`, Lenis, 3D stage, data files, and section text/content untouched.)
+- **Real section root `id=` values verified in `src/`:**
+  - `Hero`: `hero` (`src/components/Hero.tsx:49`) → `data-tone="dark"`
+  - `About`: `about` (`src/components/About.tsx:28`) → `data-tone="light"`
+  - `WorkstationBand`: `hero-workstation` (`src/components/WorkstationBand.tsx:50`) → `data-tone="dark"`
+  - `Skills`: `skills` (`src/components/Skills.tsx:16`) → `data-tone="light"`
+  - `Footprint`: `footprint` (`src/components/Footprint.tsx:61`) → `data-tone="light"`
+  - `Deployments`: `operations` (`src/components/Deployments.tsx:59`) → `data-tone="light"`
+  - `Experience`: `experience` (`src/components/Experience.tsx:28`) → `data-tone="light"`
+  - `Credentials`: `certifications` (`src/components/Credentials.tsx:10`) → `data-tone="light"`
+  - `Contact`: `contact` (`src/components/Contact.tsx:39`) → `data-tone="dark"`
+- **What was done:**
+  - Rendered `<div aria-hidden="true" id="page-bg" />` once in `src/App.tsx` (`position: fixed; inset: 0; z-index: 0; pointer-events: none`) with `linear-gradient(180deg, var(--bg-top), var(--bg-bottom))` defaulting to `#711127` → `#170308`, and placed `#main-content` and `.site-footer-5lab` at `position: relative; z-index: 1`.
+  - Created `src/utils/pagePalette.ts` exporting `initPagePalette(): () => void`, called and cleaned up alongside `initSmoothScroll()` in `src/App.tsx`. Sets `data-tone` on every section root and uses GSAP `ScrollTrigger` (`scrub: true`) to blend `--bg-top` / `--bg-bottom` through `#711127/#170308` (Hero top) → `#B0193C/#5A0C1E` (Hero middle) → `#E47F97/#E47F97` (Hero bottom / About approaching) → `#FAFAF7/#FAFAF7` (About top at 40% viewport) → `#000000/#000000` (WorkstationBand) → `#FAFAF7/#FAFAF7` (Skills through Credentials) → `#000000/#000000` (Contact top at 60% viewport). (Proportional durations and scroll offsets are starting values from `REFERENCE_5LAB_MOTION.md`, not claimed pixel-exact.)
+  - Under `prefers-reduced-motion: reduce`, skips all scrubbed tweens and snaps `#page-bg` variables directly via `ScrollTrigger` `onEnter` / `onEnterBack`.
+- **Selectors changed (`src/styles/tokens.css`, `src/styles/global.css`):**
+  - `src/styles/tokens.css`: added `[data-tone='light']` (`--ink: #22226A`, `--ink-muted: rgba(34, 34, 106, 0.62)`, `--hairline: rgba(34, 34, 106, 0.14)`, plus semantic light aliases `--color-ink`, `--color-ink-secondary`, `--color-ink-muted`, `--color-indigo`, `--color-foreground`, `--color-text-secondary`, `--color-text-muted`, `--color-surface`, `--color-paper-soft`, `--color-border`, `--color-border-strong`, `--color-grid-dashed`) and `[data-tone='dark']` (`--ink: #FFFFFF`, `--ink-muted: #888888`, `--hairline: rgba(255, 255, 255, 0.12)`).
+  - `src/styles/global.css`: added `#page-bg`, `#main-content`; made section roots and body transparent (`body`, `.hero-section-5lab`, `.content-section-5lab`, `.workstation-section-5lab`, `.contact-section-5lab`); layered `.site-footer-5lab` (`position: relative; z-index: 1`); updated light-section `-5lab` selectors to `var(--ink)`, `var(--ink-muted)`, `var(--hairline)`, and `transparent` surfaces (keeping `#ff223a` untouched): `.content-section-5lab`, `.about-statement-text`, `.about-dimmed-text`, `.works-group-eyebrow-5lab`, `.works-group-title-5lab`, `.work-card-btn-5lab`, `.work-card-btn-5lab:focus-visible`, `.work-card-media-5lab`, `.work-card-fallback-5lab`, `.work-card-title-5lab`, `.work-card-arrow-5lab`, `.work-card-tagline-5lab`, `.work-card-desc-5lab`, `.skill-cell-5lab`, `.skill-cell-mono`, `.skill-cell-action-btn`, `.skill-cell-icon-wrap`, `.skill-cell-list-5lab li`, `.skill-cell-5lab:hover .skill-cell-list-5lab li`, `.skill-ticker-wrap-5lab`, `.experience-editorial-list-5lab`, `.experience-editorial-row-5lab`, `.experience-row-role-5lab`, `.experience-editorial-row-5lab:hover .experience-row-role-5lab`, `.experience-row-company-5lab`, `.experience-row-dates-5lab`, `.experience-row-toggle-btn`, `.responsibility-list-5lab li`, `.experience-tags-5lab li`, `.footprint-gmap-card-5lab`, `.footprint-gmap-header-5lab`, `.site-row-5lab`, `.site-row-state-5lab`, `.site-name-5lab`, `.site-client-5lab`, `.credential-card-5lab`, `.credential-mono-tag`, `.credential-card-desc-5lab`.
+- **Light-section contrast check & known items left untouched per scope:**
+  - All text, headings (`SectionHeading`), eyebrows, metadata, hairline dividers, buttons, employer chips, and metrics inside `#about`, `#skills`, `#footprint`, `#operations`, `#experience`, and `#certifications` now resolve to `#22226A` / muted indigo over `#FAFAF7` (no white text on `#FAFAF7` in section content).
+  - Left untouched as instructed: `Footprint` still receives `theme="dark"` so `.footprint-corridor-viewport` / `.corridor-radar-canvas` and `EarthGlobe` continue rendering a dark navy radar frame; `.identity-panel` inside `About` keeps its dark image overlay card (`#121226` + `#fcfbf9`); fixed `<header className="site-header">` (`Navbar`) still reads `:root` `--color-foreground: #ffffff` when scrolling over `#FAFAF7` (scheduled for upcoming chrome/Navbar work).
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Problems:**
+  - `git push origin main` fails inside the AI Studio sandbox due to missing GitHub credentials (`fatal: could not read Username for 'https://github.com': No such device or address`); committed cleanly on local `main` to push via the AI Studio GitHub push button.
+

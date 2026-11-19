@@ -103,3 +103,28 @@ html[data-theme='dark'] {
   --mode-transition-duration: 450ms;
   --mode-transition-ease: var(--ease-out);
 }
+
+[data-tone='light'] {
+  --ink: #22226A;
+  --ink-muted: rgba(34, 34, 106, 0.62);
+  --hairline: rgba(34, 34, 106, 0.14);
+
+  --color-ink: #22226A;
+  --color-ink-secondary: rgba(34, 34, 106, 0.78);
+  --color-ink-muted: rgba(34, 34, 106, 0.62);
+  --color-indigo: #22226A;
+  --color-foreground: #22226A;
+  --color-text-secondary: rgba(34, 34, 106, 0.78);
+  --color-text-muted: rgba(34, 34, 106, 0.62);
+  --color-surface: rgba(34, 34, 106, 0.04);
+  --color-paper-soft: rgba(34, 34, 106, 0.08);
+  --color-border: rgba(34, 34, 106, 0.14);
+  --color-border-strong: rgba(34, 34, 106, 0.24);
+  --color-grid-dashed: rgba(34, 34, 106, 0.18);
+}
+
+[data-tone='dark'] {
+  --ink: #FFFFFF;
+  --ink-muted: #888888;
+  --hairline: rgba(255, 255, 255, 0.12);
+}

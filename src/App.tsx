@@ -23,6 +23,7 @@ import type { DeploymentBriefing } from '@/types/portfolio';
 import { assetPath } from '@/utils/assets';
 import { resolveSiteFromName } from '@/utils/vmsLogic';
 import { initSmoothScroll } from '@/utils/animMaster';
+import { initPagePalette } from '@/utils/pagePalette';
 import { useMicroInteractions } from '@/utils/microInteractions';
 import { scheduleIdle } from '@/utils/yieldToMain';
 
@@ -164,11 +165,14 @@ function AppContent() {
 
   useEffect(() => {
     let lenis: ReturnType<typeof initSmoothScroll> = null;
+    let cleanupPalette: (() => void) | null = null;
     const cancelIdle = scheduleIdle(() => {
       lenis = initSmoothScroll();
+      cleanupPalette = initPagePalette();
     }, 350);
     return () => {
       cancelIdle();
+      cleanupPalette?.();
       lenis?.destroy();
     };
   }, []);
@@ -184,6 +188,7 @@ function AppContent() {
 
   return (
     <>
+      <div aria-hidden="true" id="page-bg" />
       <a className="skip-link" href="#main-content">
         Skip to main content
       </a>
