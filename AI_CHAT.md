@@ -94,3 +94,23 @@ Edit only `src/sections/PortfolioSections.tsx` and `src/components/WorkstationBa
 4. Keep the section id `hero-workstation` and `VmsContext` behavior as is. Grep `src/` for `hero-workstation` and `#hero-workstation` and confirm that navbar links, command palette items and the "Jump to view" button still scroll to the right place after the move. If any of them breaks, fix only that reference.
 5. Do not touch CSS, the 3D stage, or any other file.
 6. Run `npm run build` and `npm run lint`, append a "## Gemini" entry (files changed, new section order, what was removed, result of the `hero-workstation` check, build status), commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
+
+---
+
+## Gemini, 2026-11-19 (TASK 3)
+- **Files changed:** `src/sections/PortfolioSections.tsx`, `src/components/WorkstationBand.tsx`, `AI_CHAT.md` (CSS, 3D stage, and all other files untouched).
+- **New section order (`src/sections/PortfolioSections.tsx`):**
+  - `Hero`, `About`, `WorkstationBand`, `Skills`, `Footprint`, `Deployments`, `Experience`, `Credentials`, `Contact`.
+- **What was removed:**
+  - Removed the Light/Dark theme toggle `<button>` inside `.workstation-actions` in `src/components/WorkstationBand.tsx` (kept `<Clock />` and the `Ctrl+K` command palette button).
+  - Removed `handleThemeToggleClick`, unused `Moon`, `Sun`, and `useCallback` imports, and the `onToggleTheme` prop from `WorkstationBandProps` and component destructuring (kept `theme` prop for `SurveillanceStage3D`).
+  - Stopped passing `onToggleTheme` to `<WorkstationBand />` in `src/sections/PortfolioSections.tsx` (kept `onToggleTheme` on `PortfolioSectionsProps` and `<Hero />` untouched).
+- **Result of `hero-workstation` check:**
+  - `grep -rnE 'hero-workstation' src` confirmed `id="hero-workstation"` (`src/components/WorkstationBand.tsx:50`), `<a className="hero-panel-card-5lab" href="#hero-workstation">` (`src/components/Hero.tsx:90`), and `{ href: '#hero-workstation', label: 'Workstation' }` (`src/components/Navbar.tsx:34`) remain intact.
+  - Checked `src/components/CommandPalette.tsx` (`jumpTo` uses `document.getElementById(hash.replace('#', ''))?.scrollIntoView({ behavior: 'smooth' })`) and `src/context/VmsContext.tsx` ("Jump to view" uses `document.getElementById(preset.sectionId)` targeting `operations`, `footprint`, `experience`); all anchors and jump actions still resolve to the moved DOM targets cleanly with zero fixes needed.
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors, built in 1.27s).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Problems:**
+  - `git push origin main` cannot authenticate inside the AI Studio sandbox (`fatal: could not read Username for 'https://github.com': No such device or address`); committed cleanly to local `main` to push via the AI Studio GitHub push button.
+

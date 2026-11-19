@@ -1,4 +1,4 @@
-import { Suspense, lazy, memo, useCallback } from 'react';
+import { Suspense, lazy, memo } from 'react';
 import {
   Activity,
   ArrowDownRight,
@@ -7,8 +7,6 @@ import {
   Film,
   Map as MapIcon,
   Monitor,
-  Moon,
-  Sun,
 } from 'lucide-react';
 import { VMS_WORKSPACE_PRESETS, type VmsViewMode, useVms } from '@/context/VmsContext';
 import { profile } from '@/data/profile';
@@ -27,7 +25,6 @@ const SurveillanceStage3D = lazy(() =>
 
 interface WorkstationBandProps {
   theme: ThemeMode;
-  onToggleTheme: (origin?: { x: number; y: number }) => void;
   onOpenPalette: () => void;
 }
 
@@ -40,24 +37,11 @@ const VMS_MODE_ICONS: Record<VmsViewMode, typeof Monitor> = {
 
 export const WorkstationBand = memo(function WorkstationBand({
   theme,
-  onToggleTheme,
   onOpenPalette,
 }: WorkstationBandProps) {
   const { viewMode, statusNote, setViewMode } = useVms();
   const isMobile = useMediaQuery('(max-width: 767px)');
   const activePreset = VMS_WORKSPACE_PRESETS.find((preset) => preset.id === viewMode);
-
-  const handleThemeToggleClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (event.clientX > 0 || event.clientY > 0) {
-        onToggleTheme({ x: event.clientX, y: event.clientY });
-      } else {
-        const rect = event.currentTarget.getBoundingClientRect();
-        onToggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
-      }
-    },
-    [onToggleTheme],
-  );
 
   return (
     <section
@@ -90,20 +74,6 @@ export const WorkstationBand = memo(function WorkstationBand({
               >
                 <Command aria-hidden="true" size={14} />
                 <span>Ctrl+K</span>
-              </button>
-              <button
-                aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-                className="workstation-util-btn"
-                onClick={handleThemeToggleClick}
-                title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
-                type="button"
-              >
-                {theme === 'dark' ? (
-                  <Sun aria-hidden="true" size={14} />
-                ) : (
-                  <Moon aria-hidden="true" size={14} />
-                )}
-                <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
               </button>
             </div>
           </div>

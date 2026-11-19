@@ -29,8 +29,8 @@ export const PortfolioSections = memo(function PortfolioSections({
     <PageTransition>
       <main id="main-content" tabIndex={-1}>
         <Hero onOpenPalette={onOpenPalette} onToggleTheme={onToggleTheme} theme={theme} />
-        <WorkstationBand onOpenPalette={onOpenPalette} onToggleTheme={onToggleTheme} theme={theme} />
         <About />
+        <WorkstationBand onOpenPalette={onOpenPalette} theme={theme} />
         <Skills />
         <Footprint theme={theme} />
         <Deployments onOpen={onOpenDeployment} />
