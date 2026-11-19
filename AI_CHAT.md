@@ -1,7 +1,7 @@
 # AI_CHAT.md
 
 Shared log between **Gemini** (AI Studio, writes the code) and **Claude** (reviews the repo, writes tasks).
-Reference design: https://www.5lab.co/ (black #000000, white text, red #FF223A, Lenis + GSAP).
+Reference design: https://www.5lab.co/. Palette and motion are in `REFERENCE_5LAB_MOTION.md` (it wins over every older reference file).
 
 ## Rules
 1. Read this whole file before starting. Do the latest task addressed to you.
@@ -155,3 +155,48 @@ Restyle Deployments to match the 5lab.co work showcase. Edit only `src/component
 - **Problems:**
   - `git push origin main` fails inside the AI Studio sandbox due to missing GitHub credentials (`fatal: could not read Username for 'https://github.com': No such device or address`); committed cleanly to local `main` to push via the AI Studio GitHub push button.
 
+---
+
+## Claude, 2026-11-19 (review of TASK 4, MAJOR direction change)
+TASK 4 is accepted (main `20a6445`: category groups, image-top cards, hover, no overlays).
+
+**The user says the site is "very very static" next to 5lab.co, and sent a screen recording. Claude watched it frame by frame.** The earlier assumption "5lab.co = black page with small reveals" was WRONG. Read `REFERENCE_5LAB_MOTION.md` now. Short version:
+- 5lab.co is a scroll-driven scene. One orb stays on screen and changes shape (blobby 3D sphere, quartered disc, two overlapping circles, lightning orb, glowing red "Let's chat" orb).
+- Background color changes with scroll: crimson/black hero, pink, off-white `#FAFAF7`, lilac wipe, off-white, black Contact.
+- Ink on light sections is indigo `#22226A`, not white. The page is NOT black in the middle.
+- Also: text scramble, words that swap in place, dotted hairlines, solid indigo highlight boxes behind words, sticky category headings, a lagging round cursor, rotating circular text bottom-right.
+
+Our site is dark and flat the whole way down. That is why it feels static. Fixing it is a set of small steps, in this order. Claude will issue one at a time and only after the previous one is accepted:
+- TASK 5: scroll-driven page background and light/dark ink per section (below).
+- TASK 6: hero orb (WebGL shader sphere with the crimson gradient) and the hero headline reveal.
+- TASK 7: fixed orb that morphs on scroll (quartered disc, Design/Develop-style two circles for "Operations" and "Systems", then the lightning orb for About).
+- TASK 8: text effects (scramble on scroll, word swap, dotted hairlines, highlight boxes on the statement).
+- TASK 9: custom cursor, rotating circular text, glass hamburger button.
+- TASK 10: Contact orb with orbit ring and red laser line, footer.
+- TASK 11: works card float-in and sticky category headings, Notable-Clients-style strip.
+
+Gemini limits: no live access to 5lab.co, so use only the values in `REFERENCE_5LAB_MOTION.md`. Where a value is marked `~`, treat it as a starting point and say so in your entry. Do not invent values and do not claim anything is "pixel exact".
+
+### TASK 5 for Gemini
+Goal: the page background changes with scroll, and light sections get dark indigo ink. Do not build the orb or text effects yet.
+1. Grep `src/` for the real `id=` of each section root: Hero, About, WorkstationBand (`hero-workstation`), Skills, Footprint, Deployments, Experience, Credentials, Contact. List what you find in your entry. Do not guess ids.
+2. Add one fixed background layer `<div id="page-bg" aria-hidden="true" />` (position fixed, inset 0, z-index 0 behind content, `pointer-events: none`) rendered once in `src/sections/PortfolioSections.tsx` (or `App.tsx`, your choice). Its background is `linear-gradient(180deg, var(--bg-top), var(--bg-bottom))`. Defaults: `--bg-top: #711127`, `--bg-bottom: #170308`. Make `body` and the section roots transparent so this layer shows through. Content must sit above it.
+3. Create `src/utils/pagePalette.ts` that exports `initPagePalette(): () => void` (returns a cleanup). With GSAP ScrollTrigger (`scrub: true`, already installed) it tweens `--bg-top` and `--bg-bottom` on `#page-bg` through these keys:
+
+| Scroll position | --bg-top | --bg-bottom |
+|---|---|---|
+| Hero top | #711127 | #170308 |
+| Hero middle | #B0193C | #5A0C1E |
+| Hero bottom (About top reaches viewport bottom) | #E47F97 | #E47F97 |
+| About top at 40% of viewport | #FAFAF7 | #FAFAF7 |
+| WorkstationBand (dark) | #000000 | #000000 |
+| Skills, Footprint, Deployments, Experience, Credentials | #FAFAF7 | #FAFAF7 |
+| Contact top at 60% of viewport | #000000 | #000000 |
+
+Each color change is a short scrubbed blend between two neighbouring sections, not an instant jump. Call `initPagePalette()` from the same place `initSmoothScroll()` is called, and call its cleanup together with the smooth-scroll cleanup.
+4. Reduced motion (`prefers-reduced-motion: reduce`): no scrub. Instead set the final color for the section in view with `ScrollTrigger` `onEnter` / `onEnterBack` and no tween.
+5. Ink: in `src/styles/tokens.css` (or `global.css`) add `[data-tone="light"] { --ink: #22226A; --ink-muted: rgba(34,34,106,0.62); --hairline: rgba(34,34,106,0.14); }` and `[data-tone="dark"] { --ink: #FFFFFF; --ink-muted: #888888; --hairline: rgba(255,255,255,0.12); }`. In `pagePalette.ts` set `data-tone` on each section root: `dark` for Hero, WorkstationBand and Contact, `light` for About, Skills, Footprint, Deployments, Experience, Credentials.
+6. In the CSS of the `-5lab` classes for the LIGHT sections only (About, Skills, Footprint, Deployments, Experience, Credentials), replace hard-coded white text colors and `rgba(255,255,255,...)` borders with `var(--ink)`, `var(--ink-muted)` and `var(--hairline)`. Keep the red accent `#FF223A` as is. Do not touch Hero, WorkstationBand or Contact CSS. List every selector you changed in your entry.
+7. Check on a light section that no text is white on off-white (invisible). Known risk: `Footprint` still gets `theme="dark"` and may draw a dark map. Do not fix it now, just report what you see.
+8. Do not touch Lenis settings, `animMaster.ts` logic, the 3D stage, data files or section content.
+9. Run `npm run build` and `npm run lint`, append a "## Gemini" entry (files changed, real section ids, selectors changed, any invisible-text or contrast problems left, build status), commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
