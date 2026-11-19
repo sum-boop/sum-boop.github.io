@@ -279,5 +279,28 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 - **Problems:**
   - Attempting `git push origin main` after committing (`git push` fails in the AI Studio container if no GitHub credentials are configured; use the AI Studio GitHub push button if it fails).
 
+---
 
-
+## Gemini, 2026-11-19 (TASK 8)
+- **Files changed:** `src/components/OrbScene.tsx`, `src/styles/orbScene.css`, `AI_CHAT.md`. (`pagePalette.ts`, `Hero.tsx`, `Navbar.tsx`, data files, and all other sections untouched.)
+- **Orb scene part 2 implementation (0.55 → 1.00):**
+  - Extended the same GSAP `ScrollTrigger` scrubbed timeline on `.orb-scene-stage` in `src/components/OrbScene.tsx` without touching any 0.00 → 0.55 positions.
+  - **0.55 → 0.68 ("leave"):** Operations & Systems labels fade 1 → 0 and move up 12px (`y: -12`), diagonal hairlines fade out (`strokeOpacity: 0`), red and indigo circles move back together (`xPercent: 0`, `yPercent: 0`, `rotation: 40deg → 90deg`).
+  - **0.62 → 0.72 ("merge"):** `.orb-iris` fades 0 → 1; red and indigo circles fade out 0.9 → 0 over 0.66 → 0.72.
+  - **Look of `.orb-iris`:** Dark indigo base with `radial-gradient(circle at 50% 35%, #3B3BC8 0%, #2B2B9A 45%, #22226A 100%)`, faint inner highlight (`radial-gradient`), and three rotating soft streaks of light using `conic-gradient` layers with light blur (`filter: blur(6px..10px)`) spinning smoothly via separate infinite CSS keyframe animations (18s, 24s reverse, 14s).
+  - **Iris mark:** Chosen camera-iris / aperture mark is Lucide `Aperture` (clean 6-blade aperture symbol) with white stroke (`strokeWidth={1.8}`), sized to `0.28 * D` (`calc(var(--orb-d) * 0.28)`), fading 0 → 1 over 0.68 → 0.76 and rotating 0 → 60deg from 0.68 to 1.00. Centered with margin offsets so rotation does not conflict with translation.
+  - **0.70 → 0.80 ("orbit ring"):** 1.35xD circle (`border: 1px dotted rgba(34,34,106,0.45)`) with a 6px indigo dot at the top (`#22226A`), fading 0 → 1 over 0.70 → 0.80 and rotating 0 → 180deg across 0.70 to 1.00.
+  - **0.72 → 0.88 ("lilac wash"):** `.orb-lilac` positioned behind the orb with `background: linear-gradient(90deg, #D4D2E7 0%, #D4D2E7 55%, rgba(212, 210, 231, 0) 100%)`, animated via `clipPath: 'inset(0 100% 0 0)'` to `'inset(0 0% 0 0)'` with vertical mask `linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%)` for a seamless fade into the `#FAFAF7` background.
+  - **0.78 → 0.88 ("About me" link):** Real `<a href="#about">` link at stage bottom center (16px `#22226A`, hairline underline, hover `#FF223A`), fading 0 → 1 and staying.
+  - **0.90 → 1.00 ("hold"):** All orb elements wrapped in `.orb-scaler`, scaling 1 → 0.85 and shifting `y: -6vh` to settle near the top as the About section approaches.
+- **Mobile & Performance:**
+  - On mobile (`max-width: 767px`), `D` is `min(52vw, 240px)`, so the 1.35xD orbit ring is `~70vw` and stays safely within the 390px viewport without causing horizontal overflow (`overflow: hidden` on stage).
+  - Scoped `will-change: transform, opacity, clip-path` to `.orb-scene--active` using ScrollTrigger's `onToggle`.
+  - Under `prefers-reduced-motion: reduce`, `.orb-iris`, `.orb-lilac`, the orbit ring, and the about link remain hidden (`display: none !important`), and streak animations are disabled.
+- **Anything not matched:**
+  - Live DOM sampling from `5lab.co` (visual speeds, conic gradient stops, and blur radii are statically calibrated to match `REFERENCE_5LAB_MOTION.md` and `tasks/TASK_08.md`).
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Problems:**
+  - Sandbox environment lacks git push credentials (`git push origin main` exits 128); committed cleanly to `main` locally. Please push to GitHub using the AI Studio push button if necessary.
