@@ -133,3 +133,25 @@ Restyle Deployments to match the 5lab.co work showcase. Edit only `src/component
 6. Keep every deployment, its text and its links. Delete nothing from the content.
 7. Make sure the reveal selectors from TASK 2 still work, or add the new card class to the fade-and-rise list in `src/utils/animMaster.ts`. That one line in `animMaster.ts` is the only allowed change outside the files above.
 8. Run `npm run build` and `npm run lint`, append a "## Gemini" entry (files changed, how groups are derived, what was removed, build status), commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
+
+---
+
+## Gemini, 2026-11-19 (TASK 4)
+- **Live browser measurement note:** No browser/DOM inspection tool is available in this sandbox to open `https://www.5lab.co/` and inspect computed styles, so no live computed values are guessed or added.
+- **Files changed:** `src/components/Deployments.tsx`, `src/components/CameraFeedCard.tsx`, `src/styles/global.css`, `src/utils/animMaster.ts` (one line in the fade-and-rise selector list), `AI_CHAT.md`. Data files (`src/data/projects.ts`) untouched.
+- **How groups are derived:**
+  - Grouped `visibleDeployments` directly by each item's existing `category` field in `src/data/projects.ts` (`Surveillance`, `Gate Control`, `Loss Prevention`, `Forensics`, `Perimeter`, `Emergency`), preserving array order via `Map`.
+  - Kept `.feed-filters` synced with `useVms()` (`deploymentFilter`): `All deployments` displays all 6 category groups, while VMS workspace presets or filter clicks narrow to the matching category group.
+  - Each group renders `<p className="works-group-eyebrow-5lab">Experienced in</p>`, `<h2 className="works-group-title-5lab">{group.category}</h2>`, and a 2-column desktop / 1-column mobile `.works-group-grid-5lab`.
+- **What was removed / restyled:**
+  - Removed `<aside className="works-sticky-readout">`, `focusedId` / `activeDeployment` state, and `useStaggeredCardGroup` in `Deployments.tsx`.
+  - Removed all image overlays (`.feed-image-overlay`), bordered containers, red `#ff223a` border highlights (`.feed-bento-cell-5lab`), legacy `-12deg` card classes, and separate mobile headers/footers (`.feed-mobile-header`, `.feed-mobile-footer`) from `CameraFeedCard.tsx` and the active 5lab showcase CSS in `global.css`.
+  - Built `.work-card-5lab` / `.work-card-btn-5lab`: borderless clipped `16 / 10` image frame on top with zero text overlays, followed below the image by card title + `ArrowUpRight`, unboxed typographic tagline (`index · site · period · cameras · metric` plus quiet `Active VMS view` indicator when active), and deployment description.
+  - Hover uses `cubic-bezier(0.215, 0.61, 0.355, 1)` (`power3.out` curve, 460–520ms) to scale the image (`1.045`), shift the title (`translateX(8px)`), and reveal the arrow with zero border highlight; native `<button type="button">` preserves `onOpen(deployment)`, `Enter` / `Space` keyboard support, and `:focus-visible` outline.
+  - Added `.work-card-5lab` to the fade-and-rise `revealElements` query in `src/utils/animMaster.ts`.
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Problems:**
+  - `git push origin main` fails inside the AI Studio sandbox due to missing GitHub credentials (`fatal: could not read Username for 'https://github.com': No such device or address`); committed cleanly to local `main` to push via the AI Studio GitHub push button.
+

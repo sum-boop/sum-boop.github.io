@@ -1,10 +1,8 @@
-import { m } from 'framer-motion';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useVms } from '@/context/VmsContext';
 import { deployments } from '@/data/projects';
-import { ChoreoReveal, motionDurations, motionEasings } from '@/motion';
+import { ChoreoReveal } from '@/motion';
 import type { DeploymentBriefing } from '@/types/portfolio';
-import { useStaggeredCardGroup } from '@/utils/scrollStory';
 import { CameraFeedCard } from './CameraFeedCard';
 import { SectionHeading } from './SectionHeading';
 
@@ -12,9 +10,13 @@ interface DeploymentsProps {
   onOpen: (deployment: DeploymentBriefing) => void;
 }
 
+interface DeploymentCategoryGroup {
+  category: string;
+  items: DeploymentBriefing[];
+}
+
 export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProps) {
   const { deploymentFilter, selectedFeedId, setDeploymentFilter } = useVms();
-  const gridRef = useRef<HTMLDivElement>(null);
 
   const filters = useMemo(
     () => ['All deployments', ...new Set(deployments.map((deployment) => deployment.category))],
@@ -29,20 +31,18 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
     [deploymentFilter],
   );
 
-  const [focusedId, setFocusedId] = useState<string>(visibleDeployments[0]?.id ?? 'op1');
-
-  useEffect(() => {
-    const candidate =
-      visibleDeployments.find((item) => item.id === selectedFeedId) ?? visibleDeployments[0];
-    if (candidate) {
-      setFocusedId(candidate.id);
+  const groupedDeployments = useMemo<DeploymentCategoryGroup[]>(() => {
+    const groups = new Map<string, DeploymentBriefing[]>();
+    for (const deployment of visibleDeployments) {
+      const existing = groups.get(deployment.category);
+      if (existing) {
+        existing.push(deployment);
+      } else {
+        groups.set(deployment.category, [deployment]);
+      }
     }
-  }, [selectedFeedId, visibleDeployments]);
-
-  const activeDeployment =
-    visibleDeployments.find((item) => item.id === focusedId) ?? visibleDeployments[0];
-
-  useStaggeredCardGroup(gridRef, '.feed-card-choreo-wrap', [deploymentFilter]);
+    return Array.from(groups, ([category, items]) => ({ category, items }));
+  }, [visibleDeployments]);
 
   const handleFilterChange = useCallback(
     (nextFilter: string) => {
@@ -93,63 +93,27 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
           </div>
         </ChoreoReveal>
 
-        {/* 5Lab Category Showcase 2-Column Grid with zero tilt and smooth hover */}
         <div className="works-showcase-5lab" id="highlight-scroller">
-          <div className="feed-bento-grid-5lab works-gallery-column" ref={gridRef}>
-            {visibleDeployments.map((deployment, visibleIdx) => (
-              <m.div
-                animate={{ opacity: 1, y: 0 }}
-                className="feed-bento-cell-5lab works-card-slot"
-                initial={{ opacity: 0, y: 14 }}
-                key={`${deploymentFilter}-${deployment.id}`}
-                onFocus={() => setFocusedId(deployment.id)}
-                onMouseEnter={() => setFocusedId(deployment.id)}
-                transition={{
-                  duration: motionDurations.fast,
-                  ease: motionEasings.out,
-                  delay: Math.min(visibleIdx * 0.04, 0.2),
-                }}
-              >
-                <div className="feed-card-choreo-wrap">
+          {groupedDeployments.map((group) => (
+            <div className="works-group-5lab" key={group.category}>
+              <header className="works-group-header-5lab">
+                <p className="works-group-eyebrow-5lab">Experienced in</p>
+                <h2 className="works-group-title-5lab">{group.category}</h2>
+              </header>
+
+              <div className="works-group-grid-5lab">
+                {group.items.map((deployment) => (
                   <CameraFeedCard
                     deployment={deployment}
-                    index={deployments.indexOf(deployment)}
+                    index={deployments.findIndex((item) => item.id === deployment.id)}
                     isSelectedFeed={selectedFeedId === deployment.id}
+                    key={deployment.id}
                     onOpen={onOpen}
                   />
-                </div>
-              </m.div>
-            ))}
-          </div>
-
-          {activeDeployment ? (
-            <aside aria-live="polite" className="works-sticky-readout">
-              <div className="works-sticky-inner">
-                <p className="works-sticky-eyebrow">
-                  DEPLOYMENT / 0{deployments.indexOf(activeDeployment) + 1} ·{' '}
-                  {activeDeployment.category}
-                </p>
-                <h3 className="works-sticky-title">{activeDeployment.cardTitle}</h3>
-                <p className="works-sticky-site">
-                  {activeDeployment.site} · {activeDeployment.cardPeriod}
-                  {activeDeployment.cardCameras
-                    ? ` · ${activeDeployment.cardCameras} cameras`
-                    : ''}
-                </p>
-                <p className="works-sticky-desc">{activeDeployment.cardDescription}</p>
-                {activeDeployment.cardMetric ? (
-                  <p className="works-sticky-metric tabular-nums">{activeDeployment.cardMetric}</p>
-                ) : null}
-                <button
-                  className="works-sticky-link lab-underline-link"
-                  onClick={() => onOpen(activeDeployment)}
-                  type="button"
-                >
-                  Expand briefing
-                </button>
+                ))}
               </div>
-            </aside>
-          ) : null}
+            </div>
+          ))}
         </div>
       </div>
     </section>

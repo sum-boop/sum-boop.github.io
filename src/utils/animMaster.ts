@@ -83,7 +83,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   });
 
   // Fade-and-rise reveals for cards, paragraphs, and images
-  const revealElements = document.querySelectorAll('.skill-cell-5lab, .experience-editorial-row-5lab, .credential-card-5lab, .footprint-gmap-card-5lab, .briefcam-alert-card, .employer-chip, .about-metric');
+  const revealElements = document.querySelectorAll('.work-card-5lab, .skill-cell-5lab, .experience-editorial-row-5lab, .credential-card-5lab, .footprint-gmap-card-5lab, .briefcam-alert-card, .employer-chip, .about-metric');
   revealElements.forEach((el) => {
     const st = ScrollTrigger.create({
       trigger: el,

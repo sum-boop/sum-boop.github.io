@@ -1,4 +1,4 @@
-import { Eye } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { memo, useState } from 'react';
 import type { DeploymentBriefing } from '@/types/portfolio';
 import { assetPath } from '@/utils/assets';
@@ -14,7 +14,6 @@ interface CameraFeedCardProps {
 export const CameraFeedCard = memo(function CameraFeedCard({
   deployment,
   index,
-  featured = false,
   isSelectedFeed = false,
   onOpen,
 }: CameraFeedCardProps) {
@@ -32,36 +31,36 @@ export const CameraFeedCard = memo(function CameraFeedCard({
     }
   };
 
+  const siteLabel =
+    deployment.site === 'Flipkart Kalash Mega Hub' ? 'Flipkart Kalash' : 'Ekart Logistics';
+  const cameraLabel = deployment.cardCameras ? `${deployment.cardCameras} cameras` : null;
+  const tagLineParts = [
+    `0${index + 1}`,
+    siteLabel,
+    deployment.cardPeriod,
+    cameraLabel,
+    deployment.cardMetric,
+  ].filter(Boolean);
+
   return (
     <article
-      className={`feed-card-article ${featured ? 'feed-card--featured' : ''} ${
-        isSelectedFeed ? 'feed-card--vms-active' : ''
-      }`}
+      className={`work-card-5lab ${isSelectedFeed ? 'work-card-5lab--vms-active' : ''}`}
     >
-      {/* Mobile / narrow header above photo matching 5Lab ref-mobile-390-mid.png */}
-      <div className="feed-mobile-header">
-        <p className="feed-mobile-eyebrow">
-          0{index + 1} · {deployment.category} · {deployment.cardPeriod}
-        </p>
-        <h3 className="feed-mobile-title">{deployment.cardTitle}</h3>
-      </div>
-
-      {/* Tilted borderless 0px-radius full-bleed photographic card on desktop/tablet */}
       <button
         aria-label={`Open briefing: ${deployment.title}`}
-        className={`feed-card ${isSelectedFeed ? 'feed-card--vms-active' : ''}`}
+        className="work-card-btn-5lab"
         onClick={() => onOpen(deployment)}
         type="button"
       >
-        <span className="feed-image-wrap">
+        <span className="work-card-media-5lab">
           {hardFailed ? (
-            <span className="feed-image-fallback">
+            <span className="work-card-fallback-5lab">
               <span>{deployment.cardTitle}</span>
             </span>
           ) : (
             <img
               alt={deployment.imageAlt}
-              className="feed-image"
+              className="work-card-img-5lab"
               decoding="async"
               height="600"
               loading="lazy"
@@ -71,42 +70,24 @@ export const CameraFeedCard = memo(function CameraFeedCard({
               width="900"
             />
           )}
-          <span className="feed-image-overlay" />
         </span>
 
-        <span className="feed-card-content">
-          <span className="feed-card-topline">
-            <span>0{index + 1} / {deployment.category}</span>
-            <span>{deployment.cardPeriod}</span>
+        <span className="work-card-body-5lab">
+          <span className="work-card-title-row-5lab">
+            <span className="work-card-title-5lab">{deployment.cardTitle}</span>
+            <ArrowUpRight aria-hidden="true" className="work-card-arrow-5lab" size={20} />
           </span>
-          <span className="feed-card-title">{deployment.cardTitle}</span>
-          <span className="feed-card-meta">
-            <span>
-              {deployment.site === 'Flipkart Kalash Mega Hub' ? 'Flipkart Kalash' : 'Ekart Logistics'}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span className="tabular-nums">{deployment.cardCameras} cameras</span>
+
+          <span className="work-card-tagline-5lab tabular-nums">
+            {tagLineParts.join(' · ')}
+            {isSelectedFeed ? (
+              <span className="work-card-vms-note-5lab"> · Active VMS view</span>
+            ) : null}
           </span>
-          <span className="feed-card-description">{deployment.cardDescription}</span>
-          <span className="feed-card-footer">
-            {deployment.cardMetric ? (
-              <span className="feed-card-metric tabular-nums">{deployment.cardMetric}</span>
-            ) : (
-              <span className="feed-card-category">{deployment.category}</span>
-            )}
-            <span className="feed-open">
-              <Eye aria-hidden="true" size={14} /> Expand briefing
-            </span>
-          </span>
+
+          <span className="work-card-desc-5lab">{deployment.cardDescription}</span>
         </span>
       </button>
-
-      {/* Mobile underlined title CTA underneath photo matching 5Lab ref-mobile-390-mid.png */}
-      <div className="feed-mobile-footer">
-        <button className="feed-mobile-link" onClick={() => onOpen(deployment)} type="button">
-          Expand briefing — {deployment.site}
-        </button>
-      </div>
     </article>
   );
 });
