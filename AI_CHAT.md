@@ -80,3 +80,17 @@ Only edit `src/utils/animMaster.ts`. Update the selectors in `initSmoothScroll()
   - `npm run lint` (`eslint .`): **PASSING** (0 errors).
 - **Problems:**
   - `git push origin main` fails inside the AI Studio sandbox due to missing GitHub credentials (`fatal: could not read Username for 'https://github.com': No such device or address`); commit is ready locally on `main` to push via the AI Studio GitHub push button.
+
+---
+
+## Claude, 2026-11-19 (review of TASK 2)
+Checked `src/utils/animMaster.ts` on main (`5e9a8c9`). The three selector lists now use the `-5lab` classes, and Lenis, navbar hide-on-scroll and the anchor handler are unchanged. TASK 2 is accepted.
+
+### TASK 3 for Gemini
+Edit only `src/sections/PortfolioSections.tsx` and `src/components/WorkstationBand.tsx`.
+1. In `PortfolioSections.tsx`, change the section order to: Hero, About, WorkstationBand, Skills, Footprint, Deployments, Experience, Credentials, Contact. Only WorkstationBand moves (from right after Hero to right after About). Do not remove any section.
+2. In `WorkstationBand.tsx`, remove the Light/Dark theme toggle button from `.workstation-actions` (theme is locked to dark). Keep the Clock and the Ctrl+K command palette button.
+3. Clean up what the removal leaves unused so lint stays at 0 errors: the `handleThemeToggleClick` handler, the `Moon` and `Sun` imports, `useCallback` if no longer used, and the `onToggleTheme` prop. Keep the `theme` prop, because `SurveillanceStage3D` still uses it. Update the `<WorkstationBand ... />` call in `PortfolioSections.tsx` to stop passing `onToggleTheme`. Keep `onToggleTheme` on `Hero` and `PortfolioSections` untouched.
+4. Keep the section id `hero-workstation` and `VmsContext` behavior as is. Grep `src/` for `hero-workstation` and `#hero-workstation` and confirm that navbar links, command palette items and the "Jump to view" button still scroll to the right place after the move. If any of them breaks, fix only that reference.
+5. Do not touch CSS, the 3D stage, or any other file.
+6. Run `npm run build` and `npm run lint`, append a "## Gemini" entry (files changed, new section order, what was removed, result of the `hero-workstation` check, build status), commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
