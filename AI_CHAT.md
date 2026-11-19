@@ -114,3 +114,22 @@ Edit only `src/sections/PortfolioSections.tsx` and `src/components/WorkstationBa
 - **Problems:**
   - `git push origin main` cannot authenticate inside the AI Studio sandbox (`fatal: could not read Username for 'https://github.com': No such device or address`); committed cleanly to local `main` to push via the AI Studio GitHub push button.
 
+---
+
+## Claude, 2026-11-19 (review of TASK 3, new direction)
+Checked `src/sections/PortfolioSections.tsx` on main (`a273b02`). Order is Hero, About, WorkstationBand, Skills, Footprint, Deployments, Experience, Credentials, Contact, and the toggle is gone. TASK 3 is accepted.
+
+**New direction from the user:** the site must look exactly like https://www.5lab.co/ (layout, type, spacing, motion). Content stays Sumit's. Claude fetched the live HTML of 5lab.co and wrote the real section order, copy and a mapping to our sections in `REFERENCE_5LAB_LIVE.md`. Read it. Where it disagrees with `REFERENCE_SPEC.md`, the LIVE file wins. Note: on 5lab.co "Notable Clients" is a single logo image, and work cards are image on top with the title below, no text over the image.
+
+Plan from here: TASK 4 Deployments as category showcase, then Skills, About, Contact, Footer, then a fine-tuning pass on type sizes and motion. If Gemini can open https://www.5lab.co/ with its browse or URL tool, add measured values (font family, font-size, line-height, letter-spacing, section padding, hover transforms, transition durations) to a new "## Gemini measurements" entry. If it cannot browse, say so and do not guess.
+
+### TASK 4 for Gemini
+Restyle Deployments to match the 5lab.co work showcase. Edit only `src/components/Deployments.tsx`, `src/components/CameraFeedCard.tsx` and the CSS that styles them. Do not edit data files.
+1. Group the existing deployments by category. Use the category or type field the data already has. If there is none, derive the group from the existing data without adding or changing data files, and note how in your entry.
+2. For each group render: a small eyebrow label (uppercase, muted, like "Experienced in"), an H2 with the category name, then the group's cards in a 2-column grid (1 column on mobile).
+3. Card layout: image on top (large, no border, no red border), title and short tag line BELOW the image. Remove every text overlay on the image.
+4. Hover, like 5lab.co: the image scales up slightly inside a clipped frame, the title shifts a few pixels and an arrow appears. Use `power3.out` style easing, about 0.4s to 0.6s. No red border highlight.
+5. Remove the `.works-sticky-readout` aside. Keep the click behavior: each card must still open the deployment briefing through the existing `onOpen` prop, keyboard accessible (Enter and Space), with a visible focus state.
+6. Keep every deployment, its text and its links. Delete nothing from the content.
+7. Make sure the reveal selectors from TASK 2 still work, or add the new card class to the fade-and-rise list in `src/utils/animMaster.ts`. That one line in `animMaster.ts` is the only allowed change outside the files above.
+8. Run `npm run build` and `npm run lint`, append a "## Gemini" entry (files changed, how groups are derived, what was removed, build status), commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
