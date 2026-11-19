@@ -20,14 +20,18 @@ const links = [
   { href: '#contact', label: 'Contact' },
 ] as const;
 
-const mobileLinks = [
+const primaryMobileLinks = [
   { href: '#hero', label: 'Home' },
   { href: '#operations', label: 'Works' },
   { href: '#about', label: 'Services' },
   { href: '#footprint', label: 'About' },
+  { href: '#contact', label: 'Contact' },
+] as const;
+
+const secondaryMobileLinks = [
   { href: '#experience', label: 'Logbook' },
   { href: '#certifications', label: 'Credentials' },
-  { href: '#contact', label: 'Contact' },
+  { href: '#hero-workstation', label: 'Workstation' },
 ] as const;
 
 const sectionIds = [
@@ -51,6 +55,37 @@ function SparkLogo({ size = 20 }: { size?: number }) {
       width={Math.round((size * 24) / 28)}
     >
       <path d="M13.5 1.5L3 15h8.2L9.4 26.5L21 12.2h-8.3l.8-10.7Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function ConcentricDotArcs() {
+  const radii = [90, 120, 150, 180, 210, 240, 270, 300, 330];
+  const ringColors = [
+    'rgba(255, 34, 58, 0.5)', // 5Lab red accent
+    'rgba(168, 85, 247, 0.35)', // subtle violet
+    'rgba(255, 255, 255, 0.28)', // white dot
+  ];
+  return (
+    <svg
+      aria-hidden="true"
+      className="mobile-modal-rings"
+      fill="none"
+      viewBox="0 0 360 360"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {radii.map((r, i) => (
+        <circle
+          cx="360"
+          cy="0"
+          key={r}
+          r={r}
+          stroke={ringColors[i % ringColors.length]}
+          strokeDasharray="2.5 8"
+          strokeLinecap="round"
+          strokeWidth="1.5"
+        />
+      ))}
     </svg>
   );
 }
@@ -119,6 +154,44 @@ export const Navbar = memo(function Navbar({
     [onToggleTheme],
   );
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: prefersReducedMotion ? 0 : 0.05,
+        delayChildren: prefersReducedMotion ? 0 : 0.06,
+      },
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        staggerChildren: prefersReducedMotion ? 0 : 0.02,
+        staggerDirection: -1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: prefersReducedMotion ? 0.01 : 0.35,
+        ease: motionEasings.out,
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: prefersReducedMotion ? 0 : 10,
+      transition: {
+        duration: prefersReducedMotion ? 0.01 : 0.2,
+        ease: motionEasings.out,
+      },
+    },
+  };
+
   return (
     <>
       <ScrollProgress />
@@ -162,10 +235,10 @@ export const Navbar = memo(function Navbar({
             ref={menuToggleRef}
             type="button"
           >
-            <svg aria-hidden="true" className="hamburger-svg" viewBox="0 0 64 64">
-              <line stroke="currentColor" strokeWidth="2.5" x1="14" x2="50" y1="22" y2="22" />
-              <line stroke="currentColor" strokeWidth="2.5" x1="26" x2="50" y1="32" y2="32" />
-              <line stroke="currentColor" strokeWidth="2.5" x1="34" x2="50" y1="42" y2="42" />
+            <svg aria-hidden="true" className="hamburger-svg" viewBox="0 0 32 32">
+              <line stroke="currentColor" strokeLinecap="round" strokeWidth="2" x1="6" x2="26" y1="11" y2="11" />
+              <line stroke="currentColor" strokeLinecap="round" strokeWidth="2" x1="12" x2="26" y1="16" y2="16" />
+              <line stroke="currentColor" strokeLinecap="round" strokeWidth="2" x1="18" x2="26" y1="21" y2="21" />
             </svg>
           </button>
         </nav>
@@ -201,6 +274,8 @@ export const Navbar = memo(function Navbar({
                 ease: motionEasings.out,
               }}
             >
+              <ConcentricDotArcs />
+
               <div className="mobile-nav-head">
                 <a
                   aria-label="Sumit Anand — Home"
@@ -223,31 +298,56 @@ export const Navbar = memo(function Navbar({
                   ref={closeMenuRef}
                   type="button"
                 >
-                  <X aria-hidden="true" size={22} />
+                  <X aria-hidden="true" size={20} strokeWidth={1.75} />
                 </button>
               </div>
 
-              <nav aria-label="Mobile sections" className="mobile-nav-links">
-                {mobileLinks.map((link) => {
+              <m.nav
+                animate="visible"
+                aria-label="Mobile sections"
+                className="mobile-nav-links"
+                exit="exit"
+                initial="hidden"
+                variants={containerVariants}
+              >
+                {primaryMobileLinks.map((link) => {
                   const active = activeSection === link.href.slice(1);
                   return (
-                    <a
+                    <m.a
                       aria-current={active ? 'location' : undefined}
                       className="mobile-nav-link"
                       href={link.href}
                       key={link.href}
                       onClick={() => setMenuOpen(false)}
+                      variants={itemVariants}
                     >
                       <span>{link.label}</span>
-                    </a>
+                    </m.a>
                   );
                 })}
-              </nav>
 
-              <div className="mobile-nav-utilities">
-                <Clock className="mobile-nav-clock" variant="nav" />
+                <m.div className="mobile-nav-sublinks" variants={itemVariants}>
+                  {secondaryMobileLinks.map((link) => (
+                    <a
+                      className="mobile-nav-sublink"
+                      href={link.href}
+                      key={link.href}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </m.div>
+              </m.nav>
+
+              <div className="mobile-nav-footer">
+                <div className="mobile-nav-footer-meta">
+                  <span>PATLI, HARYANA</span>
+                  <Clock className="mobile-nav-clock" variant="nav" />
+                </div>
                 <div className="mobile-nav-util-row">
                   <button
+                    aria-label="Quick search"
                     className="mobile-nav-util-btn"
                     onClick={() => {
                       setMenuOpen(false);
@@ -255,16 +355,21 @@ export const Navbar = memo(function Navbar({
                     }}
                     type="button"
                   >
-                    <Command aria-hidden="true" size={14} />
-                    Quick search
+                    <Command aria-hidden="true" size={13} />
+                    Search
                   </button>
-                  <button className="mobile-nav-util-btn" onClick={handleThemeClick} type="button">
+                  <button
+                    aria-label="Toggle theme"
+                    className="mobile-nav-util-btn"
+                    onClick={handleThemeClick}
+                    type="button"
+                  >
                     {theme === 'dark' ? (
-                      <Sun aria-hidden="true" size={14} />
+                      <Sun aria-hidden="true" size={13} />
                     ) : (
-                      <Moon aria-hidden="true" size={14} />
+                      <Moon aria-hidden="true" size={13} />
                     )}
-                    {theme === 'dark' ? 'Light theme' : 'Dark theme'}
+                    {theme === 'dark' ? 'Light' : 'Dark'}
                   </button>
                 </div>
               </div>
