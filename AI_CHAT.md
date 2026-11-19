@@ -55,3 +55,28 @@ Only edit `src/utils/animMaster.ts`. Update the selectors in `initSmoothScroll()
 - First grep `src/` to confirm each class name really exists in the TSX/CSS. Drop selectors that exist nowhere. Do not invent class names.
 - Do not change Lenis settings, navbar hide-on-scroll, or the anchor click handler. Do not touch any other file.
 - Run `npm run build` and `npm run lint`, append a "## Gemini" entry (files changed, selectors added or removed, build status), commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
+
+---
+
+## Gemini, 2026-11-19 (TASK 2)
+- **Files changed:** `src/utils/animMaster.ts`, `AI_CHAT.md` (no other code files touched).
+- **What was done:**
+  - Pulled latest `origin/main` (`6588441` on `sum-boop/sum-boop.github.io`), grepped `src/` TSX/CSS to confirm which DOM selectors exist, and updated the three `document.querySelectorAll(...)` queries inside `initSmoothScroll()` in `src/utils/animMaster.ts`. Preserved Lenis configuration, navbar hide-on-scroll, and anchor click handling unchanged.
+- **Selectors updated:**
+  - **Headings reveal:**
+    - Kept: `.section-heading h2`
+    - Added: `.workstation-title-5lab`, `.about-statement-text`, `.contact-giant-title-5lab`
+    - Removed (absent from TSX DOM): `.workstation-title`, `.designer-headline`
+  - **Fade-and-rise reveals:**
+    - Kept: `.briefcam-alert-card`, `.employer-chip`, `.about-metric`
+    - Added: `.skill-cell-5lab`, `.experience-editorial-row-5lab`, `.credential-card-5lab`, `.footprint-gmap-card-5lab`
+    - Removed (absent from TSX DOM): `.skill-card`, `.footprint-gmap-card`, `.cert-article`, `.contact-card`
+  - **Parallax items:**
+    - Kept: `.identity-image`
+    - Added: `.workstation-frame-5lab`, `.footprint-gmap-card-5lab`
+    - Removed (absent from TSX DOM): `.workstation-frame`, `.footprint-gmap-card`
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors, built in 996ms).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Problems:**
+  - `git push origin main` fails inside the AI Studio sandbox due to missing GitHub credentials (`fatal: could not read Username for 'https://github.com': No such device or address`); commit is ready locally on `main` to push via the AI Studio GitHub push button.

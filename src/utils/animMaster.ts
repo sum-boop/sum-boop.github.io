@@ -65,7 +65,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   }
 
   // Section Heading Reveals (slide up from mask)
-  const headings = document.querySelectorAll('.section-heading h2, .workstation-title, .designer-headline');
+  const headings = document.querySelectorAll('.section-heading h2, .workstation-title-5lab, .about-statement-text, .contact-giant-title-5lab');
   headings.forEach((heading) => {
     const st = ScrollTrigger.create({
       trigger: heading,
@@ -83,7 +83,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   });
 
   // Fade-and-rise reveals for cards, paragraphs, and images
-  const revealElements = document.querySelectorAll('.skill-card, .employer-chip, .about-metric, .footprint-gmap-card, .briefcam-alert-card, .cert-article, .contact-card');
+  const revealElements = document.querySelectorAll('.skill-cell-5lab, .experience-editorial-row-5lab, .credential-card-5lab, .footprint-gmap-card-5lab, .briefcam-alert-card, .employer-chip, .about-metric');
   revealElements.forEach((el) => {
     const st = ScrollTrigger.create({
       trigger: el,
@@ -101,7 +101,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   });
 
   // Subtle Parallax on large imagery / cards
-  const parallaxItems = document.querySelectorAll('.identity-image, .workstation-frame, .footprint-gmap-card');
+  const parallaxItems = document.querySelectorAll('.identity-image, .workstation-frame-5lab, .footprint-gmap-card-5lab');
   parallaxItems.forEach((item) => {
     const st = ScrollTrigger.create({
       trigger: item,
