@@ -1,7 +1,9 @@
 # 5lab.co live structure (fetched by Claude, 2026-11-19)
 
-Source of truth for page structure and copy. It is read from the live HTML of https://www.5lab.co/, so it overrides guesses in REFERENCE_SPEC.md where the two disagree.
-NOT known from this fetch: exact font files, pixel sizes, easing, hover values. Do not invent them. Use the measured values in AI_CHAT.md when Claude or the user adds them.
+> CORRECTION (2026-11-19): the line "Plain black page" in the first version of this file was wrong. 5lab.co is a scroll-driven scene. The page is black only at the hero start and in Contact, and light (#FAFAF7 with indigo ink #22226A) in between. See `REFERENCE_5LAB_MOTION.md`, which wins on palette and motion.
+
+Source of truth for page structure and copy. It is read from the live HTML of https://www.5lab.co/.
+NOT known from this fetch: exact font files, pixel sizes, easing, hover values. Do not invent them.
 
 Meta: theme-color #000000. Title "5Lab ⚡️ Design + Technology".
 
@@ -11,7 +13,7 @@ Meta: theme-color #000000. Title "5Lab ⚡️ Design + Technology".
 3. **Hero panels.** Two panels side by side.
    - Left: "Design", sub "Effective User Experience".
    - Right: "Develop", sub "Effective Technology".
-   - A small logo mark sits between them. "Effective" is rendered twice in the markup (a duplicated text layer, used for a hover/slide effect).
+   - A small logo mark sits between them. "Effective" is rendered twice in the markup (a duplicated text layer, used for the word swap).
 4. **Services band.** Link "Our services". Text "We craft / Websites & / Mobile Apps".
 5. **About band.** Link "About us". Heading "Award-winning / Digital Product / Design + Development / Company". Small line "to make sense to users". Link "Contact".
 6. **Identity statement.** "A bunch of / Designers who code + / + Coders who design".
@@ -28,7 +30,7 @@ Meta: theme-color #000000. Title "5Lab ⚡️ Design + Technology".
 ## Pattern to copy
 - Small "eyebrow" label above every H2 ("Experienced in", "Trusted by", "Let's chat").
 - Very large headlines broken over several short lines.
-- Plain black page, almost no boxes or borders. Content is images + big type.
+- Almost no boxes or borders. Content is images + big type + hairlines.
 - Work cards: clean image first, title under it. No text on top of the image.
 
 ## Mapping to Sumit's site (content stays Sumit's, only the look and motion copy 5lab)
