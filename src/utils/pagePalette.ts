@@ -30,6 +30,43 @@ const SECTION_FINAL_PALETTES: readonly { id: string; palette: PalettePair }[] = 
   { id: 'contact', palette: { top: '#000000', bottom: '#000000' } },
 ];
 
+function initNavbarTone(sections: readonly HTMLElement[]): () => void {
+  const header = document.getElementById('site-navigation');
+  if (!header) {
+    return () => {};
+  }
+
+  header.setAttribute('data-nav-tone', 'dark');
+  const triggers: ScrollTrigger[] = [];
+
+  for (const section of sections) {
+    const tone = section.getAttribute('data-tone') === 'light' ? 'light' : 'dark';
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: 'top 40px',
+      end: 'bottom 40px',
+      onToggle: (self) => {
+        if (self.isActive) {
+          header.setAttribute('data-nav-tone', tone);
+        }
+      },
+    });
+    triggers.push(trigger);
+
+    const rect = section.getBoundingClientRect();
+    if (rect.top <= 40 && rect.bottom >= 40) {
+      header.setAttribute('data-nav-tone', tone);
+    }
+  }
+
+  return () => {
+    for (const st of triggers) {
+      st.kill();
+    }
+    header.removeAttribute('data-nav-tone');
+  };
+}
+
 export function initPagePalette(): () => void {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     return () => {};
@@ -51,9 +88,12 @@ export function initPagePalette(): () => void {
     }
   }
 
+  const cleanupNavTone = initNavbarTone(assignedToneElements);
+
   const pageBg = document.getElementById('page-bg');
   if (!pageBg) {
     return () => {
+      cleanupNavTone();
       for (const el of assignedToneElements) {
         el.removeAttribute('data-tone');
       }
@@ -97,6 +137,7 @@ export function initPagePalette(): () => void {
     }
 
     return () => {
+      cleanupNavTone();
       for (const st of reducedTriggers) {
         st.kill();
       }
@@ -203,6 +244,7 @@ export function initPagePalette(): () => void {
   });
 
   return () => {
+    cleanupNavTone();
     ctx.revert();
     for (const el of assignedToneElements) {
       el.removeAttribute('data-tone');

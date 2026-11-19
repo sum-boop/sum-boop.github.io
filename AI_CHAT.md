@@ -231,3 +231,29 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 - **Problems:**
   - `git push origin main` fails inside the AI Studio sandbox due to missing GitHub credentials (`fatal: could not read Username for 'https://github.com': No such device or address`); committed cleanly on local `main` to push via the AI Studio GitHub push button.
 
+---
+
+## Gemini, 2026-11-19 (TASK 6)
+- **Files changed:** `src/utils/pagePalette.ts`, `src/styles/global.css`, `src/components/three/HeroOrb.tsx` (new), `src/components/Hero.tsx`, `AI_CHAT.md`. (`Navbar.tsx`, `animMaster.ts`, Hero copy/panels, data files, and other sections untouched.)
+- **Header CSS variables / colors found (`.site-header` / `Navbar.tsx`):**
+  - Before this task, `.site-header` in `src/styles/global.css` inherited `--color-foreground` (`#ffffff` from `:root`), `.site-header[data-nav-tone='light']` used `var(--color-ink)` (which also resolved to `#ffffff` on `:root` because `.site-header` sits outside `<section data-tone="light">`), `.site-header.site-header--scrolled[data-nav-tone='light']` used `var(--color-paper)` (`#000000` on `:root`), `.brand-mark` / `.nav-link` inherited `color` (`.hover-underline-animation::after` uses `currentColor`), `.brand-symbol` used `#ffffff` (and `#ff223a` under `[data-nav-tone='light'|'contact']`), and `.menu-toggle` used `border: 1px solid rgba(255, 255, 255, 0.16)`, `color: #ffffff`, `background-color: rgba(255, 255, 255, 0.08)` plus white overrides inside `[data-nav-tone='light'] .menu-toggle`.
+- **Navbar tone & light-section readability:**
+  - Added `initNavbarTone()` inside `initPagePalette()` (`src/utils/pagePalette.ts`): sets initial `data-nav-tone="dark"` on `#site-navigation`, attaches `ScrollTrigger` (`start: 'top 40px'`, `end: 'bottom 40px'`, `onToggle`) for every `[data-tone]` section in both standard and `prefers-reduced-motion` branches, syncs the section currently spanning `40px` on load, and kills triggers / removes `data-nav-tone` in cleanup.
+  - Updated `.site-header[data-nav-tone='light']` / `.site-header.site-header--scrolled[data-nav-tone='light']` in `src/styles/global.css` to `#22226A` ink, `rgba(250, 250, 247, 0.72)` background with `backdrop-filter: blur(8px)`, `rgba(34, 34, 106, 0.14)` hairline bottom border, and `#22226A` / `rgba(34, 34, 106, 0.14)` / `rgba(250, 250, 247, 0.72)` for `.menu-toggle`, keeping the `#ff223a` brand spark & hover/focus accent and preserving `.site-header--hidden` hide-on-scroll. All nav links, brand text, and menu button now have crisp contrast over `#FAFAF7` sections.
+- **Hero orb implementation, size, and performance (`src/components/three/HeroOrb.tsx`, `src/components/Hero.tsx`):**
+  - Rendered `<div className="hero-orb-layer" aria-hidden="true"><Suspense fallback={null}><HeroOrb /></Suspense></div>` as the first child of `#hero`, beneath `.hero-content-shell-5lab` (`z-index: 1`), keeping `#hero` background transparent (`#page-bg` shows through) and `min-height: 100svh`.
+  - `HeroOrb` builds an `icosahedronGeometry(1, 64)` displaced along normals by compact MIT 3D simplex noise (`uTime * 0.15`, freq `1.4`, amp `0.12`) with tangent-perturbed normals, fragment noise mixing `#2A0410`, `#3B1D8F`, `#A80486`, `#FF223A` plus red/pink Fresnel rim (`pow(1.0 - dot(N, V), 2.5)`) and fixed upper-right specular highlight, plus 60 drifting dust particles (`rgba(255, 255, 255, 0.5)`, `2px`, shell radius `1.3..1.9`).
+  - Orb visual size `--orb-size`: `min(75vw, 340px)` centered at `38%` hero height on phone (`<= 767px`) and `min(52vh, 520px)` centered at `45%` hero height on desktop (`>= 768px`), hosted in a `2.05x` transparent canvas slot (`ORB_BASE_SCALE = 0.568` at camera `[0, 0, 3.2]`, `fov={40}`) so outer dust particles do not clip at canvas edges.
+  - Scroll & pointer motion: `ScrollTrigger` on `#hero` (`start: 'top top'`, `end: 'bottom 30%'`, `scrub: true`) scales orb `1` → `0.7` and fades `uOpacity` `1` → `0` over the final 15%; `0.05 rad/s` self rotation plus `0.15 rad` pointer tilt (`0.06` lerp, skipped on touch devices).
+  - Performance notes (no headless browser FPS profiler in sandbox; statically/architecturally tuned): `dpr` capped (`[1, 1.25]` mobile / `[1, 1.75]` desktop via `useMediaQuery`), `frameloop` switches to `'never'` via `IntersectionObserver` when off screen, zero per-frame allocations inside `useFrame`, and explicit `geometry.dispose()` / `material.dispose()` on unmount (React 18 StrictMode-safe).
+- **Fallback look & what could not be matched:**
+  - Under `prefers-reduced-motion: reduce`, missing WebGL, or `webglcontextlost`, `HeroOrb` renders a static circle (`.hero-orb-fallback`) matching `--orb-size` with `radial-gradient(circle at 65% 30%, #FF223A, #A80486 45%, #3B1D8F 75%, #2A0410)` and a soft red/magenta glow.
+  - Exact live `5lab.co` GLSL shader code and particle parameters are unknown without live DOM/shader inspection; this is a close look-alike from `REFERENCE_5LAB_MOTION.md`. Morphing scroll states (quartered disc, Operations/Systems circles, lightning orb) remain deferred to TASK 7.
+- **Build & bundle status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (`0` errors, built in `1.14s`).
+  - `npm run lint` (`eslint .`): **PASSING** (`0` errors).
+  - Bundle check: `HeroOrb` splits into lazy chunk `dist/assets/HeroOrb-D66h3FHc.js` (`231.98 kB` / `70.97 kB` gzip); initial entry chunk `index-*.js` grew `+1.02 kB` (`311.93 kB` → `312.95 kB`, `+0.21 kB` gzip).
+- **Problems:**
+  - Attempting `git push origin main` after committing (note: push fails in this AI Studio sandbox if no GitHub credentials exist — push via AI Studio GitHub button if needed).
+
+

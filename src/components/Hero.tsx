@@ -1,8 +1,14 @@
-import { memo, useEffect, useRef } from 'react';
+import { Suspense, lazy, memo, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ArrowUpRight, Terminal } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { ThemeMode } from '@/hooks/useTheme';
+
+const HeroOrb = lazy(() =>
+  import('@/components/three/HeroOrb').then((module) => ({
+    default: module.HeroOrb,
+  })),
+);
 
 interface HeroProps {
   theme: ThemeMode;
@@ -47,6 +53,11 @@ export const Hero = memo(function Hero(props: HeroProps) {
 
   return (
     <section aria-labelledby="hero-title" className="hero-section-5lab" id="hero" ref={heroRef}>
+      <div className="hero-orb-layer" aria-hidden="true">
+        <Suspense fallback={null}>
+          <HeroOrb />
+        </Suspense>
+      </div>
       <div className="hero-noise-grain" aria-hidden="true" />
       <div className="hero-content-shell-5lab">
         {/* Role eyebrow */}
