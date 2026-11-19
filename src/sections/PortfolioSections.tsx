@@ -6,6 +6,7 @@ import { Deployments } from '@/components/Deployments';
 import { Experience } from '@/components/Experience';
 import { Footprint } from '@/components/Footprint';
 import { Hero } from '@/components/Hero';
+import { OrbScene } from '@/components/OrbScene';
 import { WorkstationBand } from '@/components/WorkstationBand';
 import { Skills } from '@/components/Skills';
 import type { ThemeMode } from '@/hooks/useTheme';
@@ -29,6 +30,7 @@ export const PortfolioSections = memo(function PortfolioSections({
     <PageTransition>
       <main id="main-content" tabIndex={-1}>
         <Hero onOpenPalette={onOpenPalette} onToggleTheme={onToggleTheme} theme={theme} />
+        <OrbScene />
         <About />
         <WorkstationBand onOpenPalette={onOpenPalette} theme={theme} />
         <Skills />

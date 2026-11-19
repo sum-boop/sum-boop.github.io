@@ -256,4 +256,28 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 - **Problems:**
   - Attempting `git push origin main` after committing (note: push fails in this AI Studio sandbox if no GitHub credentials exist — push via AI Studio GitHub button if needed).
 
+---
+
+## Gemini, 2026-11-19 (TASK 7)
+- **Files changed:** `src/components/OrbScene.tsx` (new), `src/styles/orbScene.css` (new), `src/main.tsx` (imported `orbScene.css`), `src/sections/PortfolioSections.tsx`, `src/components/Hero.tsx`, `src/utils/pagePalette.ts`, `AI_CHAT.md`. (`animMaster.ts`, Lenis, data files, Hero copy/text, and all other sections untouched.)
+- **Sticky vs ScrollTrigger pin:**
+  - Used CSS `position: sticky; top: 0; height: 100svh; overflow: hidden;` on `.orb-scene-stage` inside `#scene` (`height: 400svh` desktop / `360svh` mobile). Audited ancestor wrappers first: `html`, `body`, and `#root` use `overflow-x: clip`, and `.page-transition` (`PageTransition`) + `#main-content` have no `overflow` or `transform`, so native sticky pins cleanly without ScrollTrigger `pin` wrapper overhead.
+- **Timeline, final positions & visual details implemented:**
+  - Normalized one `gsap.timeline` (`scrub: true`, `ease: 'none'`, anchored at `t = 1.0`) across `#scene` (`start: 'top top'`, `end: 'bottom bottom'`) animating only `transform`, `opacity`, and SVG `stroke-dashoffset`.
+  - **Size D & Anchor:** `min(36vh, 364px)` at `(50%, 45%)` on desktop (`>= 768px`) and `min(52vw, 240px)` at `(50%, 38%)` on mobile (`<= 767px`), matching HeroOrb's `0.7` exit scale/position.
+  - **Phase A (`0.00` → `0.22`):** Quartered conic disc (`#B5127F`, `#E8133A`, `#3A35B8`, `#5B2AB0`) with `radial-gradient` top highlight, 1px crosshair lines, and 48 JS-positioned dots (`2px`, `rgba(34, 34, 106, 0.45)`, radius `1.12 * D/2`); fades/scales in (`0.9` → `1`) over `0..0.06` and rotates `0` → `90deg` over `0..0.22`; `"Operations & Systems"` bottom caption (`13px` uppercase) fades in at `0.06` and out by `0.28`.
+  - **Phase B (`0.22` → `0.55`):** Disc fades out while red (`#FF6A88` → `#F0123F` → `#B3002B`) and indigo (`#7B7BE0` → `#4040B0` → `#26268A`) `mix-blend-mode: multiply` circles fade in (`0.22..0.28`), draw two diagonal 1px SVG hairlines (`pathLength={1}`, `vectorEffect="non-scaling-stroke"`, `#FF223A` `0.4` and `#4040B0` `0.35`) via `stroke-dashoffset` (`0.22..0.50`), and separate (`0.28..0.55`) with `0..40deg` rotation and subtle scale wobble (`0.92` / `1.04` / `1`) to:
+    - Desktop (`>= 768px`): red at `xPercent: -22` (`-0.22 * D`), indigo at `xPercent: +22` (`+0.22 * D`); `"Operations"` (`#F83858`, `36px`) vertically centered on the left (`#operations`), `"Systems"` (`#4040B0`, `36px`) vertically centered on the right (`#hero-workstation`), both fading `0.25` → `1` over `0.30..0.45`.
+    - Mobile (`<= 767px`): red at `xPercent: -18, yPercent: -6`, indigo at `xPercent: +18, yPercent: +6`; `"Operations"` (`32px`) at top-left (`max(12%, 5.5rem)`), `"Systems"` (`32px`) at bottom-right (`78%`), clear of `.site-header` and the circles.
+  - **`Hero.tsx` & `pagePalette.ts`:** Visually hid `.hero-panels-grid-5lab` with `.sr-only` (keeping DOM links intact for keyboard/SR users). Added `'scene'` to `LIGHT_SECTION_IDS` and `SECTION_FINAL_PALETTES`; reworked background transitions into ScrollTrigger A (`#hero` `top top` → `bottom top`, `#711127/#170308` → `#B0193C/#5A0C1E` `45%` → `#E47F97/#E47F97` `55%`) and ScrollTrigger B (`#scene` `top top` → `top+=25% top`, `#E47F97/#E47F97` → `#FAFAF7/#FAFAF7`). Under `prefers-reduced-motion: reduce`, `#scene` renders statically at `min-height: 100svh` in its final two-circle state with full-opacity labels and no disc/animations.
+- **Anything not matched from `REFERENCE_5LAB_MOTION.md`:**
+  - Visual browser rendering/live scrolling at `390px`/`1280px` could not be inspected inside this headless sandbox (verified breakpoints and clearance mathematically and structurally).
+  - Exact diagonal line angles and wobble easing curves are tuned approximations rather than live DOM measurements; word-swap / glitch `"Friendly"` → `"Humanized"` text effects, hero headline scramble, and iris orb + lilac wash remain deferred to TASK 8 & TASK 9.
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (`0` errors, built in `1.46s`).
+  - `npm run lint` (`eslint .`): **PASSING** (`0` errors).
+- **Problems:**
+  - Attempting `git push origin main` after committing (`git push` fails in the AI Studio container if no GitHub credentials are configured; use the AI Studio GitHub push button if it fails).
+
+
 

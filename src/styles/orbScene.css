@@ -1,0 +1,296 @@
+/* Scroll-driven Orb Scene (Part 1: quartered disc -> two overlapping circles) */
+
+.orb-scene {
+  position: relative;
+  height: 400vh;
+  height: 400svh;
+  background: transparent;
+  color: var(--ink);
+  --orb-d: min(36vh, 364px);
+  --orb-top: 45%;
+}
+
+.orb-scene-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: transparent;
+}
+
+.orb-hairlines-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.orb-anchor {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: var(--orb-top);
+  width: var(--orb-d);
+  height: var(--orb-d);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Phase A: Quartered disc */
+.orb-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #b5127f 0 90deg,
+    #e8133a 90deg 180deg,
+    #3a35b8 180deg 270deg,
+    #5b2ab0 270deg 360deg
+  );
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.orb-disc-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.18), transparent 55%);
+  pointer-events: none;
+}
+
+.orb-disc-crosshair {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+
+.orb-disc-crosshair--v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+.orb-disc-crosshair--h {
+  right: 0;
+  left: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.orb-disc-ring {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orb-disc-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(34, 34, 106, 0.45);
+}
+
+/* Phase B: Overlapping Venn circles */
+.orb-circle {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0;
+  mix-blend-mode: multiply;
+  will-change: transform, opacity;
+}
+
+.orb-circle--red {
+  background: radial-gradient(circle at 35% 30%, #ff6a88, #f0123f 55%, #b3002b);
+}
+
+.orb-circle--indigo {
+  background: radial-gradient(circle at 65% 30%, #7b7be0, #4040b0 55%, #26268a);
+}
+
+/* Clickable labels */
+.orb-label-block {
+  position: absolute;
+  z-index: 2;
+  max-width: clamp(170px, calc(50vw - var(--orb-d) * 0.78 - var(--gutter)), 310px);
+  opacity: 0.25;
+  pointer-events: auto;
+  will-change: opacity;
+}
+
+.orb-label-block--operations {
+  top: 45%;
+  left: var(--gutter);
+  transform: translateY(-50%);
+  text-align: left;
+}
+
+.orb-label-block--systems {
+  top: 45%;
+  right: var(--gutter);
+  transform: translateY(-50%);
+  text-align: right;
+}
+
+.orb-label-link {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: opacity 180ms ease;
+}
+
+.orb-label-link--red {
+  color: #f83858;
+}
+
+.orb-label-link--indigo {
+  color: #4040b0;
+}
+
+.orb-label-link:hover {
+  opacity: 0.8;
+}
+
+.orb-label-link:focus-visible {
+  outline: 2px solid var(--focus-ring-color, #ff223a);
+  outline-offset: 4px;
+}
+
+.orb-label-sub {
+  margin: 0.45rem 0 0.35rem;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.orb-label-copy {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.orb-stage-caption {
+  position: absolute;
+  z-index: 2;
+  bottom: clamp(1.75rem, 4vh, 3rem);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+}
+
+@media (max-width: 767px) {
+  .orb-scene {
+    height: 360vh;
+    height: 360svh;
+    --orb-d: min(52vw, 240px);
+    --orb-top: 38%;
+  }
+
+  .orb-label-block {
+    max-width: min(320px, calc(100vw - 2 * var(--gutter)));
+    transform: none;
+  }
+
+  .orb-label-block--operations {
+    top: max(12%, 5.5rem);
+    left: var(--gutter);
+    text-align: left;
+  }
+
+  .orb-label-block--systems {
+    top: 78%;
+    right: var(--gutter);
+    transform: translateY(-30%);
+    text-align: right;
+  }
+
+  .orb-label-link {
+    font-size: 32px;
+  }
+
+  .orb-label-sub {
+    margin: 0.25rem 0 0.2rem;
+  }
+
+  .orb-label-copy {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-scene {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .orb-scene-stage {
+    position: relative;
+    top: auto;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .orb-disc,
+  .orb-disc-ring,
+  .orb-stage-caption {
+    display: none;
+  }
+
+  .orb-circle--red {
+    opacity: 0.9;
+    transform: translateX(-22%);
+  }
+
+  .orb-circle--indigo {
+    opacity: 0.9;
+    transform: translateX(22%);
+  }
+
+  .orb-label-block {
+    opacity: 1;
+  }
+
+  @media (max-width: 767px) {
+    .orb-circle--red {
+      transform: translate(-18%, -6%);
+    }
+
+    .orb-circle--indigo {
+      transform: translate(18%, 6%);
+    }
+  }
+}

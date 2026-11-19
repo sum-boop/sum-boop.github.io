@@ -4,6 +4,7 @@ import { LazyMotion, MotionConfig, domAnimation } from 'framer-motion';
 import App from './App';
 import './styles/tokens.css';
 import './styles/global.css';
+import './styles/orbScene.css';
 import './motion/motion.css';
 
 const rootElement = document.getElementById('root');

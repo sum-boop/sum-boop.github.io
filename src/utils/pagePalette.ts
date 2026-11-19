@@ -5,6 +5,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const DARK_SECTION_IDS = ['hero', 'hero-workstation', 'contact'] as const;
 const LIGHT_SECTION_IDS = [
+  'scene',
   'about',
   'skills',
   'footprint',
@@ -20,6 +21,7 @@ interface PalettePair {
 
 const SECTION_FINAL_PALETTES: readonly { id: string; palette: PalettePair }[] = [
   { id: 'hero', palette: { top: '#711127', bottom: '#170308' } },
+  { id: 'scene', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'about', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'hero-workstation', palette: { top: '#000000', bottom: '#000000' } },
   { id: 'skills', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
@@ -149,40 +151,52 @@ export function initPagePalette(): () => void {
 
   const ctx = gsap.context(() => {
     const heroEl = document.getElementById('hero');
-    const aboutEl = document.getElementById('about');
+    const sceneEl = document.getElementById('scene');
     const workstationEl = document.getElementById('hero-workstation');
     const skillsEl = document.getElementById('skills');
     const contactEl = document.getElementById('contact');
 
-    if (heroEl && aboutEl) {
-      const heroToAboutTl = gsap.timeline({
+    if (heroEl) {
+      const heroTl = gsap.timeline({
         scrollTrigger: {
           trigger: heroEl,
           start: 'top top',
-          endTrigger: aboutEl,
-          end: 'top 40%',
+          end: 'bottom top',
           scrub: true,
         },
       });
 
-      heroToAboutTl
+      heroTl
         .fromTo(
           pageBg,
           { '--bg-top': '#711127', '--bg-bottom': '#170308' },
-          { '--bg-top': '#B0193C', '--bg-bottom': '#5A0C1E', duration: 0.28, ease: 'none' },
+          { '--bg-top': '#B0193C', '--bg-bottom': '#5A0C1E', duration: 0.45, ease: 'none' },
         )
         .to(pageBg, {
           '--bg-top': '#E47F97',
           '--bg-bottom': '#E47F97',
-          duration: 0.3,
-          ease: 'none',
-        })
-        .to(pageBg, {
-          '--bg-top': '#FAFAF7',
-          '--bg-bottom': '#FAFAF7',
-          duration: 0.42,
+          duration: 0.55,
           ease: 'none',
         });
+    }
+
+    if (sceneEl) {
+      gsap.fromTo(
+        pageBg,
+        { '--bg-top': '#E47F97', '--bg-bottom': '#E47F97' },
+        {
+          '--bg-top': '#FAFAF7',
+          '--bg-bottom': '#FAFAF7',
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: sceneEl,
+            start: 'top top',
+            end: 'top+=25% top',
+            scrub: true,
+          },
+        },
+      );
     }
 
     if (workstationEl) {

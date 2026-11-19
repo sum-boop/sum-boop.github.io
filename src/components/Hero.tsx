@@ -82,7 +82,7 @@ export const Hero = memo(function Hero(props: HeroProps) {
         </h1>
 
         {/* Two large side-by-side panels (Design & Develop equivalents) */}
-        <div className="hero-panels-grid-5lab" ref={panelsRef}>
+        <div className="hero-panels-grid-5lab sr-only" ref={panelsRef}>
           <a className="hero-panel-card-5lab" href="#operations">
             <div className="hero-panel-meta">
               <span className="hero-panel-index">01</span>
