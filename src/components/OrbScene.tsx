@@ -121,12 +121,19 @@ export const OrbScene = memo(function OrbScene() {
         );
 
         // Phase B transition (0.22 -> 0.28): Disc fades out, red & indigo circles fade in on top
-        tl.to(discEl, { opacity: 0, duration: 0.06 }, 0.22).fromTo(
-          [redCircleEl, indigoCircleEl],
-          { opacity: 0, xPercent: 0, yPercent: 0, rotation: 0, scale: 1 },
-          { opacity: 0.9, duration: 0.06 },
-          0.22,
-        );
+        tl.to(discEl, { opacity: 0, duration: 0.06 }, 0.22)
+          .fromTo(
+            redCircleEl,
+            { opacity: 0, xPercent: 0, yPercent: 0, rotation: 0, scale: 1 },
+            { opacity: 0.9, duration: 0.06 },
+            0.22,
+          )
+          .fromTo(
+            indigoCircleEl,
+            { opacity: 0, xPercent: 0, yPercent: 0, rotation: 0, scale: 1 },
+            { opacity: 0.8, duration: 0.06 },
+            0.22,
+          );
 
         // Diagonal hairlines draw on with stroke-dashoffset between 0.22 and 0.50
         tl.fromTo(
@@ -180,10 +187,14 @@ export const OrbScene = memo(function OrbScene() {
             0.28,
           );
 
-        // Labels start at opacity 0.25 and become 1 from 0.30 to 0.45, then stay
+        // Labels start at opacity 0, fade to 0.25 (0.22 -> 0.30), then 0.25 to 1 (0.30 -> 0.45)
         tl.fromTo(
           [opsLabelEl, sysLabelEl],
-          { opacity: 0.25 },
+          { opacity: 0 },
+          { opacity: 0.25, duration: 0.08 },
+          0.22,
+        ).to(
+          [opsLabelEl, sysLabelEl],
           { opacity: 1, duration: 0.15 },
           0.3,
         );

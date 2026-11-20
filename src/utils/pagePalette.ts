@@ -23,13 +23,10 @@ const SECTION_FINAL_PALETTES: readonly { id: string; palette: PalettePair }[] = 
   { id: 'hero', palette: { top: '#711127', bottom: '#170308' } },
   { id: 'scene', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'about', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
-  { id: 'hero-workstation', palette: { top: '#000000', bottom: '#000000' } },
-  { id: 'skills', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'footprint', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'operations', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'experience', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'certifications', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
-  { id: 'contact', palette: { top: '#000000', bottom: '#000000' } },
 ];
 
 function initNavbarTone(sections: readonly HTMLElement[]): () => void {
@@ -152,9 +149,6 @@ export function initPagePalette(): () => void {
   const ctx = gsap.context(() => {
     const heroEl = document.getElementById('hero');
     const sceneEl = document.getElementById('scene');
-    const workstationEl = document.getElementById('hero-workstation');
-    const skillsEl = document.getElementById('skills');
-    const contactEl = document.getElementById('contact');
 
     if (heroEl) {
       const heroTl = gsap.timeline({
@@ -193,63 +187,6 @@ export function initPagePalette(): () => void {
             trigger: sceneEl,
             start: 'top top',
             end: 'top+=25% top',
-            scrub: true,
-          },
-        },
-      );
-    }
-
-    if (workstationEl) {
-      gsap.fromTo(
-        pageBg,
-        { '--bg-top': '#FAFAF7', '--bg-bottom': '#FAFAF7' },
-        {
-          '--bg-top': '#000000',
-          '--bg-bottom': '#000000',
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: workstationEl,
-            start: 'top 82%',
-            end: 'top 38%',
-            scrub: true,
-          },
-        },
-      );
-    }
-
-    if (skillsEl) {
-      gsap.fromTo(
-        pageBg,
-        { '--bg-top': '#000000', '--bg-bottom': '#000000' },
-        {
-          '--bg-top': '#FAFAF7',
-          '--bg-bottom': '#FAFAF7',
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: skillsEl,
-            start: 'top 82%',
-            end: 'top 38%',
-            scrub: true,
-          },
-        },
-      );
-    }
-
-    if (contactEl) {
-      gsap.fromTo(
-        pageBg,
-        { '--bg-top': '#FAFAF7', '--bg-bottom': '#FAFAF7' },
-        {
-          '--bg-top': '#000000',
-          '--bg-bottom': '#000000',
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: contactEl,
-            start: 'top 95%',
-            end: 'top 60%',
             scrub: true,
           },
         },

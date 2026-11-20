@@ -4484,7 +4484,7 @@ button.feed-card.feed-card--vms-active {
 .hero-section-5lab {
   position: relative;
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100lvh;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -4598,6 +4598,10 @@ button.feed-card.feed-card--vms-active {
   font-style: italic;
   font-weight: 400;
   color: #ff223a;
+}
+
+.hero-section-5lab .hero-italic-accent {
+  color: #ffffff;
 }
 
 .hero-bottom-row-5lab {
@@ -4774,7 +4778,7 @@ button.feed-card.feed-card--vms-active {
 .works-showcase-5lab {
   display: flex;
   flex-direction: column;
-  gap: clamp(4rem, 7vw, 6.5rem);
+  gap: 0;
   margin-top: clamp(3rem, 5vw, 4.5rem);
 }
 
@@ -4782,6 +4786,8 @@ button.feed-card.feed-card--vms-active {
   display: flex;
   flex-direction: column;
   gap: clamp(1.5rem, 3vw, 2.25rem);
+  padding-block: clamp(2rem, 5vw, 4rem);
+  border-top: 1px dotted var(--hairline);
 }
 
 .works-group-header-5lab {
@@ -4810,7 +4816,7 @@ button.feed-card.feed-card--vms-active {
 
 .works-group-grid-5lab {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(2rem, 4vw, 3.5rem);
 }
 
@@ -4940,6 +4946,24 @@ button.feed-card.feed-card--vms-active {
   line-height: 1.55;
 }
 
+@media (min-width: 768px) {
+  .works-group-5lab {
+    display: grid;
+    grid-template-columns: minmax(220px, 4fr) 8fr;
+    column-gap: clamp(2rem, 4vw, 4rem);
+    align-items: start;
+  }
+
+  .works-group-header-5lab {
+    position: sticky;
+    top: 96px;
+  }
+
+  .works-group-grid-5lab:has(> :nth-child(2)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 767px) {
   .works-group-grid-5lab {
     grid-template-columns: minmax(0, 1fr);
@@ -4976,7 +5000,7 @@ button.feed-card.feed-card--vms-active {
    5LAB 3D WORKSTATION BAND
    ========================= */
 .workstation-section-5lab {
-  background-color: transparent;
+  background: #000000;
 }
 
 .workstation-title-5lab {
@@ -5420,7 +5444,7 @@ button.feed-card.feed-card--vms-active {
    5LAB CLOSING CONTACT CTA & MINIMAL FOOTER
    ========================= */
 .contact-section-5lab {
-  background-color: transparent;
+  background: #000000;
   color: #ffffff;
 }
 
@@ -5682,7 +5706,7 @@ button.feed-card.feed-card--vms-active {
   position: relative;
   z-index: 1;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  background-color: #000000;
+  background: #000000;
   color: rgba(255, 255, 255, 0.6);
   padding: 2.25rem var(--gutter);
 }
