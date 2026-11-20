@@ -4,6 +4,7 @@ import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 gsap.registerPlugin(ScrambleTextPlugin);
 
 const DEFAULT_CHARS = 'abcdefghijklmnopqrstuvwxyz!<>-_/[]{}=+*^?#';
+const activeRestorers = new WeakMap<HTMLElement, () => void>();
 
 export interface ScrambleRevealOptions {
   duration?: number;
@@ -43,6 +44,10 @@ function collectLeafElements(root: HTMLElement): HTMLElement[] {
   return leaves;
 }
 
+export function restoreScramble(el: HTMLElement): void {
+  activeRestorers.get(el)?.();
+}
+
 export function scrambleReveal(el: HTMLElement, opts?: ScrambleRevealOptions): void {
   if (typeof window === 'undefined') return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -56,7 +61,7 @@ export function scrambleReveal(el: HTMLElement, opts?: ScrambleRevealOptions): v
 
   el.setAttribute('data-scrambled', '');
 
-  const duration = opts?.duration ?? 0.9;
+  const duration = Math.min(0.9, Math.max(0.1, opts?.duration ?? 0.9));
   const delay = opts?.delay ?? 0;
   const chars = opts?.chars ?? DEFAULT_CHARS;
 
@@ -66,6 +71,20 @@ export function scrambleReveal(el: HTMLElement, opts?: ScrambleRevealOptions): v
   }
 
   let remaining = leaves.length;
+  const restoreLeafFns: (() => void)[] = [];
+  let observer: IntersectionObserver | null = null;
+  let cleanedUp = false;
+
+  const cleanupHost = () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    observer?.disconnect();
+    observer = null;
+    activeRestorers.delete(el);
+    if (!hadAriaLabel) {
+      el.removeAttribute('aria-label');
+    }
+  };
 
   for (const leaf of leaves) {
     const originalText = leaf.textContent ?? '';
@@ -83,10 +102,17 @@ export function scrambleReveal(el: HTMLElement, opts?: ScrambleRevealOptions): v
         leaf.setAttribute('aria-hidden', prevAriaHidden);
       }
       remaining -= 1;
-      if (remaining === 0 && !hadAriaLabel) {
-        el.removeAttribute('aria-label');
+      if (remaining <= 0) {
+        cleanupHost();
       }
     };
+
+    const forceRestore = () => {
+      if (settled) return;
+      gsap.killTweensOf(leaf);
+      finalize();
+    };
+    restoreLeafFns.push(forceRestore);
 
     const scrambleVars = {
       text: originalText,
@@ -105,5 +131,29 @@ export function scrambleReveal(el: HTMLElement, opts?: ScrambleRevealOptions): v
       onComplete: finalize,
       onInterrupt: finalize,
     });
+  }
+
+  activeRestorers.set(el, () => {
+    for (const restoreLeaf of restoreLeafFns) {
+      restoreLeaf();
+    }
+    cleanupHost();
+  });
+
+  if (typeof IntersectionObserver !== 'undefined') {
+    let sawVisible = false;
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            sawVisible = true;
+          } else if (sawVisible) {
+            restoreScramble(el);
+          }
+        }
+      },
+      { threshold: 0 },
+    );
+    observer.observe(el);
   }
 }

@@ -1,6 +1,6 @@
 import { memo, useId } from 'react';
 
-const BADGE_COPY = 'SUMIT ANAND \u00B7 CCTV OPERATOR \u00B7 PATLI, HARYANA \u00B7 ';
+const BADGE_COPY = 'SUMIT ANAND \u00B7 CCTV OPERATOR \u00B7 HARYANA \u00B7 ';
 
 export const CircularBadge = memo(function CircularBadge() {
   const pathId = useId();
@@ -22,7 +22,12 @@ export const CircularBadge = memo(function CircularBadge() {
         </defs>
         <circle cx="68" cy="68" fill="currentColor" r="2.5" />
         <text className="circular-badge-text">
-          <textPath href={`#${pathId}`} startOffset="0%">
+          <textPath
+            href={`#${pathId}`}
+            lengthAdjust="spacing"
+            startOffset="0%"
+            textLength="335"
+          >
             {BADGE_COPY}
           </textPath>
         </text>

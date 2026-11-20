@@ -1,7 +1,7 @@
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { scrambleReveal } from '@/utils/scrambleReveal';
+import { restoreScramble, scrambleReveal } from '@/utils/scrambleReveal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,6 +9,7 @@ let lenisInstance: Lenis | null = null;
 let tickerCallback: ((time: number) => void) | null = null;
 let anchorClickHandler: ((event: MouseEvent) => void) | null = null;
 let scrollTriggers: ScrollTrigger[] = [];
+let scrambledHeadings: HTMLElement[] = [];
 let lastScrollY = 0;
 
 export function initSmoothScroll(): { destroy: () => void } | null {
@@ -65,10 +66,12 @@ export function initSmoothScroll(): { destroy: () => void } | null {
     scrollTriggers.push(st);
   }
 
-  // Section Heading Reveals (slide up from mask)
-  const headings = document.querySelectorAll('.section-heading h2, .workstation-title-5lab, .about-statement-text, .contact-giant-title-5lab, .works-group-title-5lab');
+  // Section Heading Reveals (slide up from mask) and heading-only scramble
+  const headings = document.querySelectorAll(
+    '.section-heading h2, .workstation-title-5lab, .contact-giant-title-5lab, .works-group-title-5lab',
+  );
   headings.forEach((heading) => {
-    const st = ScrollTrigger.create({
+    const revealTrigger = ScrollTrigger.create({
       trigger: heading,
       start: 'top 85%',
       once: true,
@@ -76,14 +79,30 @@ export function initSmoothScroll(): { destroy: () => void } | null {
         gsap.fromTo(
           heading,
           { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' }
+          { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' },
         );
-        if (heading instanceof HTMLElement && !heading.closest('#hero-workstation')) {
-          scrambleReveal(heading);
-        }
       },
     });
-    scrollTriggers.push(st);
+    scrollTriggers.push(revealTrigger);
+
+    if (
+      heading instanceof HTMLElement &&
+      (heading.tagName === 'H1' ||
+        heading.tagName === 'H2' ||
+        heading.classList.contains('works-group-title-5lab')) &&
+      !heading.closest('#hero-workstation')
+    ) {
+      scrambledHeadings.push(heading);
+      const scrambleTrigger = ScrollTrigger.create({
+        trigger: heading,
+        start: 'top 85%',
+        end: 'bottom top',
+        onEnter: () => scrambleReveal(heading, { duration: 0.85 }),
+        onLeave: () => restoreScramble(heading),
+        onLeaveBack: () => restoreScramble(heading),
+      });
+      scrollTriggers.push(scrambleTrigger);
+    }
   });
 
   // Fade-and-rise reveals for cards, paragraphs, and images
@@ -143,6 +162,11 @@ export function initSmoothScroll(): { destroy: () => void } | null {
 }
 
 export function destroySmoothScroll(): void {
+  for (const heading of scrambledHeadings) {
+    restoreScramble(heading);
+  }
+  scrambledHeadings = [];
+
   for (const st of scrollTriggers) {
     st.kill();
   }

@@ -6,6 +6,7 @@ import { assetPath } from '@/utils/assets';
 interface CameraFeedCardProps {
   deployment: DeploymentBriefing;
   index: number;
+  eagerLoad?: boolean;
   featured?: boolean;
   isSelectedFeed?: boolean;
   onOpen: (deployment: DeploymentBriefing) => void;
@@ -14,6 +15,7 @@ interface CameraFeedCardProps {
 export const CameraFeedCard = memo(function CameraFeedCard({
   deployment,
   index,
+  eagerLoad = index < 2,
   isSelectedFeed = false,
   onOpen,
 }: CameraFeedCardProps) {
@@ -52,7 +54,10 @@ export const CameraFeedCard = memo(function CameraFeedCard({
         onClick={() => onOpen(deployment)}
         type="button"
       >
-        <span className="work-card-media-5lab">
+        <span
+          className="work-card-media-5lab"
+          style={{ aspectRatio: '16 / 10', background: '#E4E3EE' }}
+        >
           {hardFailed ? (
             <span className="work-card-fallback-5lab">
               <span>{deployment.cardTitle}</span>
@@ -61,13 +66,13 @@ export const CameraFeedCard = memo(function CameraFeedCard({
             <img
               alt={deployment.imageAlt}
               className="work-card-img-5lab"
-              decoding="async"
+              decoding={eagerLoad ? 'sync' : 'async'}
               height="600"
-              loading="lazy"
+              loading={eagerLoad ? 'eager' : 'lazy'}
               onError={handleImageError}
               referrerPolicy="no-referrer"
               src={imgSrc}
-              width="900"
+              width="960"
             />
           )}
         </span>

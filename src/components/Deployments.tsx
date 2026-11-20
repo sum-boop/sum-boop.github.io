@@ -94,26 +94,34 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
         </ChoreoReveal>
 
         <div className="works-showcase-5lab" id="highlight-scroller">
-          {groupedDeployments.map((group) => (
-            <div className="works-group-5lab" key={group.category}>
-              <header className="works-group-header-5lab">
-                <p className="works-group-eyebrow-5lab">Experienced in</p>
-                <h2 className="works-group-title-5lab">{group.category}</h2>
-              </header>
+          {(() => {
+            let visibleCardOffset = 0;
+            return groupedDeployments.map((group) => (
+              <div className="works-group-5lab" key={group.category}>
+                <header className="works-group-header-5lab">
+                  <p className="works-group-eyebrow-5lab">Experienced in</p>
+                  <h2 className="works-group-title-5lab">{group.category}</h2>
+                </header>
 
-              <div className="works-group-grid-5lab">
-                {group.items.map((deployment) => (
-                  <CameraFeedCard
-                    deployment={deployment}
-                    index={deployments.findIndex((item) => item.id === deployment.id)}
-                    isSelectedFeed={selectedFeedId === deployment.id}
-                    key={deployment.id}
-                    onOpen={onOpen}
-                  />
-                ))}
+                <div className="works-group-grid-5lab">
+                  {group.items.map((deployment) => {
+                    const isEagerCard = visibleCardOffset < 2;
+                    visibleCardOffset += 1;
+                    return (
+                      <CameraFeedCard
+                        deployment={deployment}
+                        eagerLoad={isEagerCard}
+                        index={deployments.findIndex((item) => item.id === deployment.id)}
+                        isSelectedFeed={selectedFeedId === deployment.id}
+                        key={deployment.id}
+                        onOpen={onOpen}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            ));
+          })()}
         </div>
       </div>
     </section>

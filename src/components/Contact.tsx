@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   ArrowUpRight,
   Check,
@@ -12,12 +14,47 @@ import {
   Radio,
 } from 'lucide-react';
 import { contact, socialLinks } from '@/data/contact';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
+import '@/styles/contactOrb.css';
 import { assetPath } from '@/utils/assets';
 import { ContactForm } from './ContactForm';
 import { SocialIcon } from './SocialIcon';
 
+gsap.registerPlugin(ScrollTrigger);
+
+const ORBIT_RING_PATH = 'M 6 120 A 114 36 0 1 0 234 120 A 114 36 0 1 0 6 120';
+
 export function Contact() {
   const [copied, setCopied] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const laserRef = useRef<HTMLSpanElement>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const sectionEl = sectionRef.current;
+    const laserEl = laserRef.current;
+    if (!sectionEl || !laserEl) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        laserEl,
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          duration: 0.9,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionEl,
+            start: 'top 78%',
+            once: true,
+          },
+        },
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
 
   function markCopied() {
     setCopied(true);
@@ -37,6 +74,7 @@ export function Contact() {
       aria-labelledby="contact-title"
       className="content-section-5lab contact-section-5lab"
       id="contact"
+      ref={sectionRef}
     >
       <div className="section-inner">
         {/* 5Lab Closing CTA Hero Area ("Ready to spark something?" equivalent) */}
@@ -52,14 +90,44 @@ export function Contact() {
               <span> about a role.</span>
             </h2>
 
-            <button
-              aria-label="Scroll to message composer form"
-              className="contact-lets-chat-btn-5lab"
-              onClick={focusComposer}
-              type="button"
-            >
-              <span>Let&apos;s chat</span>
-            </button>
+            <div className="contact-orb-block">
+              <div aria-hidden="true" className="contact-orb-laser-wrap">
+                <span className="contact-orb-laser" ref={laserRef} />
+              </div>
+
+              <div className="contact-orb-float">
+                <button
+                  aria-label="Scroll to message composer form"
+                  className="contact-lets-chat-btn-5lab"
+                  onClick={focusComposer}
+                  type="button"
+                >
+                  <span>Let&apos;s chat</span>
+                </button>
+
+                <svg
+                  aria-hidden="true"
+                  className="contact-orb-ring"
+                  fill="none"
+                  viewBox="0 0 240 240"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d={ORBIT_RING_PATH}
+                    stroke="rgba(248, 56, 88, 0.55)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  {prefersReducedMotion ? (
+                    <circle cx="234" cy="120" fill="#F83858" r="2" />
+                  ) : (
+                    <circle cx="0" cy="0" fill="#F83858" r="2">
+                      <animateMotion dur="9s" path={ORBIT_RING_PATH} repeatCount="indefinite" />
+                    </circle>
+                  )}
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Large underlined direct communication links with red hover */}

@@ -1,0 +1,156 @@
+/* 5Lab-style Contact Orb, Elliptical Orbit Ring & Diagonal Laser Line */
+
+.contact-cta-hero-5lab {
+  position: relative;
+  overflow: hidden;
+  padding-top: 28px;
+  padding-bottom: 1.5rem;
+  margin-top: -28px;
+}
+
+.contact-cta-hero-5lab .section-eyebrow,
+.contact-cta-hero-5lab .contact-giant-title-5lab,
+.contact-cta-hero-5lab .contact-big-links-5lab,
+.contact-cta-hero-5lab .contact-location-link-5lab {
+  position: relative;
+  z-index: 2;
+}
+
+.contact-orb-block {
+  position: relative;
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  margin-right: clamp(32px, 4.5vw, 64px);
+}
+
+.contact-orb-float {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  animation: contact-orb-float 5s ease-in-out infinite;
+}
+
+@keyframes contact-orb-float {
+  0%,
+  100% {
+    transform: translateY(-6px);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.contact-cta-hero-5lab .contact-lets-chat-btn-5lab {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 28%,
+    #ff7a9c 0%,
+    #e83e75 32%,
+    #b72a5d 62%,
+    #6e1038 100%
+  );
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  box-shadow:
+    0 0 60px 8px rgba(232, 62, 117, 0.45),
+    inset -8px -10px 22px rgba(60, 0, 30, 0.55),
+    inset 6px 8px 16px rgba(255, 200, 215, 0.35);
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.contact-cta-hero-5lab .contact-lets-chat-btn-5lab:hover,
+.contact-cta-hero-5lab .contact-lets-chat-btn-5lab:focus-visible {
+  transform: scale(1.06);
+  box-shadow:
+    0 0 76px 14px rgba(232, 62, 117, 0.68),
+    inset -8px -10px 22px rgba(60, 0, 30, 0.55),
+    inset 6px 8px 16px rgba(255, 200, 215, 0.45);
+}
+
+.contact-cta-hero-5lab .contact-lets-chat-btn-5lab:focus-visible {
+  outline: 2px solid #ff223a;
+  outline-offset: 4px;
+}
+
+.contact-orb-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  width: 200%;
+  height: 200%;
+  transform: translate(-50%, -50%) rotate(-18deg);
+  pointer-events: none;
+  overflow: visible;
+}
+
+.contact-orb-laser-wrap {
+  position: absolute;
+  top: 50%;
+  right: 50%;
+  z-index: 1;
+  width: 38vh;
+  height: 2px;
+  transform-origin: right center;
+  transform: translateY(-50%) rotate(-62deg);
+  pointer-events: none;
+}
+
+.contact-orb-laser {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(248, 56, 88, 0), #f83858 55%, rgba(248, 56, 88, 0));
+  filter: drop-shadow(0 0 6px #f83858);
+  transform-origin: right center;
+  transform: scaleX(0);
+}
+
+@media (max-width: 767px) {
+  .contact-cta-hero-5lab .contact-headline-row-5lab {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .contact-orb-block {
+    align-self: center;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 479px) {
+  .contact-orb-block,
+  .contact-cta-hero-5lab .contact-lets-chat-btn-5lab {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-orb-float {
+    animation: none;
+  }
+
+  .contact-orb-laser {
+    transform: scaleX(1) !important;
+  }
+}
