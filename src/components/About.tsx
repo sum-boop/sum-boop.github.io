@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   Activity,
   ArrowRight,
@@ -11,37 +13,113 @@ import {
 import { contact } from '@/data/contact';
 import { careerSites } from '@/data/experience';
 import { profile } from '@/data/profile';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { ChoreoReveal, Counter, Magnetic } from '@/motion';
 import { assetPath } from '@/utils/assets';
 import { useStaggeredCardGroup } from '@/utils/scrollStory';
 import { SocialLinks } from './SocialLinks';
+import '@/styles/aboutBand.css';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function About() {
   const [imageFailed, setImageFailed] = useState(false);
+  const bandRef = useRef<HTMLElement>(null);
   const employersRef = useRef<HTMLDivElement>(null);
   const metricsRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   useStaggeredCardGroup(employersRef, '.about-employer-item');
   useStaggeredCardGroup(metricsRef, '.about-metric');
+
+  useEffect(() => {
+    if (prefersReducedMotion || !bandRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.set('.about-band-line-inner', { yPercent: 110 });
+      gsap.to('.about-band-line-inner', {
+        yPercent: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        stagger: 0.12,
+        scrollTrigger: {
+          trigger: '.about-band-lines',
+          start: 'top 85%',
+          once: true,
+        },
+      });
+
+      gsap.set('.about-band-line', { '--line': 0 });
+      gsap.to('.about-band-line', {
+        '--line': 1,
+        duration: 0.8,
+        ease: 'power3.out',
+        stagger: 0.12,
+        scrollTrigger: {
+          trigger: '.about-band-lines',
+          start: 'top 85%',
+          once: true,
+        },
+      });
+
+      gsap.set('.about-hl', { '--hl': 0 });
+      gsap.to('.about-hl', {
+        '--hl': 1,
+        duration: 0.7,
+        ease: 'power3.out',
+        stagger: 0.2,
+        scrollTrigger: {
+          trigger: '.about-statement-5lab',
+          start: 'top 80%',
+          once: true,
+        },
+      });
+    }, bandRef);
+
+    return () => {
+      ctx.revert();
+    };
+  }, [prefersReducedMotion]);
 
   return (
     <section aria-labelledby="about-title" className="content-section-5lab" id="about">
       <div className="section-inner">
         {/* Statement-style intro + tagline area matching 5lab.co */}
-        <header className="about-statement-header" id="designer-header">
+        <header className="about-band-5lab" id="designer-header" ref={bandRef}>
           <ChoreoReveal as="p" className="section-eyebrow" direction="left" distance={20}>
             <span>01</span> / About &amp; Security Profile
           </ChoreoReveal>
-          <ChoreoReveal delay={0.05} direction="up" distance={24}>
-            <h2 className="about-statement-text" id="about-title">
-              <span>Calm eyes. </span>
-              <em className="hero-italic-accent">Clear records. </em>
-              <span className="about-dimmed-text">
-                Precision monitoring, gate control, and loss prevention across India&apos;s largest logistics hubs.
+          <p className="about-band-lines">
+            <span className="about-band-line">
+              <span className="about-band-line-inner">Precision monitoring,</span>
+            </span>
+            <span className="about-band-line">
+              <span className="about-band-line-inner">
+                <em className="hero-italic-accent">gate control,</em> and
               </span>
-            </h2>
-          </ChoreoReveal>
+            </span>
+            <span className="about-band-line">
+              <span className="about-band-line-inner">loss prevention across</span>
+            </span>
+            <span className="about-band-line">
+              <span className="about-band-line-inner">India&apos;s largest logistics hubs.</span>
+            </span>
+          </p>
+          <h2 className="about-statement-5lab" id="about-title">
+            <span className="about-hl">
+              <span className="about-hl-text">Calm eyes</span>
+            </span>
+            <span aria-hidden="true" className="about-plus">
+              {' '}
+              +{' '}
+            </span>
+            <span className="about-hl">
+              <span className="about-hl-text">Clear records</span>
+            </span>
+            <span>.</span>
+          </h2>
         </header>
+        <p className="about-dossier-eyebrow">Operator dossier</p>
 
         {/* Asymmetric Operator Dossier & Summary Split */}
         <div className="about-layout">

@@ -304,3 +304,23 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
   - `npm run lint` (`eslint .`): **PASSING** (0 errors).
 - **Problems:**
   - Sandbox environment lacks git push credentials (`git push origin main` exits 128); committed cleanly to `main` locally. Please push to GitHub using the AI Studio push button if necessary.
+
+---
+
+## Gemini, 2026-11-20 (TASK 9)
+- **Files changed:** `src/components/About.tsx`, `src/styles/aboutBand.css` (new), `AI_CHAT.md`. (`src/styles/global.css`, `animMaster.ts`, `pagePalette.ts`, Lenis, data files, and all other sections untouched.)
+- **What was done:**
+  - Replaced `<header className="about-statement-header" id="designer-header">` in `src/components/About.tsx` with `<header className="about-band-5lab" id="designer-header" ref={bandRef}>`, keeping the existing `<ChoreoReveal as="p" className="section-eyebrow">` (`01 / About & Security Profile`), followed by the 4-line `.about-band-lines` stack (`Precision monitoring,`, `gate control, and`, `loss prevention across`, `India's largest logistics hubs.`), `<h2 className="about-statement-5lab" id="about-title">` (`Calm eyes` + `Clear records` inside `.about-hl` / `.about-hl-text`), and `<p className="about-dossier-eyebrow">Operator dossier</p>`. Everything from `.about-layout` onward remains verbatim.
+  - Added `gsap.registerPlugin(ScrollTrigger)` and a `useEffect` in `src/components/About.tsx` wrapped in `gsap.context(..., bandRef)` (reverted on cleanup, skipped entirely when `useReducedMotion()` is `true`):
+    - `.about-band-line-inner`: `yPercent: 110` → `0`, `0.9s`, `power3.out`, `stagger: 0.12`, `ScrollTrigger` on `.about-band-lines` (`start: 'top 85%'`, `once: true`).
+    - `.about-band-line`: `--line` `0` → `1`, `0.8s`, `power3.out`, `stagger: 0.12`, same trigger.
+    - `.about-hl`: `--hl` `0` → `1`, `0.7s`, `power3.out`, `stagger: 0.2`, `ScrollTrigger` on `.about-statement-5lab` (`start: 'top 80%'`, `once: true`).
+    - Never hides the `<h2>` with `opacity: 0`.
+  - Created `src/styles/aboutBand.css` with `@property --line` and `@property --hl` (`syntax: '<number>'; initial-value: 1; inherits: true;` — used `inherits: true` so `.about-band-line::before`/`::after` and child `.about-hl-text` inherit the animated `--line` and `--hl` values instead of falling back to `initial-value: 1`, which would have prevented hairlines from drawing and rendered `#FAFAF7` text before the box wiped in), dotted `rgba(34, 34, 106, 0.35)` hairlines, `.about-hl` `#202068` wipe background with `box-decoration-break: clone`, `.about-hl-text` `color-mix(in srgb, #FAFAF7 calc(var(--hl) * 100%), var(--ink))`, mobile `@media (max-width: 767px)` sizes, and `@media (prefers-reduced-motion: reduce)` static overrides.
+  - Left `.about-statement-header`, `.about-statement-text`, and `.about-dimmed-text` in `src/styles/global.css` untouched (`src/utils/animMaster.ts` still references `.about-statement-text`, and `animMaster.ts` / `global.css` are outside TASK 9's allowed file list).
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Problems:**
+  - `.git` is not present in this AI Studio sandbox (`fatal: not a git repository (or any of the parent directories): .git`), so `git pull`, `git commit`, and `git push origin main` could not be executed from the container. Please commit and push to `main` using the AI Studio GitHub push button.
+  - No headless browser viewport renderer was run in this sandbox; `390px` and `1280px` wrapping, `box-decoration-break: clone`, and light-section contrast (`--ink` `#22226A`, `#202068`, `#FAFAF7`) were verified in CSS/TSX.
