@@ -1,6 +1,7 @@
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { scrambleReveal } from '@/utils/scrambleReveal';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -65,7 +66,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   }
 
   // Section Heading Reveals (slide up from mask)
-  const headings = document.querySelectorAll('.section-heading h2, .workstation-title-5lab, .about-statement-text, .contact-giant-title-5lab');
+  const headings = document.querySelectorAll('.section-heading h2, .workstation-title-5lab, .about-statement-text, .contact-giant-title-5lab, .works-group-title-5lab');
   headings.forEach((heading) => {
     const st = ScrollTrigger.create({
       trigger: heading,
@@ -77,6 +78,9 @@ export function initSmoothScroll(): { destroy: () => void } | null {
           { y: 50, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' }
         );
+        if (heading instanceof HTMLElement && !heading.closest('#hero-workstation')) {
+          scrambleReveal(heading);
+        }
       },
     });
     scrollTriggers.push(st);

@@ -324,3 +324,32 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 - **Problems:**
   - `.git` is not present in this AI Studio sandbox (`fatal: not a git repository (or any of the parent directories): .git`), so `git pull`, `git commit`, and `git push origin main` could not be executed from the container. Please commit and push to `main` using the AI Studio GitHub push button.
   - No headless browser viewport renderer was run in this sandbox; `390px` and `1280px` wrapping, `box-decoration-break: clone`, and light-section contrast (`--ink` `#22226A`, `#202068`, `#FAFAF7`) were verified in CSS/TSX.
+
+---
+
+## Gemini, 2026-11-20 (TASK 10)
+- **Files changed:** `src/utils/scrambleReveal.ts` (new), `src/components/Hero.tsx`, `src/utils/animMaster.ts` (import + heading-reveal block only), `AI_CHAT.md`. (Also synced `.nvmrc` and `tasks/TASK_10.md` from `origin/main` `293cb9d`; no other files touched.)
+- **Plugin / fallback used:**
+  - Used official `ScrambleTextPlugin` from `gsap/ScrambleTextPlugin` (`gsap` `3.15.1`), registered via `gsap.registerPlugin(ScrambleTextPlugin)`. Confirmed the import and type definitions (`node_modules/gsap/types/scramble-text-plugin.d.ts`) resolve cleanly in `tsc --noEmit` and `vite build` (no hand-written fallback needed).
+- **What was done:**
+  - Created `src/utils/scrambleReveal.ts` exporting `scrambleReveal(el: HTMLElement, opts?: { duration?: number; delay?: number; chars?: string }): void`:
+    - Defaults: `duration = 0.9`, `delay = 0`, `chars = 'abcdefghijklmnopqrstuvwxyz!<>-_/[]{}=+*^?#'`.
+    - Skips if `prefers-reduced-motion: reduce`, empty text, or `data-scrambled` is already set; marks `el` with `data-scrambled`.
+    - If `el` has element children, wraps each direct non-empty text node in `<span data-scramble>` once (marking `el` with `data-scramble-ready`), then collects descendant `HTMLElement` leaf nodes with no element children and non-empty text (preserving `<em>`, `<mark>`, links, and skipping SVGs/empty nodes).
+    - Runs a single `gsap.to` tween per leaf element (`ease: 'none'`, `scrambleText: { text: originalText, chars, speed: 0.6, revealDelay: 0.15, tweenLength: false, trim: false }`) with zero per-frame allocations in our code.
+    - Accessibility: sets `aria-label` on `el` to full original text (only if none existed) and `aria-hidden="true"` on each scrambled leaf node while animating; restores original `textContent`, `aria-hidden`, and removes temporary `aria-label` in `finalize()` on both `onComplete` and `onInterrupt`.
+  - Updated `src/utils/animMaster.ts` (heading-reveal block only):
+    - Added `.works-group-title-5lab` to the `headings` selector (without adding `.about-statement-5lab`).
+    - Kept the existing `y: 50 -> 0` and `opacity: 0 -> 1` tween and invoked `scrambleReveal(heading)` inside `onEnter`.
+  - Updated `src/components/Hero.tsx`:
+    - Registered `ScrollTrigger` and added a one-shot `ScrollTrigger` on `#hero` (`start: 'top top-=40'`, `once: true`) inside the existing `gsap.context` (skipped when `prefersReducedMotion` is true, cleaned up on unmount, existing intro timeline untouched).
+    - `onEnter` calls `scrambleReveal(child, { duration: 0.7, chars: 'upperAndLowerCase' })` on each `.hero-line > *` child, preserving `"Sumit Anand"` and `"Eyes on every hub."`.
+- **Anything unsure about:**
+  - `.workstation-title-5lab` is part of the existing `headings` selector in `animMaster.ts` (TASK 10 item 3), while item 5 states *"Do not scramble anything inside `#hero-workstation`, the contact form, nav links or buttons."* To satisfy both, `.workstation-title-5lab` remains in `headings` for its `y`/`opacity` slide-up reveal, and `scrambleReveal(heading)` is guarded with `!heading.closest('#hero-workstation')` so nothing inside `#hero-workstation` is scrambled. Easily toggled by removing that guard if `#workstation-title` should also scramble.
+  - `ScrambleTextPlugin` trims leading/trailing spaces by default (`trim !== false`), which would collapse the word-boundary spaces inside `<span>Sumit </span>`, `<span>Eyes on </span>`, `<span>Let's </span>`, and `<span> about a role.</span>`; passed `trim: false` (via `NonNullable<gsap.TweenVars['scrambleText']>`) and restored `originalText` on completion/interruption.
+- **Build status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Problems:**
+  - `.git` is not present in this AI Studio container (`fatal: not a git repository (or any of the parent directories): .git`), so `git pull`, `git commit`, and `git push origin main` could not run inside the sandbox. Synced `tasks/TASK_10.md` and `.nvmrc` from `origin/main` (`293cb9d`) via HTTPS beforehand; please commit and push via the AI Studio GitHub push button.
+  - Live headless browser scroll verification at `390px` and `1280px` could not be executed in this container.

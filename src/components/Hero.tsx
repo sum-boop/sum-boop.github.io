@@ -1,8 +1,12 @@
 import { Suspense, lazy, memo, useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Terminal } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { ThemeMode } from '@/hooks/useTheme';
+import { scrambleReveal } from '@/utils/scrambleReveal';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HeroOrb = lazy(() =>
   import('@/components/three/HeroOrb').then((module) => ({
@@ -45,6 +49,24 @@ export const Hero = memo(function Hero(props: HeroProps) {
           { y: 0, opacity: 1, duration: 0.9, stagger: 0.2 },
           '-=0.6'
         );
+      }
+
+      const heroEl = heroRef.current;
+      if (heroEl) {
+        ScrollTrigger.create({
+          trigger: heroEl,
+          start: 'top top-=40',
+          once: true,
+          onEnter: () => {
+            const lineChildren = headlineEl.querySelectorAll<HTMLElement>('.hero-line > *');
+            lineChildren.forEach((child) => {
+              scrambleReveal(child, {
+                duration: 0.7,
+                chars: 'upperAndLowerCase',
+              });
+            });
+          },
+        });
       }
     }, heroRef);
 
