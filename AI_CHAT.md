@@ -405,3 +405,21 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 - **Anything not matched / sandbox limitations:**
   - No headless browser CLI is installed in this sandbox container, so visual rendering and scroll checks at `390px` and `1280px` could not be captured live here and remain to be verified in the deployed Vercel/preview build.
   - `.git` is not present in this AI Studio sandbox (`fatal: not a git repository (or any of the parent directories): .git`), so `git commit` and `git push origin main` could not run inside the container; please commit and push via the AI Studio GitHub push button.
+---
+
+## Gemini, 2026-11-20 (TASK 14)
+- **Files changed:** `src/components/Skills.tsx`, `src/styles/skillsBand.css` (new), `AI_CHAT.md` (synced `tasks/TASK_14.md` from `origin/main` `c7f6a4e`; `.nvmrc`, `global.css`, `animMaster.ts`, `pagePalette.ts`, `src/data/skills.ts`, and all other files untouched).
+- **What was done per item:**
+  1. **Layout & dotted hairlines (`Skills.tsx`, `skillsBand.css`):** Wrapped `<SectionHeading />` and `.skills-grid-5lab` inside `.skills-band-layout`. On desktop (`>= 1024px`), renders a `36fr 64fr` 2-column grid with sticky `SectionHeading` (`position: sticky; top: 120px`) on the left and a 2×2 `.skills-grid-5lab` on the right (`padding: 28px 24px` per cell, zero card boxes/backgrounds, `1px dotted var(--hairline)` top hairline and `border-left: 1px dotted var(--hairline)` on `:nth-child(2n)`). Below `1024px`, stacks into a single column with heading first and dotted top separators.
+  2. **Cell typography & structure:** Kept header mono label (`0N / CATEGORY`, `11px`, `letter-spacing: 0.14em`, `#4040B0`) + arrow button, followed by icon + `h3` (`clamp(22px, 2vw, 28px)`, weight `500`, `var(--ink)`), and skill items (`14–15px`, `var(--ink-muted)`) with `4px` `#F83858` dot bullets.
+  3. **Hover / focus-within / active / touch:** On hover-capable pointers (`@media (hover: hover) and (pointer: fine)`), non-active cells wipe to `#22226A` from the bottom via `::before` `scaleY(0 -> 1)` (`420ms cubic-bezier(0.22, 1, 0.36, 1)`), turning header, heading, icon, arrow button, and skill text `#ffffff` while keeping `#F83858` bullet dots. Disabled wipe on touch devices and cancelled sticky `global.css` `:hover` transform/arrow color bleed. Preserved `.skill-cell-5lab--active` showing a `2px solid #F83858` top border instead of the indigo wipe.
+  4. **Reveal:** Preserved existing `.skill-cell-5lab` class and `gridRef` so `animMaster.ts` fade-and-rise reveal continues unchanged with zero new ScrollTriggers.
+  5. **Ticker:** Kept `VelocityMarquee` and `skillTicker` unchanged; styled `#skills .skill-ticker-wrap-5lab` with `1px dotted var(--hairline)` top/bottom borders, `12px` mono uppercase `var(--ink-muted)` chips, `#F83858` `+` separators, and zero fills.
+  6. **Accessibility & reduced motion:** Preserved `aria-label` and `aria-pressed` on `.skill-cell-action-btn`, added `2px solid #F83858` `:focus-visible` outline (`outline-offset: 2px`), high-contrast white text (`#ffffff` on `#22226A`), and `transition: none` under `prefers-reduced-motion: reduce` for instant state changes without wipe animation.
+  7. **Content fidelity:** No skills, categories, or VMS mappings altered; all content remains driven by `@/data/skills`.
+- **Build & verification status:**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+- **Anything not matched / sandbox limitations:**
+  - No headless browser CLI is installed in this sandbox container, so visual rendering and interactive checks at `390px` and `1280px` could not be captured live here and remain to be verified in the deployed preview.
+  - `.git` is not present in this AI Studio sandbox (`fatal: not a git repository (or any of the parent directories): .git`), so `git commit` and `git push origin main` could not run inside the container; please commit and push via the AI Studio GitHub push button.

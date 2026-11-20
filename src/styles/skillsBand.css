@@ -1,0 +1,257 @@
+/* Editorial 5Lab-style Skills Band: sticky heading + 2x2 dotted-hairline grid + indigo hover wipe */
+
+#skills .skills-band-layout {
+  display: block;
+}
+
+#skills .skills-grid-5lab {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 2.5rem;
+}
+
+#skills .skill-cell-5lab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 28px 24px;
+  border: 0;
+  border-top: 1px dotted var(--hairline);
+  background-color: transparent;
+  color: var(--ink);
+  overflow: hidden;
+  transform: none;
+  transition: none;
+}
+
+#skills .skill-cell-5lab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: #22226a;
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+#skills .skill-cell-header-5lab,
+#skills .skill-cell-body-5lab {
+  position: relative;
+  z-index: 1;
+}
+
+#skills .skill-cell-header-5lab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+#skills .skill-cell-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #4040b0;
+  transition: color 280ms ease;
+}
+
+#skills .skill-cell-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 280ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#skills .skill-cell-action-btn:focus-visible {
+  outline: 2px solid #f83858;
+  outline-offset: 2px;
+}
+
+#skills .skill-cell-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+#skills .skill-cell-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  flex-shrink: 0;
+  transition: color 280ms ease;
+}
+
+#skills .skill-cell-title-row h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  transition: color 280ms ease;
+}
+
+#skills .skill-cell-list-5lab {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+#skills .skill-cell-list-5lab li {
+  position: relative;
+  padding-left: 14px;
+  font-size: clamp(14px, 1.05vw, 15px);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  transition: color 280ms ease;
+}
+
+#skills .skill-cell-list-5lab li::before {
+  content: '';
+  position: absolute;
+  top: 0.62em;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #f83858;
+}
+
+/* VMS-synced active cell shows a 2px #F83858 top border instead of the wipe */
+#skills .skill-cell-5lab--active {
+  border-top: 2px solid #f83858;
+  transform: none;
+}
+
+#skills .skill-cell-5lab--active .skill-cell-action-btn {
+  color: #f83858;
+}
+
+#skills .skill-cell-5lab:hover,
+#skills .skill-cell-5lab:focus-within {
+  transform: none;
+}
+
+#skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover .skill-cell-action-btn {
+  color: var(--ink-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover::before,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):focus-within::before {
+    transform: scaleY(1);
+  }
+
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover .skill-cell-mono,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):focus-within .skill-cell-mono,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover .skill-cell-title-row h3,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):focus-within .skill-cell-title-row h3,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover .skill-cell-icon-wrap,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):focus-within .skill-cell-icon-wrap,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover .skill-cell-action-btn,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):focus-within .skill-cell-action-btn,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover .skill-cell-list-5lab li,
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):focus-within .skill-cell-list-5lab li {
+    color: #ffffff;
+  }
+
+  #skills .skill-cell-5lab:not(.skill-cell-5lab--active):hover .skill-cell-action-btn {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* Dotted ticker strip with + marks */
+#skills .skill-ticker-wrap-5lab {
+  margin-top: clamp(3.25rem, 5.5vw, 5rem);
+  padding-block: 1.15rem;
+  border-top: 1px dotted var(--hairline);
+  border-bottom: 1px dotted var(--hairline);
+  background: transparent;
+  overflow: hidden;
+}
+
+#skills .skill-ticker-wrap-5lab .velocity-marquee-chip {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+#skills .skill-ticker-wrap-5lab .velocity-marquee-chip i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  color: #f83858;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+}
+
+#skills .skill-ticker-wrap-5lab .velocity-marquee-chip i::before {
+  content: '+';
+}
+
+/* Desktop (>=1024px): 36% sticky heading / 64% 2x2 dotted grid */
+@media (min-width: 1024px) {
+  #skills .skills-band-layout {
+    display: grid;
+    grid-template-columns: 36fr 64fr;
+    column-gap: clamp(2.5rem, 4.5vw, 5rem);
+    align-items: start;
+  }
+
+  #skills .skills-band-layout > .section-heading {
+    position: sticky;
+    top: 120px;
+    margin-bottom: 0;
+  }
+
+  #skills .skills-grid-5lab {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 0;
+  }
+
+  #skills .skill-cell-5lab:nth-child(2n) {
+    border-left: 1px dotted var(--hairline);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #skills .skill-cell-5lab::before,
+  #skills .skill-cell-mono,
+  #skills .skill-cell-title-row h3,
+  #skills .skill-cell-icon-wrap,
+  #skills .skill-cell-action-btn,
+  #skills .skill-cell-list-5lab li {
+    transition: none;
+  }
+}

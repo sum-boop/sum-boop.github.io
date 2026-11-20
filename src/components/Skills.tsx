@@ -3,6 +3,7 @@ import { ArrowUpRight, Cpu, Network, ScanEye, ShieldCheck } from 'lucide-react';
 import { type VmsViewMode, useVms } from '@/context/VmsContext';
 import { skillCategories, skillTicker } from '@/data/skills';
 import { VelocityMarquee } from '@/motion';
+import '@/styles/skillsBand.css';
 import { SectionHeading } from './SectionHeading';
 
 const icons = [ScanEye, Network, Cpu, ShieldCheck] as const;
@@ -15,18 +16,19 @@ export const Skills = memo(function Skills() {
   return (
     <section aria-labelledby="skills-title" className="content-section-5lab skills-section-5lab" id="skills">
       <div className="section-inner">
-        <SectionHeading
-          description="A working toolkit across Milestone XProtect Smart Client consoles, connectivity, gate operations, and safety response."
-          eyebrow="Capabilities / Signal Map"
-          highlightWord="in sync."
-          id="skills-title"
-          number="02"
-          title="Systems in sync."
-          tone="amber"
-        />
+        <div className="skills-band-layout">
+          <SectionHeading
+            description="A working toolkit across Milestone XProtect Smart Client consoles, connectivity, gate operations, and safety response."
+            eyebrow="Capabilities / Signal Map"
+            highlightWord="in sync."
+            id="skills-title"
+            number="02"
+            title="Systems in sync."
+            tone="amber"
+          />
 
-        {/* 5Lab Notable Clients style clean grid (4 columns desktop, 2 on mobile) */}
-        <div className="skills-grid-5lab" ref={gridRef}>
+          {/* 5Lab Notable Clients / Services style hairline grid */}
+          <div className="skills-grid-5lab" ref={gridRef}>
           {skillCategories.map((category, index) => {
             const Icon = icons[index] ?? ScanEye;
             const mappedMode = CATEGORY_VMS_MODES[index] ?? 'live';
@@ -66,6 +68,7 @@ export const Skills = memo(function Skills() {
               </article>
             );
           })}
+          </div>
         </div>
       </div>
 
