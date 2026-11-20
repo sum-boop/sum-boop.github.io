@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, m } from 'framer-motion';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { CircularBadge } from '@/components/CircularBadge';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Footer } from '@/components/Footer';
 import { Modal } from '@/components/Modal';
@@ -216,6 +217,7 @@ function AppContent() {
       </AnimatePresence>
 
       <Footer />
+      <CircularBadge />
       <BackToTop />
       {paletteOpen ? (
         <Suspense fallback={null}>

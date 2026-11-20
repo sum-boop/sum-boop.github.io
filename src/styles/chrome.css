@@ -1,0 +1,116 @@
+/* Chrome overrides: aperture brand mark, glass mobile menu button, and rotating circular badge */
+
+header.site-header .brand-symbol,
+header.site-header[data-nav-tone] .brand-symbol,
+.mobile-nav-overlay .brand-mark--modal .brand-symbol {
+  color: #ff223a;
+}
+
+.site-header .menu-toggle {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff;
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease,
+    transform 300ms ease;
+}
+
+.site-header .menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.36);
+  color: #ffffff;
+}
+
+.site-header .menu-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.36);
+  color: #ffffff;
+  outline: 2px solid #ff223a;
+  outline-offset: 3px;
+}
+
+header.site-header[data-nav-tone='light'] .menu-toggle {
+  background: rgba(34, 34, 106, 0.08);
+  border-color: rgba(34, 34, 106, 0.18);
+  color: #22226a;
+}
+
+header.site-header[data-nav-tone='light'] .menu-toggle:hover {
+  background: rgba(34, 34, 106, 0.16);
+  border-color: rgba(34, 34, 106, 0.32);
+  color: #22226a;
+}
+
+header.site-header[data-nav-tone='light'] .menu-toggle:focus-visible {
+  background: rgba(34, 34, 106, 0.16);
+  border-color: rgba(34, 34, 106, 0.32);
+  color: #22226a;
+  outline: 2px solid #ff223a;
+  outline-offset: 3px;
+}
+
+/* Rotating circular badge (bottom-left; back-to-top remains bottom-right) */
+.circular-badge {
+  position: fixed;
+  left: clamp(12px, 2vw, 28px);
+  bottom: clamp(12px, 2vw, 28px);
+  z-index: 900;
+  width: 76px;
+  height: 76px;
+  pointer-events: none;
+  user-select: none;
+  color: #ffffff;
+  mix-blend-mode: difference;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+.circular-badge-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: center center;
+  animation: circular-badge-spin 22s linear infinite;
+}
+
+.circular-badge-text {
+  fill: currentColor;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@keyframes circular-badge-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body.menu-open .circular-badge {
+  opacity: 0;
+}
+
+@media (max-width: 767px) {
+  .circular-badge {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circular-badge-svg {
+    animation: none;
+  }
+}

@@ -1,10 +1,11 @@
 import { AnimatePresence, m, useMotionValueEvent, useScroll } from 'framer-motion';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Command, Moon, Sun, X } from 'lucide-react';
+import { Aperture, Command, Moon, Sun, X } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useScrollSpy } from '@/hooks/useScrollSpy';
 import type { ThemeMode } from '@/hooks/useTheme';
 import { ScrollProgress, motionDurations, motionEasings } from '@/motion';
+import '@/styles/chrome.css';
 import { Clock } from './Clock';
 
 interface NavbarProps {
@@ -15,20 +16,21 @@ interface NavbarProps {
 
 const links = [
   { href: '#operations', label: 'Works' },
-  { href: '#about', label: 'Services' },
-  { href: '#footprint', label: 'About' },
+  { href: '#skills', label: 'Services' },
+  { href: '#about', label: 'About' },
   { href: '#contact', label: 'Contact' },
 ] as const;
 
 const primaryMobileLinks = [
   { href: '#hero', label: 'Home' },
   { href: '#operations', label: 'Works' },
-  { href: '#about', label: 'Services' },
-  { href: '#footprint', label: 'About' },
+  { href: '#skills', label: 'Services' },
+  { href: '#about', label: 'About' },
   { href: '#contact', label: 'Contact' },
 ] as const;
 
 const secondaryMobileLinks = [
+  { href: '#footprint', label: 'Footprint' },
   { href: '#experience', label: 'Logbook' },
   { href: '#certifications', label: 'Credentials' },
   { href: '#hero-workstation', label: 'Workstation' },
@@ -44,20 +46,6 @@ const sectionIds = [
   'certifications',
   'contact',
 ] as const;
-
-function SparkLogo({ size = 20 }: { size?: number }) {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height={size}
-      viewBox="0 0 24 28"
-      width={Math.round((size * 24) / 28)}
-    >
-      <path d="M13.5 1.5L3 15h8.2L9.4 26.5L21 12.2h-8.3l.8-10.7Z" fill="currentColor" />
-    </svg>
-  );
-}
 
 function ConcentricDotArcs() {
   const radii = [90, 120, 150, 180, 210, 240, 270, 300, 330];
@@ -202,7 +190,7 @@ export const Navbar = memo(function Navbar({
         <nav aria-label="Primary navigation" className="nav-shell">
           <a aria-label="Sumit Anand — Home" className="brand-mark" href="#hero">
             <span aria-hidden="true" className="brand-symbol">
-              <SparkLogo size={20} />
+              <Aperture aria-hidden="true" size={20} strokeWidth={1.8} />
             </span>
             <span className="brand-text">
               Sumit<span className="brand-surname"> Anand</span>
@@ -284,7 +272,7 @@ export const Navbar = memo(function Navbar({
                   onClick={() => setMenuOpen(false)}
                 >
                   <span aria-hidden="true" className="brand-symbol">
-                    <SparkLogo size={20} />
+                    <Aperture aria-hidden="true" size={20} strokeWidth={1.8} />
                   </span>
                   <span className="brand-text">Sumit Anand</span>
                 </a>
