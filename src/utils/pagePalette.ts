@@ -1,5 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import '@/styles/servicesDark.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -8,7 +9,7 @@ const SECTION_TONES: readonly { id: string; tone: 'hero' | 'light' | 'dark'; pal
   { id: 'scene', tone: 'light', paletteTone: 'light' },
   { id: 'about', tone: 'light', paletteTone: 'light' },
   { id: 'hero-workstation', tone: 'dark', paletteTone: 'dark' },
-  { id: 'skills', tone: 'light', paletteTone: 'light' },
+  { id: 'skills', tone: 'dark', paletteTone: 'dark' },
   { id: 'footprint', tone: 'light', paletteTone: 'light' },
   { id: 'operations', tone: 'light', paletteTone: 'light' },
   { id: 'experience', tone: 'light', paletteTone: 'light' },
@@ -26,6 +27,7 @@ const SECTION_FINAL_PALETTES: readonly { id: string; palette: PalettePair }[] = 
   { id: 'scene', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'about', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'hero-workstation', palette: { top: '#000000', bottom: '#000000' } },
+  { id: 'skills', palette: { top: '#000000', bottom: '#000000' } },
   { id: 'footprint', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'operations', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
   { id: 'experience', palette: { top: '#FAFAF7', bottom: '#FAFAF7' } },
