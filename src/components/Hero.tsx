@@ -5,6 +5,7 @@ import { ArrowUpRight, Terminal } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { ThemeMode } from '@/hooks/useTheme';
 import { scrambleReveal } from '@/utils/scrambleReveal';
+import '@/styles/exact5lab.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -53,6 +54,24 @@ export const Hero = memo(function Hero(props: HeroProps) {
 
       const heroEl = heroRef.current;
       if (heroEl) {
+        // 5lab: the headline slides sideways (left) as the page scrolls, line by line,
+        // while the orb stays in front of it and shrinks away.
+        gsap.fromTo(
+          headlineEl.querySelectorAll('.hero-line'),
+          { xPercent: 0, opacity: 1 },
+          {
+            xPercent: (index: number) => -115 - index * 45,
+            opacity: 0,
+            immediateRender: false,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: heroEl,
+              start: 'top top',
+              end: 'bottom top+=10%',
+              scrub: 0.6,
+            },
+          },
+        );
         ScrollTrigger.create({
           trigger: heroEl,
           start: 'top top-=40',
