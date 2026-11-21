@@ -1,0 +1,46 @@
+/* Services band, dark phase (5lab /services): the section turns black and the four
+   skill categories become dark glass cards. Colors flow from data-tone="dark" tokens. */
+
+html #skills[data-tone='dark'] {
+  background: #000;
+  color: var(--ink);
+}
+
+html #skills .section-heading h2 {
+  font-size: clamp(2.6rem, 6vw, 5.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+html #skills .skills-grid-5lab {
+  gap: 14px;
+}
+
+html #skills .skill-cell-5lab {
+  border: 1px dotted rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+html #skills .skill-cell-5lab:nth-child(2n) {
+  border-left: 1px dotted rgba(255, 255, 255, 0.18);
+}
+
+html #skills .skill-cell-5lab--active {
+  border-top: 2px solid #f83858;
+}
+
+html #skills .skill-cell-mono {
+  color: #9a9aff;
+}
+
+html #skills .skill-cell-5lab::before {
+  background-color: #22226a;
+  border-radius: inherit;
+}
+
+html #skills .skill-ticker-wrap-5lab {
+  border-color: rgba(255, 255, 255, 0.16);
+}
