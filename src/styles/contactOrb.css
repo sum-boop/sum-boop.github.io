@@ -2,7 +2,7 @@
 
 .contact-cta-hero-5lab {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   padding-top: 28px;
   padding-bottom: 1.5rem;
   margin-top: -28px;
@@ -54,9 +54,9 @@
   border-radius: 50%;
   background: radial-gradient(
     circle at 32% 28%,
-    #ff7a9c 0%,
-    #e83e75 32%,
-    #b72a5d 62%,
+    #ff86a6 0%,
+    #e83e75 34%,
+    #b72a5d 64%,
     #6e1038 100%
   );
   color: #ffffff;
@@ -67,9 +67,9 @@
   text-align: center;
   cursor: pointer;
   box-shadow:
-    0 0 60px 8px rgba(232, 62, 117, 0.45),
+    0 0 68px 12px rgba(248, 56, 88, 0.5),
     inset -8px -10px 22px rgba(60, 0, 30, 0.55),
-    inset 6px 8px 16px rgba(255, 200, 215, 0.35);
+    inset 6px 8px 16px rgba(255, 200, 215, 0.42);
   transition:
     transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -79,9 +79,9 @@
 .contact-cta-hero-5lab .contact-lets-chat-btn-5lab:focus-visible {
   transform: scale(1.06);
   box-shadow:
-    0 0 76px 14px rgba(232, 62, 117, 0.68),
+    0 0 84px 16px rgba(248, 56, 88, 0.72),
     inset -8px -10px 22px rgba(60, 0, 30, 0.55),
-    inset 6px 8px 16px rgba(255, 200, 215, 0.45);
+    inset 6px 8px 16px rgba(255, 200, 215, 0.48);
 }
 
 .contact-cta-hero-5lab .contact-lets-chat-btn-5lab:focus-visible {
@@ -94,8 +94,8 @@
   top: 50%;
   left: 50%;
   z-index: 3;
-  width: 200%;
-  height: 200%;
+  width: 205%;
+  height: 205%;
   transform: translate(-50%, -50%) rotate(-18deg);
   pointer-events: none;
   overflow: visible;
@@ -104,12 +104,12 @@
 .contact-orb-laser-wrap {
   position: absolute;
   top: 50%;
-  right: 50%;
+  left: 50%;
   z-index: 1;
-  width: 38vh;
+  width: 78vh;
   height: 2px;
-  transform-origin: right center;
-  transform: translateY(-50%) rotate(-62deg);
+  transform-origin: center center;
+  transform: translate(-50%, -50%) rotate(-62deg);
   pointer-events: none;
 }
 
@@ -117,9 +117,16 @@
   display: block;
   width: 100%;
   height: 1.5px;
-  background: linear-gradient(90deg, rgba(248, 56, 88, 0), #f83858 55%, rgba(248, 56, 88, 0));
-  filter: drop-shadow(0 0 6px #f83858);
-  transform-origin: right center;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 34, 58, 0) 0%,
+    #ff223a 30%,
+    #ff7a9c 50%,
+    #ff223a 70%,
+    rgba(255, 34, 58, 0) 100%
+  );
+  filter: drop-shadow(0 0 8px rgba(255, 34, 58, 0.85));
+  transform-origin: center center;
   transform: scaleX(0);
 }
 
@@ -134,6 +141,10 @@
   .contact-orb-block {
     align-self: center;
     margin-right: 0;
+  }
+
+  .contact-orb-laser-wrap {
+    width: 48vh;
   }
 }
 

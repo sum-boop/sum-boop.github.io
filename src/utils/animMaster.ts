@@ -10,7 +10,6 @@ let tickerCallback: ((time: number) => void) | null = null;
 let anchorClickHandler: ((event: MouseEvent) => void) | null = null;
 let scrollTriggers: ScrollTrigger[] = [];
 let scrambledHeadings: HTMLElement[] = [];
-let lastScrollY = 0;
 
 export function initSmoothScroll(): { destroy: () => void } | null {
   if (typeof window === 'undefined') return null;
@@ -43,30 +42,13 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   gsap.ticker.add(tickerCallback);
   gsap.ticker.lagSmoothing(0);
 
-  // Navbar Hide on Scroll Down / Show on Scroll Up
+  // Navbar remains visible at all scroll positions to match 5lab.co navigation chrome
   const header = document.getElementById('site-navigation');
   if (header) {
-    const st = ScrollTrigger.create({
-      start: 'top top',
-      end: 'max',
-      onUpdate: (self) => {
-        const currentY = self.scroll();
-        if (currentY > 120) {
-          if (currentY > lastScrollY + 6) {
-            header.classList.add('site-header--hidden');
-          } else if (currentY < lastScrollY - 6) {
-            header.classList.remove('site-header--hidden');
-          }
-        } else {
-          header.classList.remove('site-header--hidden');
-        }
-        lastScrollY = currentY;
-      },
-    });
-    scrollTriggers.push(st);
+    header.classList.remove('site-header--hidden');
   }
 
-  // Section Heading Reveals (slide up from mask) and heading-only scramble
+  // Section Heading Reveals (slide up from mask) and crisp letter-only heading scramble
   const headings = document.querySelectorAll(
     '.section-heading h2, .workstation-title-5lab, .contact-giant-title-5lab, .works-group-title-5lab',
   );
@@ -97,7 +79,8 @@ export function initSmoothScroll(): { destroy: () => void } | null {
         trigger: heading,
         start: 'top 85%',
         end: 'bottom top',
-        onEnter: () => scrambleReveal(heading, { duration: 0.85 }),
+        onEnter: () =>
+          scrambleReveal(heading, { duration: 0.55, chars: 'upperAndLowerCase' }),
         onLeave: () => restoreScramble(heading),
         onLeaveBack: () => restoreScramble(heading),
       });

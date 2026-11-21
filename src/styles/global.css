@@ -290,24 +290,23 @@ section[id] {
 .site-header[data-nav-tone='hero'],
 .site-header[data-nav-tone='contact'] {
   color: #ffffff;
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
 }
 
 .site-header[data-nav-tone='light'],
 .site-header.site-header--scrolled[data-nav-tone='light'] {
-  color: #22226A;
-  background: rgba(250, 250, 247, 0.72);
-  backdrop-filter: blur(8px);
-  border-bottom-color: rgba(34, 34, 106, 0.14);
+  color: #22226a;
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
 }
 
 .site-header.site-header--scrolled[data-nav-tone='contact'] {
-  background: linear-gradient(
-    180deg,
-    rgba(18, 18, 18, 0.88) 52%,
-    rgba(18, 18, 18, 0.56) 82%,
-    transparent 100%
-  );
-  backdrop-filter: blur(8px);
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
 }
 
 .nav-shell {
@@ -317,15 +316,15 @@ section[id] {
   gap: 1rem;
   width: min(100%, var(--content-width));
   margin: 0 auto;
-  padding: 1.5rem var(--gutter);
-  min-height: 88px;
+  padding: 1.05rem var(--gutter);
+  min-height: 70px;
 }
 
 .brand-mark {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 1.05rem;
+  gap: 0.5rem;
+  font-size: 0.96rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -336,18 +335,23 @@ section[id] {
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  transition: color 200ms ease;
+  transition: color 220ms ease;
+}
+
+.site-header[data-nav-tone='hero'] .brand-symbol {
+  color: #ffffff;
 }
 
 .site-header[data-nav-tone='light'] .brand-symbol,
+.site-header[data-nav-tone='dark'] .brand-symbol,
 .site-header[data-nav-tone='contact'] .brand-symbol {
-  color: #ff223a;
+  color: #f83858;
 }
 
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: clamp(1.45rem, 3vw, 2.75rem);
+  gap: clamp(1.25rem, 2.2vw, 2rem);
 }
 
 .nav-link {
@@ -355,10 +359,18 @@ section[id] {
   align-items: center;
   padding: 0.25rem 0;
   color: inherit;
-  font-size: 1rem;
-  font-weight: 400;
+  font-size: 0.875rem;
+  font-weight: 500;
   letter-spacing: 0;
   white-space: nowrap;
+  opacity: 0.76;
+  transition: opacity 180ms ease, color 180ms ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible,
+.nav-link--active {
+  opacity: 1;
 }
 
 /* 5Lab Circular Frosted Mobile Toggle (< 768px only) */
@@ -3327,7 +3339,7 @@ button.feed-card.feed-card--vms-active {
   border: 1px solid transparent;
   border-radius: 0;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.72);
   font: 600 0.64rem/1.1 var(--font-mono);
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -3336,8 +3348,8 @@ button.feed-card.feed-card--vms-active {
 
 .stage3d-client-tab--active {
   color: #ffffff;
-  border-color: var(--color-indigo);
-  background-color: var(--color-indigo);
+  border-color: #ff223a;
+  background-color: #ff223a;
 }
 
 .stage3d-global-toolbar {
@@ -5137,12 +5149,12 @@ button.feed-card.feed-card--vms-active {
   display: flex;
   flex-direction: column;
   margin-top: 3.5rem;
-  border-top: 1px solid var(--hairline);
+  border-top: 1px dotted var(--hairline);
 }
 
 .experience-editorial-row-5lab {
   padding-block: 2.25rem;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: 1px dotted var(--hairline);
   transition: transform 220ms ease, border-color 220ms ease;
 }
 
@@ -5220,7 +5232,7 @@ button.feed-card.feed-card--vms-active {
   align-items: center;
   gap: 0.45rem;
   padding: 0.45rem 0.85rem;
-  border: 1px solid var(--hairline);
+  border: 1px dotted var(--hairline);
   background: transparent;
   color: var(--ink);
   font: 500 0.82rem var(--font-mono);
@@ -5284,7 +5296,7 @@ button.feed-card.feed-card--vms-active {
 
 .experience-tags-5lab li {
   padding: 0.3rem 0.65rem;
-  border: 1px solid var(--hairline);
+  border: 1px dotted var(--hairline);
   font: 500 0.76rem var(--font-mono);
   color: var(--ink-muted);
 }
@@ -5293,7 +5305,7 @@ button.feed-card.feed-card--vms-active {
    5LAB FOOTPRINT MAP & CREDENTIALS
    ========================= */
 .footprint-gmap-card-5lab {
-  border: 1px solid var(--hairline);
+  border: 1px dotted var(--hairline);
   background-color: transparent;
 }
 
@@ -5304,7 +5316,7 @@ button.feed-card.feed-card--vms-active {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1.4rem;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: 1px dotted var(--hairline);
   font: 600 0.76rem var(--font-mono);
   letter-spacing: 0.08em;
   color: var(--ink);
@@ -5332,7 +5344,7 @@ button.feed-card.feed-card--vms-active {
   align-items: flex-start;
   gap: 0.45rem;
   padding: 1.5rem;
-  border: 1px solid var(--hairline);
+  border: 1px dotted var(--hairline);
   background-color: transparent;
   color: var(--ink);
   text-align: left;
@@ -5342,7 +5354,7 @@ button.feed-card.feed-card--vms-active {
 
 .site-row-5lab:hover,
 .site-row-5lab--active {
-  border-color: #ff223a;
+  border-top: 2px solid #f83858;
   transform: translateY(-3px);
 }
 
@@ -5385,19 +5397,19 @@ button.feed-card.feed-card--vms-active {
 
 .credential-card-5lab {
   padding: 1.75rem;
-  border: 1px solid var(--hairline);
+  border: 1px dotted var(--hairline);
   background-color: transparent;
   color: var(--ink);
   transition: border-color 200ms ease, transform 200ms ease;
 }
 
 .credential-card-5lab:hover {
-  border-color: #ff223a;
+  border-color: #f83858;
   transform: translateY(-3px);
 }
 
 .credential-card-5lab--featured {
-  border-left: 3px solid #ff223a;
+  border-top: 2px solid #f83858;
 }
 
 .credential-card-header-5lab {

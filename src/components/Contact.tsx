@@ -87,7 +87,8 @@ export function Contact() {
             <h2 className="contact-giant-title-5lab" id="contact-title">
               <span>Let&apos;s </span>
               <em className="hero-italic-accent">talk</em>
-              <span> about a role.</span>
+              <br />
+              <span>about a role.</span>
             </h2>
 
             <div className="contact-orb-block">
@@ -112,16 +113,31 @@ export function Contact() {
                   viewBox="0 0 240 240"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  <defs>
+                    <filter id="contact-orb-dot-glow" height="300%" width="300%" x="-100%" y="-100%">
+                      <feGaussianBlur result="blur" stdDeviation="2.5" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
                   <path
                     d={ORBIT_RING_PATH}
-                    stroke="rgba(248, 56, 88, 0.55)"
-                    strokeWidth="1"
+                    stroke="rgba(255, 76, 114, 0.78)"
+                    strokeWidth="1.25"
                     vectorEffect="non-scaling-stroke"
                   />
                   {prefersReducedMotion ? (
-                    <circle cx="234" cy="120" fill="#F83858" r="2" />
+                    <circle
+                      cx="234"
+                      cy="120"
+                      fill="#ff6b8b"
+                      filter="url(#contact-orb-dot-glow)"
+                      r="3.4"
+                    />
                   ) : (
-                    <circle cx="0" cy="0" fill="#F83858" r="2">
+                    <circle cx="0" cy="0" fill="#ff6b8b" filter="url(#contact-orb-dot-glow)" r="3.4">
                       <animateMotion dur="9s" path={ORBIT_RING_PATH} repeatCount="indefinite" />
                     </circle>
                   )}

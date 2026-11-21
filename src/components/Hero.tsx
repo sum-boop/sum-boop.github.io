@@ -1,19 +1,13 @@
-import { Suspense, lazy, memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowUpRight, Terminal } from 'lucide-react';
+import { HeroOrb } from '@/components/three/HeroOrb';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { ThemeMode } from '@/hooks/useTheme';
-import { scrambleReveal } from '@/utils/scrambleReveal';
 import '@/styles/exact5lab.css';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const HeroOrb = lazy(() =>
-  import('@/components/three/HeroOrb').then((module) => ({
-    default: module.HeroOrb,
-  })),
-);
 
 interface HeroProps {
   theme: ThemeMode;
@@ -24,23 +18,52 @@ interface HeroProps {
 export const Hero = memo(function Hero(props: HeroProps) {
   void props;
   const heroRef = useRef<HTMLElement>(null);
+  const orbLayerRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
+    const heroEl = heroRef.current;
+    const orbLayerEl = orbLayerRef.current;
+    if (!heroEl || !orbLayerEl) return;
+
+    const sceneEl = document.getElementById('scene');
+    const handoffTrigger = ScrollTrigger.create({
+      trigger: sceneEl ?? heroEl,
+      start: sceneEl ? 'top top' : 'bottom top',
+      onEnter: () => gsap.set(orbLayerEl, { autoAlpha: 0 }),
+      onLeaveBack: () => gsap.set(orbLayerEl, { autoAlpha: 1 }),
+    });
+
+    const syncInitial = () => {
+      const targetRect = (sceneEl ?? heroEl).getBoundingClientRect();
+      const hidden = sceneEl ? targetRect.top <= 0 : targetRect.bottom <= 0;
+      gsap.set(orbLayerEl, { autoAlpha: hidden ? 0 : 1 });
+    };
+    syncInitial();
+
+    return () => {
+      handoffTrigger.kill();
+    };
+  }, []);
+
+  useEffect(() => {
     if (prefersReducedMotion) return;
     const headlineEl = headlineRef.current;
     const panelsEl = panelsRef.current;
-    if (!headlineEl) return;
+    const orbLayerEl = orbLayerRef.current;
+    const heroEl = heroRef.current;
+    if (!headlineEl || !heroEl) return;
 
+    let mm: gsap.MatchMedia | null = null;
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
       tl.fromTo(
         headlineEl.querySelectorAll('.hero-line'),
         { y: 56, opacity: 0, rotateX: -15 },
-        { y: 0, opacity: 1, rotateX: 0, duration: 1.1, stagger: 0.15 }
+        { y: 0, opacity: 1, rotateX: 0, duration: 1.05, stagger: 0.14 },
       );
 
       if (panelsEl) {
@@ -48,56 +71,105 @@ export const Hero = memo(function Hero(props: HeroProps) {
           panelsEl.children,
           { y: 40, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.9, stagger: 0.2 },
-          '-=0.6'
+          '-=0.6',
         );
       }
 
-      const heroEl = heroRef.current;
-      if (heroEl) {
-        // 5lab: the headline slides sideways (left) as the page scrolls, line by line,
-        // while the orb stays in front of it and shrinks away.
+      const sceneEl = document.getElementById('scene');
+
+      gsap.fromTo(
+        headlineEl.querySelectorAll('.hero-line'),
+        { xPercent: 0, opacity: 1 },
+        {
+          xPercent: (index: number) => -115 - index * 45,
+          opacity: 0,
+          immediateRender: false,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroEl,
+            start: 'top top',
+            end: sceneEl ? 'top top' : 'bottom top',
+            endTrigger: sceneEl ?? heroEl,
+            scrub: 0.55,
+          },
+        },
+      );
+
+      const eyebrowEl = heroEl.querySelector('.hero-eyebrow-wrapper-5lab');
+      if (eyebrowEl) {
         gsap.fromTo(
-          headlineEl.querySelectorAll('.hero-line'),
-          { xPercent: 0, opacity: 1 },
+          eyebrowEl,
+          { opacity: 1, y: 0 },
           {
-            xPercent: (index: number) => -115 - index * 45,
             opacity: 0,
+            y: -24,
             immediateRender: false,
             ease: 'none',
             scrollTrigger: {
               trigger: heroEl,
               start: 'top top',
-              end: 'bottom top+=10%',
-              scrub: 0.6,
+              end: 'top+=45% top',
+              scrub: true,
             },
           },
         );
-        ScrollTrigger.create({
-          trigger: heroEl,
-          start: 'top top-=40',
-          once: true,
-          onEnter: () => {
-            const lineChildren = headlineEl.querySelectorAll<HTMLElement>('.hero-line > *');
-            lineChildren.forEach((child) => {
-              scrambleReveal(child, {
-                duration: 0.7,
-                chars: 'upperAndLowerCase',
-              });
-            });
-          },
+      }
+
+      if (orbLayerEl) {
+        const rings = orbLayerEl.querySelectorAll('.hero-orb-ring');
+        if (rings.length) {
+          gsap.fromTo(
+            rings,
+            { opacity: 1, scale: 1 },
+            {
+              opacity: 0,
+              scale: 0.8,
+              immediateRender: false,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: heroEl,
+                start: 'top top',
+                end: 'top+=55% top',
+                scrub: true,
+              },
+            },
+          );
+        }
+
+        mm = gsap.matchMedia();
+        mm.add('(max-width: 767px)', () => {
+          gsap.fromTo(
+            orbLayerEl,
+            { y: '0vh' },
+            {
+              y: '10vh',
+              immediateRender: false,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: heroEl,
+                start: 'top top',
+                endTrigger: sceneEl ?? heroEl,
+                end: sceneEl ? 'top top' : 'bottom top',
+                scrub: true,
+              },
+            },
+          );
         });
       }
     }, heroRef);
 
-    return () => ctx.revert();
+    return () => {
+      mm?.revert();
+      ctx.revert();
+    };
   }, [prefersReducedMotion]);
 
   return (
     <section aria-labelledby="hero-title" className="hero-section-5lab" id="hero" ref={heroRef}>
-      <div className="hero-orb-layer" aria-hidden="true">
-        <Suspense fallback={null}>
-          <HeroOrb />
-        </Suspense>
+      <div className="hero-orb-layer" aria-hidden="true" ref={orbLayerRef}>
+        <span className="hero-orb-ring hero-orb-ring--outer" />
+        <span className="hero-orb-ring hero-orb-ring--inner" />
+        <HeroOrb />
       </div>
       <div className="hero-noise-grain" aria-hidden="true" />
       <div className="hero-content-shell-5lab">

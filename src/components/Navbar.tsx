@@ -38,7 +38,9 @@ const secondaryMobileLinks = [
 
 const sectionIds = [
   'hero',
+  'scene',
   'about',
+  'hero-workstation',
   'skills',
   'footprint',
   'operations',

@@ -384,6 +384,7 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 - **Anything left unfixed / could not match:**
   - No headless browser CLI is installed in this sandbox container, so visual inspection at `390px` and `1280px` (checking the glass toggle over pink/off-white/black, `mix-blend-mode: difference` legibility, and circular text fit/spacing) was verified structurally via SVG geometry and CSS specificity and remains to be visually confirmed in the deployed preview.
   - `.git` is not present in this AI Studio sandbox (`fatal: not a git repository (or any of the parent directories): .git`), so `git commit` and `git push origin main` could not be executed in the container; please commit and push via the AI Studio GitHub push button.
+
 ---
 
 ## Gemini, 2026-11-20 (TASK 13)
@@ -423,3 +424,32 @@ Each color change is a short scrubbed blend between two neighbouring sections, n
 - **Anything not matched / sandbox limitations:**
   - No headless browser CLI is installed in this sandbox container, so visual rendering and interactive checks at `390px` and `1280px` could not be captured live here and remain to be verified in the deployed preview.
   - `.git` is not present in this AI Studio sandbox (`fatal: not a git repository (or any of the parent directories): .git`), so `git commit` and `git push origin main` could not run inside the container; please commit and push via the AI Studio GitHub push button.
+
+---
+
+## Gemini, 2026-11-20 (5lab.co Frame-by-Frame Video Comparison & Parity Pass)
+
+- **Reference & recording files inspected:** Compared `/public/assets/aistudio/Record_2026-11-20-20-02-13_40deb401b9ffe8e1df2f1cc5ba480b12_deebd815.mp4` (`https://www.5lab.co/`) and `/public/assets/aistudio/Record_2026-11-20-20-12-15_40deb401b9ffe8e1df2f1cc5ba480b12_53553ac9.mp4` (Sumit Anand portfolio), plus `/reference-shots/*` and `REFERENCE_5LAB_MOTION.md`.
+- **Files updated:** `src/utils/pagePalette.ts`, `src/App.tsx`, `src/components/Navbar.tsx`, `src/components/Hero.tsx`, `src/components/three/HeroOrb.tsx`, `src/components/OrbScene.tsx`, `src/components/WorkstationBand.tsx`, `src/components/three/SurveillanceStage3D.tsx`, `src/components/Contact.tsx`, `src/utils/animMaster.ts`, `src/motion/motion.css`, `src/styles/chrome.css`, `src/styles/exact5lab.css`, `src/styles/orbScene.css`, `src/styles/contactOrb.css`, `src/styles/global.css`, `AI_CHAT.md` (`.nvmrc` and `package.json` left untouched; all Sumit Anand factual data preserved).
+- **Changes implemented in priority order:**
+  1. **Top Menu (`Navbar.tsx`, `pagePalette.ts`, `animMaster.ts`, `chrome.css`, `global.css`):**
+     - Kept the top navbar always visible (`translateY` hide-on-scroll-down removed in `animMaster.ts` and overridden in `exact5lab.css`) and hid `.scroll-progress` in `motion.css` to keep the top edge clean.
+     - Replaced out-of-order ScrollTrigger tone toggling in `pagePalette.ts` with deterministic DOM-order `getBoundingClientRect()` probe checks on scroll/resize/refresh and initialized `initPagePalette()` immediately on mount in `App.tsx`. Added explicit header `.nav-link` / `.brand-mark` color specificity in `chrome.css` so dark `#hero-workstation` & `#contact` render crisp `#ffffff` nav text + `#f83858` aperture mark while light/lilac sections (`#scene`, `#about`, `#skills`, `#footprint`, `#operations`, `#experience`, `#certifications`) render unified `#22226a` navy links + `#f83858` mark.
+     - Included `'scene'` and `'hero-workstation'` in `Navbar.tsx` scroll-spy `sectionIds`, preserved mobile frosted glass hamburger button (`42px`), and verified opening/closing the full-screen `#000000` mobile overlay menu with concentric dotted arcs.
+  2. **Hero & Scroll-Driven Orb (`Hero.tsx`, `HeroOrb.tsx`, `exact5lab.css`, `pagePalette.ts`):**
+     - Switched `HeroOrb` to static import with immediate CSS sphere backdrop (`hero-orb-slot--backdrop`) prior to WebGL paint and added adaptive software-GL fallback (`32` segments + `frameloop="demand"`).
+     - Positioned `.hero-orb-layer` (`position: fixed; z-index: 2`) in front of the split display headline, added concentric rotating orbital rings (`hero-orb-ring--outer` / `--inner`) that fade out cleanly on scroll (`0 -> 0.55`), and tuned scroll-left line stagger (`scrub: 0.55`).
+     - Added mobile (`< 768px`) layout putting the orb at `34%` top with an un-occluded centered bottom headline stack below it plus a `0vh -> 10vh` scroll glide matching `OrbScene`'s `44%` disc center. Sped `#page-bg` pink-to-off-white transition at `#scene` (`end: 'top+=10% top'`).
+  3. **OrbScene Venn -> Lilac Wipe -> Iris -> Circular Badge (`OrbScene.tsx`, `orbScene.css`, `chrome.css`):**
+     - Matched `--orb-d: min(26vh, 250px)` at `50%` so HeroOrb hands off seamlessly into the quartered `.orb-disc`, split `mix-blend-mode: multiply` `Operations` (`#f83858`) & `Systems` (`#4040b0`) Venn circles with outer rings and diagonal hairlines, anchored Venn copy blocks cleanly outside outer halos (`right/left: calc(50% + var(--orb-d) * 1.18)` on desktop and top/bottom on mobile), added in-place `.orb-sub-slot` sublabel swap, completed the horizontal `.orb-lilac` wipe (`0.68 -> 0.82`) with left-drifted Indigo Iris + Aperture mark + orbiting dot and right editorial summary, and scaled `.circular-badge` to `56px` on `< 768px`.
+  4. **Contact `"Let's chat"` Orb & Laser (`Contact.tsx`, `contactOrb.css`, `exact5lab.css`):**
+     - Kept 2-line left headline (`Let's talk / about a role.`), enlarged soft radial glow halo, brightened tilted elliptical orbit ring (`rgba(255, 76, 114, 0.78)`) with `#contact-orb-dot-glow` SVG filter on the moving dot, extended the bidirectional red laser (`78vh` desktop / `48vh` mobile) cleanly through the orb center, and compacted the monospace contact links.
+  5. **Other Sections (`WorkstationBand.tsx`, `SurveillanceStage3D.tsx`, `global.css`, `animMaster.ts`):**
+     - Forced `forceTheme="dark"` on `SurveillanceStage3D` inside `WorkstationBand` so the 3D XProtect Smart Client canvas renders obsidian dark, styled active `.stage3d-client-tab--active` crimson (`#ff223a`), unified hairline borders to `1px dotted`, and set heading `scrambleReveal` to crisp letter-only `{ duration: 0.55, chars: 'upperAndLowerCase' }`.
+- **Build & verification status (`1280px` & `390px` via headless Playwright + Vite):**
+  - `npm run build` (`tsc --noEmit && vite build`): **PASSING** (0 errors).
+  - `npm run lint` (`eslint .`): **PASSING** (0 errors).
+  - Headless Chromium (`1280x800` & `390x844`): **0 console errors**; visually verified Hero, Venn (non-overlapping labels), full-width Lilac + Iris, dark Workstation + active red `VIEWS` tab, Contact orb/ellipse/laser, accurate nav link colors (`hero`, `light`, `dark`), mobile un-occluded Hero, and mobile overlay menu open/close cycle.
+- **Anything not matched / sandbox limitations:**
+  - Headless Playwright used Chromium software WebGL (`SwiftShader`) and synthetic `scrollTo` snapshots rather than 60fps real-GPU screen capture, so live pointer tilt smoothness during continuous wheel gestures remains best verified in a GPU desktop browser.
+  - `.git` is not initialized in this AI Studio sandbox (`fatal: not a git repository`), so committing and pushing to `main` must be performed via the AI Studio GitHub push UI.

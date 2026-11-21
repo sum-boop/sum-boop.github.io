@@ -233,29 +233,49 @@ void main() {
 }
 `;
 
-function detectWebGLSupport(): boolean {
+interface WebGLCap {
+  supported: boolean;
+  isSoftwareGl: boolean;
+}
+
+function detectWebGLCapability(): WebGLCap {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
-    return false;
+    return { supported: false, isSoftwareGl: true };
   }
   try {
     const probeCanvas = document.createElement('canvas');
     const gl = probeCanvas.getContext('webgl2') || probeCanvas.getContext('webgl');
     if (!gl) {
-      return false;
+      return { supported: false, isSoftwareGl: true };
     }
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
+    const gpu = String(gl.getParameter(param) ?? '');
+    const isSoftwareGl = /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
     gl.getExtension('WEBGL_lose_context')?.loseContext();
-    return true;
+    return { supported: true, isSoftwareGl };
   } catch {
-    return false;
+    return { supported: false, isSoftwareGl: true };
   }
 }
 
 interface OrbSceneProps {
+  isMobile: boolean;
   isTouchDevice: boolean;
+  isSoftwareGl: boolean;
+  inView: boolean;
   pixelRatioCap: number;
+  onFirstFrame: () => void;
 }
 
-function OrbScene({ isTouchDevice, pixelRatioCap }: OrbSceneProps) {
+function OrbScene({
+  isMobile,
+  isTouchDevice,
+  isSoftwareGl,
+  inView,
+  pixelRatioCap,
+  onFirstFrame,
+}: OrbSceneProps) {
   const groupRef = useRef<THREE.Group>(null);
   const orbMeshRef = useRef<THREE.Mesh>(null);
   const pointsRef = useRef<THREE.Points>(null);
@@ -264,6 +284,7 @@ function OrbScene({ isTouchDevice, pixelRatioCap }: OrbSceneProps) {
   const scrollProgressRef = useRef(0);
   const pointerTargetRef = useRef({ x: 0, y: 0 });
   const pointerCurrentRef = useRef({ x: 0, y: 0 });
+  const notifiedFirstFrameRef = useRef(false);
 
   useEffect(() => {
     pixelRatioRef.current = pixelRatioCap;
@@ -274,7 +295,8 @@ function OrbScene({ isTouchDevice, pixelRatioCap }: OrbSceneProps) {
     const pointsMesh = pointsRef.current;
     if (!orbMesh || !pointsMesh) return;
 
-    const orbGeometry = new THREE.IcosahedronGeometry(1, 64);
+    const segments = isSoftwareGl ? 32 : 64;
+    const orbGeometry = new THREE.IcosahedronGeometry(1, segments);
     const orbMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -336,16 +358,18 @@ function OrbScene({ isTouchDevice, pixelRatioCap }: OrbSceneProps) {
       particleGeometry.dispose();
       particleMaterial.dispose();
     };
-  }, []);
+  }, [isSoftwareGl]);
 
   useEffect(() => {
     const heroEl = document.getElementById('hero');
+    const sceneEl = document.getElementById('scene');
     if (!heroEl) return;
 
     const st = ScrollTrigger.create({
       trigger: heroEl,
       start: 'top top',
-      end: 'bottom 30%',
+      endTrigger: sceneEl ?? heroEl,
+      end: sceneEl ? 'top top' : 'bottom top',
       scrub: true,
       onUpdate: (self) => {
         scrollProgressRef.current = self.progress;
@@ -379,13 +403,17 @@ function OrbScene({ isTouchDevice, pixelRatioCap }: OrbSceneProps) {
     };
   }, [isTouchDevice]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const clampedDelta = Math.min(delta, 0.05);
     timeRef.current += clampedDelta;
     const elapsed = timeRef.current;
 
     const progress = scrollProgressRef.current;
-    const fadeProgress = Math.max(0, Math.min(1, (progress - 0.85) / 0.15));
+    // Shrink smoothly from 1 -> target diameter ratio matching .orb-disc at scene arrival
+    const shrinkTarget = isMobile ? 0.92 : 0.735;
+    const scrollScale = 1 - progress * (1 - shrinkTarget);
+    // Keep orb solid right until scene top arrival so .orb-disc swaps cleanly in place
+    const fadeProgress = Math.max(0, Math.min(1, (progress - 0.93) / 0.07));
     const opacity = 1 - fadeProgress;
 
     if (isTouchDevice) {
@@ -403,7 +431,6 @@ function OrbScene({ isTouchDevice, pixelRatioCap }: OrbSceneProps) {
 
     const group = groupRef.current;
     if (group) {
-      const scrollScale = 1 - progress * 0.3;
       group.scale.setScalar(ORB_BASE_SCALE * scrollScale);
       group.rotation.y = elapsed * SELF_ROTATION_SPEED + tiltX;
       group.rotation.x = tiltY;
@@ -428,6 +455,15 @@ function OrbScene({ isTouchDevice, pixelRatioCap }: OrbSceneProps) {
         ptMat.uniforms.uOpacity!.value = opacity;
       }
     }
+
+    if (!notifiedFirstFrameRef.current) {
+      notifiedFirstFrameRef.current = true;
+      onFirstFrame();
+    }
+
+    if (isSoftwareGl && inView) {
+      state.invalidate();
+    }
   });
 
   return (
@@ -443,26 +479,36 @@ export function HeroOrb() {
   const isMobile = useMediaQuery('(max-width: 767px)');
   const isTouchDevice = useMediaQuery('(hover: none), (pointer: coarse)');
   const prefersReducedMotion = useReducedMotion();
-  const [webglReady] = useState<boolean>(() => detectWebGLSupport());
+  const [{ supported: webglReady, isSoftwareGl }] = useState<WebGLCap>(() =>
+    detectWebGLCapability(),
+  );
   const [contextLost, setContextLost] = useState(false);
+  const [canvasPainted, setCanvasPainted] = useState(false);
   const [inView, setInView] = useState(true);
 
   useEffect(() => {
-    const targetEl = document.getElementById('hero') ?? containerRef.current;
-    if (!targetEl || typeof IntersectionObserver === 'undefined') return;
+    const heroEl = document.getElementById('hero');
+    const sceneEl = document.getElementById('scene');
+    if (!heroEl) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry) {
-          setInView(entry.isIntersecting);
-        }
-      },
-      { threshold: 0.01 },
-    );
+    const updateVisibility = () => {
+      if (sceneEl) {
+        const sceneRect = sceneEl.getBoundingClientRect();
+        // Keep active across Hero and right into Scene top arrival, then unmount RAF cleanly
+        setInView(sceneRect.top > -40);
+      } else {
+        const heroRect = heroEl.getBoundingClientRect();
+        setInView(heroRect.bottom > 0);
+      }
+    };
 
-    observer.observe(targetEl);
-    return () => observer.disconnect();
+    updateVisibility();
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    window.addEventListener('resize', updateVisibility, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', updateVisibility);
+      window.removeEventListener('resize', updateVisibility);
+    };
   }, []);
 
   if (prefersReducedMotion || !webglReady || contextLost) {
@@ -473,28 +519,46 @@ export function HeroOrb() {
     );
   }
 
-  const maxDpr = isMobile ? 1.25 : 1.75;
+  const maxDpr = isSoftwareGl ? 1 : isMobile ? 1.25 : 1.75;
 
   return (
-    <div className="hero-orb-slot hero-orb-slot--canvas" ref={containerRef}>
-      <Canvas
-        camera={{ fov: 40, position: [0, 0, 3.2] }}
-        dpr={[1, maxDpr]}
-        frameloop={inView ? 'always' : 'never'}
-        gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
-        onCreated={({ gl }) => {
-          gl.setClearColor(0x000000, 0);
-          const canvas = gl.domElement;
-          const handleContextLost = (event: Event) => {
-            event.preventDefault();
-            setContextLost(true);
-          };
-          canvas.addEventListener('webglcontextlost', handleContextLost, { once: true });
-        }}
+    <>
+      {!canvasPainted ? (
+        <div className="hero-orb-slot hero-orb-slot--backdrop">
+          <div className="hero-orb-fallback" />
+        </div>
+      ) : null}
+      <div
+        className={`hero-orb-slot hero-orb-slot--canvas ${canvasPainted ? 'hero-orb-slot--painted' : ''}`}
+        ref={containerRef}
       >
-        <OrbScene isTouchDevice={isTouchDevice} pixelRatioCap={maxDpr} />
-      </Canvas>
-    </div>
+        <Canvas
+          camera={{ fov: 40, position: [0, 0, 3.2] }}
+          dpr={[1, maxDpr]}
+          frameloop={inView ? (isSoftwareGl ? 'demand' : 'always') : 'never'}
+          gl={{ alpha: true, antialias: !isSoftwareGl, powerPreference: 'high-performance' }}
+          onCreated={({ gl, invalidate }) => {
+            gl.setClearColor(0x000000, 0);
+            const canvas = gl.domElement;
+            const handleContextLost = (event: Event) => {
+              event.preventDefault();
+              setContextLost(true);
+            };
+            canvas.addEventListener('webglcontextlost', handleContextLost, { once: true });
+            invalidate();
+          }}
+        >
+          <OrbScene
+            inView={inView}
+            isMobile={isMobile}
+            isSoftwareGl={isSoftwareGl}
+            isTouchDevice={isTouchDevice}
+            onFirstFrame={() => setCanvasPainted(true)}
+            pixelRatioCap={maxDpr}
+          />
+        </Canvas>
+      </div>
+    </>
   );
 }
 

@@ -175,10 +175,12 @@ function getWebGLCapability(): WebGLCapability {
 
 interface SurveillanceStage3DProps {
   theme: ThemeMode;
+  forceTheme?: ThemeMode;
 }
 
 export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   theme,
+  forceTheme,
 }: SurveillanceStage3DProps) {
   const { viewMode, activeSiteId, selectedFeedId, setViewMode, focusSectionFromVms } = useVms();
 
@@ -200,14 +202,16 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   const [briefCamModule, setBriefCamModule] = useState<'review' | 'respond' | 'research'>('review');
   const [consoleTab, setConsoleTab] = useState<'views' | 'exports' | 'search' | 'alarms' | 'monitor'>('views');
 
+  const initialResolvedTheme = forceTheme ?? resolveLiveTheme(theme);
   const explodeTargetRef = useRef(0);
   const finishRef = useRef<FinishId>('slate');
-  const themeRef = useRef<ThemeMode>(resolveLiveTheme(theme));
+  const forceThemeRef = useRef<ThemeMode | undefined>(forceTheme);
+  const themeRef = useRef<ThemeMode>(initialResolvedTheme);
   const screenStateRef = useRef({
     mode: viewMode,
     siteId: activeSiteId,
     feedId: selectedFeedId,
-    theme: resolveLiveTheme(theme),
+    theme: initialResolvedTheme,
   });
   const materialsRef = useRef<MaterialBundle | null>(null);
   const presetFlightRef = useRef<{
@@ -238,15 +242,16 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   }, [activeFinish]);
 
   useEffect(() => {
-    const resolved = resolveLiveTheme(theme);
+    forceThemeRef.current = forceTheme;
+    const resolved = forceTheme ?? resolveLiveTheme(theme);
     themeRef.current = resolved;
     applyThemeCallbackRef.current?.(resolved);
-  }, [theme]);
+  }, [forceTheme, theme]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const syncLiveTheme = () => {
-      const nextTheme = resolveLiveTheme(themeRef.current);
+      const nextTheme = forceThemeRef.current ?? resolveLiveTheme(themeRef.current);
       if (nextTheme !== themeRef.current) {
         themeRef.current = nextTheme;
         applyThemeCallbackRef.current?.(nextTheme);
@@ -283,7 +288,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   }, []);
 
   useEffect(() => {
-    const resolvedTheme = resolveLiveTheme(theme);
+    const resolvedTheme = forceTheme ?? resolveLiveTheme(theme);
     screenStateRef.current = {
       mode: viewMode,
       siteId: activeSiteId,
@@ -299,7 +304,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     drawBriefCamCanvas(bundle.briefcamCanvas, screenStateRef.current);
     bundle.briefcamTexture.needsUpdate = true;
     requestRenderRef.current?.();
-  }, [activeSiteId, selectedFeedId, theme, viewMode]);
+  }, [activeSiteId, forceTheme, selectedFeedId, theme, viewMode]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

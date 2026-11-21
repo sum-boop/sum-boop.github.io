@@ -110,7 +110,7 @@ export const WorkstationBand = memo(function WorkstationBand({
             <Suspense
               fallback={<StageSkeleton label="Initializing 3D Command Room…" variant="vms" />}
             >
-              <SurveillanceStage3D theme={theme} />
+              <SurveillanceStage3D forceTheme="dark" theme={theme} />
             </Suspense>
           )}
         </div>

@@ -6,8 +6,8 @@
   height: 400lvh;
   background: transparent;
   color: var(--ink);
-  --orb-d: min(36vh, 364px);
-  --orb-top: 45%;
+  --orb-d: min(26vh, 250px);
+  --orb-top: 50%;
 }
 
 .orb-scene-stage {
@@ -19,16 +19,14 @@
   background: transparent;
 }
 
-/* Step 5: Lilac wash panel behind the orb */
+/* Lilac wash panel behind the orb (full horizontal coverage fading cleanly downward into #FAFAF7) */
 .orb-lilac {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(90deg, #d4d2e7 0%, #d4d2e7 55%, rgba(212, 210, 231, 0) 100%);
+  background: linear-gradient(180deg, #dcdaf0 0%, #d4d2e7 86%, rgba(212, 210, 231, 0) 100%);
   clip-path: inset(0 100% 0 0);
   -webkit-clip-path: inset(0 100% 0 0);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
   pointer-events: none;
 }
 
@@ -52,7 +50,7 @@
   pointer-events: none;
 }
 
-/* Inner scaler for 0.90 -> 1.00 settle at top */
+/* Inner scaler for left drift & 0.90 -> 1.00 settle */
 .orb-scaler {
   position: absolute;
   inset: 0;
@@ -80,13 +78,13 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.18), transparent 55%);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.22), transparent 55%);
   pointer-events: none;
 }
 
 .orb-disc-crosshair {
   position: absolute;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
   pointer-events: none;
 }
 
@@ -122,23 +120,41 @@
   background: rgba(34, 34, 106, 0.45);
 }
 
-/* Phase B: Overlapping Venn circles */
+/* Phase B: Overlapping Venn circles with multiply intersection and translucent outer halo */
 .orb-circle {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   opacity: 0;
-  mix-blend-mode: normal;
+  mix-blend-mode: multiply;
+}
+
+.orb-circle::before {
+  content: '';
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .orb-circle--red {
   z-index: 1;
-  background: radial-gradient(circle at 35% 30%, #ff6a88, #f0123f 55%, #b3002b);
+  background: radial-gradient(circle at 35% 32%, #ff7a98, #f0123f 56%, #b3002b);
+  box-shadow: 0 0 36px rgba(248, 56, 88, 0.28);
+}
+
+.orb-circle--red::before {
+  border: 1px solid rgba(248, 56, 88, 0.22);
 }
 
 .orb-circle--indigo {
   z-index: 2;
-  background: radial-gradient(circle at 65% 30%, #7b7be0, #4040b0 55%, #26268a);
+  background: radial-gradient(circle at 65% 32%, #8686ee, #4040b0 56%, #26268a);
+  box-shadow: 0 0 36px rgba(64, 64, 176, 0.28);
+}
+
+.orb-circle--indigo::before {
+  border: 1px dashed rgba(64, 64, 176, 0.24);
 }
 
 /* Step 2: Iris orb */
@@ -149,14 +165,14 @@
   background: radial-gradient(circle at 50% 35%, #3b3bc8 0%, #2b2b9a 45%, #22226a 100%);
   overflow: hidden;
   opacity: 0;
-  box-shadow: 0 0 44px rgba(34, 34, 106, 0.32);
+  box-shadow: 0 0 48px rgba(34, 34, 106, 0.36);
 }
 
 .orb-iris-highlight {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 45% 28%, rgba(255, 255, 255, 0.22), transparent 52%);
+  background: radial-gradient(circle at 45% 28%, rgba(255, 255, 255, 0.24), transparent 52%);
   pointer-events: none;
 }
 
@@ -234,7 +250,7 @@
   }
 }
 
-/* Step 3: Camera-iris / aperture mark */
+/* Camera-iris aperture mark */
 .orb-iris-mark-wrap {
   position: absolute;
   top: 50%;
@@ -256,7 +272,7 @@
   stroke: #ffffff;
 }
 
-/* Step 4: Orbit ring with tracking dot */
+/* Orbit ring with tracking dot */
 .orb-orbit-ring {
   position: absolute;
   top: 50%;
@@ -281,25 +297,27 @@
   background: #22226a;
 }
 
-/* Clickable labels */
+/* Clickable labels anchored neatly alongside Venn orbs */
 .orb-label-block {
   position: absolute;
   z-index: 2;
-  max-width: clamp(170px, calc(50vw - var(--orb-d) * 0.78 - var(--gutter)), 310px);
+  max-width: clamp(190px, 21vw, 275px);
   opacity: 0;
   pointer-events: auto;
 }
 
 .orb-label-block--operations {
-  top: 45%;
-  left: var(--gutter);
+  top: var(--orb-top);
+  left: auto;
+  right: calc(50% + var(--orb-d) * 1.18);
   transform: translateY(-50%);
   text-align: left;
 }
 
 .orb-label-block--systems {
-  top: 45%;
-  right: var(--gutter);
+  top: var(--orb-top);
+  right: auto;
+  left: calc(50% + var(--orb-d) * 1.18);
   transform: translateY(-50%);
   text-align: right;
 }
@@ -309,7 +327,7 @@
   z-index: 2;
   display: inline-block;
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: clamp(28px, 2.5vw, 36px);
   font-weight: 600;
   line-height: 1.08;
   letter-spacing: -0.02em;
@@ -344,11 +362,79 @@
   line-height: 1.35;
 }
 
+.orb-label-sub--swap {
+  position: relative;
+  min-height: 1.4em;
+}
+
+.orb-sub-slot {
+  display: block;
+}
+
+.orb-sub-slot--alt {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
 .orb-label-copy {
   margin: 0;
   color: var(--ink-muted);
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* Desktop right-side editorial summary during Lilac phase */
+.orb-lilac-editorial {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  max-width: min(36vw, 430px);
+  padding: 1.5rem 0;
+  border-top: 1px dotted rgba(34, 34, 106, 0.32);
+  border-bottom: 1px dotted rgba(34, 34, 106, 0.32);
+  opacity: 0;
+  pointer-events: auto;
+}
+
+.orb-lilac-eyebrow {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: rgba(34, 34, 106, 0.72);
+}
+
+.orb-lilac-quote {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.2vw, 1.95rem);
+  font-weight: 500;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  color: #22226a;
+}
+
+.orb-lilac-cta {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f83858;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(248, 56, 88, 0.45);
+  padding-bottom: 0.2rem;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.orb-lilac-cta:hover {
+  color: #22226a;
+  border-color: #22226a;
 }
 
 .orb-stage-caption {
@@ -369,7 +455,7 @@
   opacity: 0;
 }
 
-/* Step 6: "About me" link at bottom center */
+/* "About me" link at bottom center */
 .orb-about-link-wrap {
   position: absolute;
   z-index: 2;
@@ -402,7 +488,7 @@
   outline-offset: 4px;
 }
 
-/* Requirement 10: will-change only while scene is on screen */
+/* will-change only while scene is on screen */
 .orb-scene--active .orb-scaler,
 .orb-scene--active .orb-disc,
 .orb-scene--active .orb-circle,
@@ -411,6 +497,7 @@
 .orb-scene--active .orb-orbit-ring,
 .orb-scene--active .orb-label-block,
 .orb-scene--active .orb-lilac,
+.orb-scene--active .orb-lilac-editorial,
 .orb-scene--active .orb-about-link-wrap,
 .orb-scene--active .orb-stage-caption {
   will-change: transform, opacity, clip-path;
@@ -420,8 +507,12 @@
   .orb-scene {
     height: 360vh;
     height: 360lvh;
-    --orb-d: min(52vw, 240px);
-    --orb-top: 38%;
+    --orb-d: min(44vw, 180px);
+    --orb-top: 44%;
+  }
+
+  .orb-lilac-editorial {
+    display: none;
   }
 
   .orb-label-block {
@@ -430,20 +521,23 @@
   }
 
   .orb-label-block--operations {
-    top: max(12%, 5.5rem);
+    top: 5.5rem;
+    right: auto;
     left: var(--gutter);
     text-align: left;
   }
 
   .orb-label-block--systems {
-    top: 78%;
+    top: auto;
+    bottom: 5.25rem;
+    left: auto;
     right: var(--gutter);
-    transform: translateY(-30%);
+    transform: none;
     text-align: right;
   }
 
   .orb-label-link {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .orb-label-sub {
@@ -451,7 +545,7 @@
   }
 
   .orb-label-copy {
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 1.4;
   }
 }

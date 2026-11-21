@@ -1,24 +1,52 @@
 /* Chrome overrides: aperture brand mark, glass mobile menu button, and rotating circular badge */
 
-header.site-header .brand-symbol,
-header.site-header[data-nav-tone] .brand-symbol,
+header.site-header[data-nav-tone='hero'],
+header.site-header[data-nav-tone='hero'] .brand-mark,
+header.site-header[data-nav-tone='hero'] .nav-link,
+header.site-header[data-nav-tone='dark'],
+header.site-header[data-nav-tone='dark'] .brand-mark,
+header.site-header[data-nav-tone='dark'] .nav-link,
+header.site-header[data-nav-tone='contact'],
+header.site-header[data-nav-tone='contact'] .brand-mark,
+header.site-header[data-nav-tone='contact'] .nav-link {
+  color: #ffffff;
+}
+
+header.site-header[data-nav-tone='light'],
+header.site-header[data-nav-tone='light'] .brand-mark,
+header.site-header[data-nav-tone='light'] .nav-link {
+  color: #22226a;
+}
+
+header.site-header .brand-mark,
+header.site-header .nav-link {
+  transition: opacity 180ms ease;
+}
+
+header.site-header[data-nav-tone='hero'] .brand-symbol,
 .mobile-nav-overlay .brand-mark--modal .brand-symbol {
-  color: #ff223a;
+  color: #ffffff;
+}
+
+header.site-header[data-nav-tone='light'] .brand-symbol,
+header.site-header[data-nav-tone='dark'] .brand-symbol,
+header.site-header[data-nav-tone='contact'] .brand-symbol {
+  color: #f83858;
 }
 
 .site-header .menu-toggle {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #ffffff;
   transition:
-    background-color 300ms ease,
-    border-color 300ms ease,
-    color 300ms ease,
-    transform 300ms ease;
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    transform 200ms ease;
 }
 
 .site-header .menu-toggle:hover {
@@ -31,7 +59,7 @@ header.site-header[data-nav-tone] .brand-symbol,
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.36);
   color: #ffffff;
-  outline: 2px solid #ff223a;
+  outline: 2px solid #f83858;
   outline-offset: 3px;
 }
 
@@ -51,23 +79,23 @@ header.site-header[data-nav-tone='light'] .menu-toggle:focus-visible {
   background: rgba(34, 34, 106, 0.16);
   border-color: rgba(34, 34, 106, 0.32);
   color: #22226a;
-  outline: 2px solid #ff223a;
+  outline: 2px solid #f83858;
   outline-offset: 3px;
 }
 
-/* Rotating circular badge (bottom-left; back-to-top remains bottom-right) */
+/* Rotating circular badge */
 .circular-badge {
   position: fixed;
   left: clamp(12px, 2vw, 28px);
   bottom: clamp(12px, 2vw, 28px);
   z-index: 900;
-  width: 84px;
-  height: 84px;
+  width: 82px;
+  height: 82px;
   pointer-events: none;
   user-select: none;
   color: #ffffff;
   mix-blend-mode: difference;
-  opacity: 1;
+  opacity: 0.92;
   transition: opacity 200ms ease;
 }
 
@@ -83,9 +111,9 @@ header.site-header[data-nav-tone='light'] .menu-toggle:focus-visible {
 .circular-badge-text {
   fill: currentColor;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -104,8 +132,11 @@ body.menu-open .circular-badge {
 
 @media (max-width: 767px) {
   .circular-badge {
-    width: 72px;
-    height: 72px;
+    width: 56px;
+    height: 56px;
+    left: 10px;
+    bottom: 10px;
+    opacity: 0.78;
   }
 }
 

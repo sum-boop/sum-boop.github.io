@@ -26,6 +26,7 @@
    SCROLL PROGRESS & ACTIVE NAV PILLS
    ===================================================== */
 .scroll-progress {
+  display: none;
   position: fixed;
   z-index: 1200;
   top: 0;

@@ -1,84 +1,252 @@
-/* 5lab-exact pass: always-visible nav, centered hero headline behind the orb, Contact orb as a centerpiece */
+/* 5lab-exact pass: always-visible nav, centered hero headline behind fixed shrinking orb, Contact orb centerpiece */
 
-/* --- Top menu: 5lab keeps it visible on every section --- */
+/* --- Top menu: always visible on every section --- */
 html header.site-header.site-header--hidden {
   transform: none;
 }
-html header.site-header .nav-link {
-  font-size: 0.95rem;
+
+/* --- Hero: headline centered behind orb, fixed shrinking orb with concentric orbital rings --- */
+html #hero.hero-section-5lab {
+  position: relative;
+  min-height: 100svh;
+  min-height: 100lvh;
+  justify-content: center;
+  padding: 6.5rem var(--gutter) 3.5rem;
+  overflow-x: clip;
+  overflow-y: visible;
+  background: radial-gradient(
+    ellipse 85% 68% at 50% 34%,
+    rgba(218, 20, 62, 0.24) 0%,
+    rgba(113, 17, 39, 0.1) 50%,
+    rgba(12, 2, 6, 0.42) 100%
+  );
 }
 
-/* --- Hero: headline mid-screen, orb in FRONT of the text, crimson fading to black --- */
 html #hero .hero-orb-layer {
+  position: fixed;
+  inset: 0;
   z-index: 2;
-  --orb-size: min(30vh, 320px);
-  --orb-top: 52%;
+  pointer-events: none;
+  --orb-size: min(34vh, 340px);
+  --orb-top: 50%;
 }
+
+html #hero .hero-orb-ring {
+  position: absolute;
+  top: var(--orb-top);
+  left: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+html #hero .hero-orb-ring--outer {
+  width: calc(var(--orb-size) * 1.48);
+  height: calc(var(--orb-size) * 1.48);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  animation: hero-ring-spin 36s linear infinite;
+}
+
+html #hero .hero-orb-ring--inner {
+  width: calc(var(--orb-size) * 1.24);
+  height: calc(var(--orb-size) * 1.24);
+  border: 1px dashed rgba(255, 118, 150, 0.24);
+  animation: hero-ring-spin 24s linear infinite reverse;
+}
+
+@keyframes hero-ring-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+html #hero .hero-orb-slot--backdrop {
+  z-index: 0;
+}
+
+html #hero .hero-orb-slot--canvas {
+  z-index: 1;
+}
+
 html #hero .hero-content-shell-5lab {
+  position: relative;
+  z-index: 1;
   justify-content: center;
+  min-height: auto;
 }
+
 html #hero .hero-eyebrow-wrapper-5lab {
   order: 2;
   margin: 2.5rem 0 0;
+  padding-top: 1.15rem;
+  border-top: 1px dotted rgba(255, 255, 255, 0.22);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
 }
+
+html #hero .hero-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 html #hero .hero-title-5lab-exact {
   margin: 0;
-  font-size: clamp(3rem, 8.2vw, 8.5rem);
-  line-height: 1.04;
+  font-size: clamp(3.3rem, 7.6vw, 7.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
 }
+
 html #hero .hero-line {
-  will-change: transform;
+  will-change: transform, opacity;
 }
+
 html #hero .hero-line-indent-exact {
-  padding-left: clamp(2rem, 14vw, 14rem);
+  padding-left: clamp(2rem, 11vw, 11.5rem);
 }
+
 @media (max-width: 767px) {
+  html #hero.hero-section-5lab {
+    justify-content: flex-end;
+    padding: 5.5rem var(--gutter) 4.25rem;
+  }
+
+  html #hero .hero-content-shell-5lab {
+    justify-content: flex-end;
+    min-height: auto;
+  }
+
   html #hero .hero-orb-layer {
-    --orb-size: min(52vw, 230px);
-    --orb-top: 52%;
+    --orb-size: min(50vw, 200px);
+    --orb-top: 34%;
   }
+
   html #hero .hero-title-5lab-exact {
-    font-size: clamp(2.6rem, 13vw, 4rem);
+    font-size: clamp(2.25rem, 9.6vw, 3.15rem);
+    line-height: 1.08;
+    text-align: center;
   }
+
+  html #hero .hero-line {
+    white-space: nowrap;
+  }
+
   html #hero .hero-line-indent-exact {
-    padding-left: 1.75rem;
+    padding-left: 0;
+  }
+
+  html #hero .hero-eyebrow-wrapper-5lab {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+    margin-top: 1.75rem;
+    padding-top: 0.9rem;
+    font-size: 0.68rem;
   }
 }
 
-/* --- Contact: orb is a centerpiece to the right of the headline, with a soft pink halo --- */
-html #contact .contact-cta-hero-5lab {
-  min-height: min(100svh, 780px);
-  padding-bottom: 6rem;
+@media (prefers-reduced-motion: reduce) {
+  html #hero .hero-orb-ring--outer,
+  html #hero .hero-orb-ring--inner {
+    animation: none;
+  }
 }
+
+/* --- Contact: two-line headline left, glowing pink-red orb right with tilted ellipse & long laser --- */
+html #contact.contact-section-5lab {
+  overflow-x: clip;
+}
+
+html #contact .contact-cta-hero-5lab {
+  overflow: visible;
+  padding-top: clamp(2.5rem, 6vw, 5rem);
+  padding-bottom: clamp(2rem, 4vw, 3.25rem);
+  margin-top: 0;
+  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+html #contact .contact-headline-row-5lab {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(2rem, 5vw, 4rem);
+  margin-bottom: clamp(2.5rem, 4.5vw, 3.75rem);
+}
+
+html #contact .contact-giant-title-5lab {
+  font-size: clamp(2.85rem, 6.2vw, 5.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  max-width: 11.5ch;
+}
+
 html #contact .contact-orb-block {
-  position: absolute;
-  top: 44%;
-  right: 14%;
-  margin: 0;
+  position: relative;
+  flex-shrink: 0;
+  margin: 0 clamp(2rem, 5vw, 5.5rem) 0 0;
   z-index: 1;
 }
+
 html #contact .contact-orb-block::before {
   content: '';
   position: absolute;
-  inset: -120%;
+  inset: -145%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(232, 62, 117, 0.4) 0%, rgba(232, 62, 117, 0.12) 38%, rgba(232, 62, 117, 0) 66%);
+  background: radial-gradient(
+    circle,
+    rgba(248, 56, 88, 0.42) 0%,
+    rgba(232, 62, 117, 0.18) 38%,
+    rgba(232, 62, 117, 0) 68%
+  );
   pointer-events: none;
 }
-html #contact .contact-orb-laser-wrap {
-  width: 62vh;
+
+html #contact .contact-big-links-5lab {
+  gap: 0.9rem clamp(1rem, 2vw, 1.75rem);
+  margin-bottom: 1.5rem;
 }
+
+html #contact .contact-big-link {
+  padding-bottom: 0.22rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+  font: 500 clamp(0.84rem, 1.2vw, 1.02rem) var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+html #contact .contact-big-link:hover {
+  color: #f83858;
+  border-color: #f83858;
+}
+
 @media (max-width: 767px) {
   html #contact .contact-cta-hero-5lab {
-    min-height: 0;
-    padding-bottom: 20rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
+
+  html #contact .contact-headline-row-5lab {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2.5rem;
+    margin-bottom: 2.25rem;
+  }
+
+  html #contact .contact-giant-title-5lab {
+    font-size: clamp(2.45rem, 11vw, 3.4rem);
+  }
+
   html #contact .contact-orb-block {
+    position: relative;
     top: auto;
-    bottom: 4.5rem;
-    right: 18%;
-  }
-  html #contact .contact-orb-laser-wrap {
-    width: 46vh;
+    bottom: auto;
+    right: auto;
+    align-self: center;
+    margin: 2.5rem auto 1.5rem;
   }
 }
+

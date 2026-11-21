@@ -165,15 +165,14 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
+    const cleanupPalette = initPagePalette();
     let lenis: ReturnType<typeof initSmoothScroll> = null;
-    let cleanupPalette: (() => void) | null = null;
     const cancelIdle = scheduleIdle(() => {
       lenis = initSmoothScroll();
-      cleanupPalette = initPagePalette();
-    }, 350);
+    }, 250);
     return () => {
       cancelIdle();
-      cleanupPalette?.();
+      cleanupPalette();
       lenis?.destroy();
     };
   }, []);
