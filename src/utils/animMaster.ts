@@ -2,6 +2,7 @@ import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { restoreScramble, scrambleReveal } from '@/utils/scrambleReveal';
+import { playPageCurtain } from '@/utils/pageCurtain';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -132,7 +133,16 @@ export function initSmoothScroll(): { destroy: () => void } | null {
     const target = document.getElementById(hash.slice(1));
     if (!target || !lenisInstance) return;
     event.preventDefault();
-    lenisInstance.scrollTo(target, { offset: -84 });
+    const fromNav = anchor.closest('#site-navigation, .mobile-nav-overlay') !== null;
+    if (fromNav) {
+      // 5lab-style page transition: curtain closes, we jump while covered, curtain opens.
+      playPageCurtain(() => {
+        lenisInstance?.scrollTo(target, { offset: -84, immediate: true, force: true });
+        ScrollTrigger.update();
+      });
+    } else {
+      lenisInstance.scrollTo(target, { offset: -84 });
+    }
     if (window.location.hash !== hash) {
       window.history.replaceState(null, '', hash);
     }
