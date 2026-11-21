@@ -38,13 +38,19 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
-            return 'react';
+            return 'react-vendor';
           }
           if (id.includes('node_modules/framer-motion')) {
-            return 'motion';
+            return 'motion-vendor';
           }
-          if (id.includes('node_modules/three')) {
-            return 'three';
+          if (id.includes('node_modules/three') || id.includes('node_modules/@react-three')) {
+            return 'three-vendor';
+          }
+          if (id.includes('node_modules/gsap') || id.includes('node_modules/lenis')) {
+            return 'scroll-vendor';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'icons';
           }
           return undefined;
         },

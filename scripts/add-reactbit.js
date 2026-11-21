@@ -48,7 +48,7 @@ async function installComponent() {
       for (const file of data.files) {
         const fileName = path.basename(file.path);
         const destination = path.join(targetDir, fileName);
-        
+
         // Adapt 'motion/react' imports to 'framer-motion' if needed
         let content = file.content;
         content = content.replace(/from\s+['"]motion\/react['"]/g, "from 'framer-motion'");

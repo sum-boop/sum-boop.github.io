@@ -8,6 +8,7 @@ NOT known from this fetch: exact font files, pixel sizes, easing, hover values. 
 Meta: theme-color #000000. Title "5Lab ⚡️ Design + Technology".
 
 ## Section order on 5lab.co (top to bottom)
+
 1. **Header.** Logo (white and red logo variants, swaps on hover) left. Links right: Works, Services, About, Contact. Mobile menu repeats them with a Home link first.
 2. **Hero headline.** "We spark web and / mobile experience". Large, two lines.
 3. **Hero panels.** Two panels side by side.
@@ -28,19 +29,21 @@ Meta: theme-color #000000. Title "5Lab ⚡️ Design + Technology".
 10. **Footer.** Links "Career | Internship". Line "COPYRIGHT © 2026 5LAB COMPANY |" and "CRAFTED WITH [icons] AND [icons] IN BANGKOK".
 
 ## Pattern to copy
+
 - Small "eyebrow" label above every H2 ("Experienced in", "Trusted by", "Let's chat").
 - Very large headlines broken over several short lines.
 - Almost no boxes or borders. Content is images + big type + hairlines.
 - Work cards: clean image first, title under it. No text on top of the image.
 
 ## Mapping to Sumit's site (content stays Sumit's, only the look and motion copy 5lab)
-| 5lab.co | Sumit's site |
-|---|---|
-| Header | Navbar |
-| Headline + Design/Develop panels | Hero |
-| Services, About, Identity statement | About (statement on top) |
-| Work showcase by category | Deployments |
-| Notable Clients | Skills |
-| Let's chat CTA | Contact |
-| Footer | Footer |
-| (no equivalent) | WorkstationBand, Footprint, Experience, Credentials: keep, restyle in the same visual language |
+
+| 5lab.co                             | Sumit's site                                                                                   |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Header                              | Navbar                                                                                         |
+| Headline + Design/Develop panels    | Hero                                                                                           |
+| Services, About, Identity statement | About (statement on top)                                                                       |
+| Work showcase by category           | Deployments                                                                                    |
+| Notable Clients                     | Skills                                                                                         |
+| Let's chat CTA                      | Contact                                                                                        |
+| Footer                              | Footer                                                                                         |
+| (no equivalent)                     | WorkstationBand, Footprint, Experience, Credentials: keep, restyle in the same visual language |

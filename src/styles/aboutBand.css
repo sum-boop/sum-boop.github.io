@@ -61,14 +61,14 @@
 }
 
 .about-statement-5lab {
-  margin: clamp(2.5rem, 6vw, 5rem) auto 0;
-  max-width: 1100px;
+  margin: clamp(3rem, 7vw, 6rem) auto 0;
+  max-width: 1200px;
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 7vw, 5.5rem);
+  font-size: clamp(2.8rem, 8vw, 6.5rem);
   font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  padding-block: 0.5em;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  padding-block: 0.6em;
   border-block: 1px dotted rgba(34, 34, 106, 0.35);
   color: var(--ink);
 }
@@ -85,7 +85,7 @@
 }
 
 .about-hl-text {
-  color: color-mix(in srgb, #FAFAF7 calc(var(--hl) * 100%), var(--ink));
+  color: color-mix(in srgb, #fafaf7 calc(var(--hl) * 100%), var(--ink));
 }
 
 .about-plus {

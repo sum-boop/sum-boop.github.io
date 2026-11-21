@@ -114,7 +114,13 @@ export function Contact() {
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <defs>
-                    <filter id="contact-orb-dot-glow" height="300%" width="300%" x="-100%" y="-100%">
+                    <filter
+                      id="contact-orb-dot-glow"
+                      height="300%"
+                      width="300%"
+                      x="-100%"
+                      y="-100%"
+                    >
                       <feGaussianBlur result="blur" stdDeviation="2.5" />
                       <feMerge>
                         <feMergeNode in="blur" />
@@ -137,7 +143,13 @@ export function Contact() {
                       r="3.4"
                     />
                   ) : (
-                    <circle cx="0" cy="0" fill="#ff6b8b" filter="url(#contact-orb-dot-glow)" r="3.4">
+                    <circle
+                      cx="0"
+                      cy="0"
+                      fill="#ff6b8b"
+                      filter="url(#contact-orb-dot-glow)"
+                      r="3.4"
+                    >
                       <animateMotion dur="9s" path={ORBIT_RING_PATH} repeatCount="indefinite" />
                     </circle>
                   )}
@@ -152,12 +164,16 @@ export function Contact() {
               <Mail aria-hidden="true" size={20} />
               <span>{contact.email.toUpperCase()}</span>
             </a>
-            <span aria-hidden="true" className="contact-link-sep">|</span>
+            <span aria-hidden="true" className="contact-link-sep">
+              |
+            </span>
             <a className="contact-big-link" href={`tel:${contact.phone.replace(/\s+/g, '')}`}>
               <Phone aria-hidden="true" size={20} />
               <span>{contact.phone}</span>
             </a>
-            <span aria-hidden="true" className="contact-link-sep">|</span>
+            <span aria-hidden="true" className="contact-link-sep">
+              |
+            </span>
             <a
               className="contact-big-link"
               href={contact.whatsappUrl}
@@ -238,15 +254,19 @@ export function Contact() {
               </div>
 
               <div className="terminal-actions-5lab">
-                <button
-                  className="copy-email-btn-5lab"
-                  onClick={markCopied}
-                  type="button"
-                >
-                  {copied ? <Check aria-hidden="true" size={14} /> : <Copy aria-hidden="true" size={14} />}
+                <button className="copy-email-btn-5lab" onClick={markCopied} type="button">
+                  {copied ? (
+                    <Check aria-hidden="true" size={14} />
+                  ) : (
+                    <Copy aria-hidden="true" size={14} />
+                  )}
                   <span>{copied ? 'Copied email' : 'Copy email'}</span>
                 </button>
-                <a className="resume-download-btn-5lab" download href={assetPath(contact.resumePath)}>
+                <a
+                  className="resume-download-btn-5lab"
+                  download
+                  href={assetPath(contact.resumePath)}
+                >
                   <FileDown aria-hidden="true" size={14} />
                   <span>Download Résumé PDF</span>
                 </a>

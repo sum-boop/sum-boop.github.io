@@ -90,18 +90,18 @@ export function About() {
             <span>01</span> / About &amp; Security Profile
           </ChoreoReveal>
           <p className="about-band-lines">
-            <span className="about-band-line">
+            <span className="about-band-line" style={{ transform: 'translateX(-2.5vw)' }}>
               <span className="about-band-line-inner">Precision monitoring,</span>
             </span>
-            <span className="about-band-line">
+            <span className="about-band-line" style={{ transform: 'translateX(3.5vw)' }}>
               <span className="about-band-line-inner">
                 <em className="hero-italic-accent">gate control,</em> and
               </span>
             </span>
-            <span className="about-band-line">
+            <span className="about-band-line" style={{ transform: 'translateX(-1.5vw)' }}>
               <span className="about-band-line-inner">loss prevention across</span>
             </span>
-            <span className="about-band-line">
+            <span className="about-band-line" style={{ transform: 'translateX(3vw)' }}>
               <span className="about-band-line-inner">India&apos;s largest logistics hubs.</span>
             </span>
           </p>
@@ -234,8 +234,7 @@ export function About() {
 
             <div className="about-metrics" ref={metricsRef}>
               {profile.careerMetrics.map((metric, index) => {
-                const MetricIcon =
-                  index === 0 ? Activity : index === 1 ? ShieldCheck : Fingerprint;
+                const MetricIcon = index === 0 ? Activity : index === 1 ? ShieldCheck : Fingerprint;
                 return (
                   <div className="about-metric" key={metric.label}>
                     <MetricIcon aria-hidden="true" size={16} />

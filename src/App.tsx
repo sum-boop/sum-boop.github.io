@@ -193,7 +193,7 @@ function AppContent() {
         Skip to main content
       </a>
       <Navbar onOpenPalette={openPalette} onToggleTheme={toggleTheme} theme={theme} />
-      
+
       <AnimatePresence mode="wait">
         <m.div
           animate={{ opacity: 1 }}

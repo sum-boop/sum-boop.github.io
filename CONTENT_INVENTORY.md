@@ -5,6 +5,7 @@ Complete inventory of every file, section, copy string, visual asset, interactiv
 ---
 
 ## 1. Repository File Map
+
 - **HTML & Entry**: `index.html`, `src/main.tsx`, `src/App.tsx`, `src/sections/PortfolioSections.tsx`
 - **Data Modules (`src/data/`)**: `profile.ts`, `projects.ts`, `skills.ts`, `experience.ts`, `certifications.ts`, `contact.ts`
 - **Styles (`src/styles/`, `src/motion/`)**: `src/styles/tokens.css`, `src/styles/global.css`, `src/motion/motion.css`, `src/motion/tokens.ts`, `src/motion/variants.ts`, `src/motion/primitives.tsx`, `src/motion/ScrollProgress.tsx`, `src/motion/SideSectionRail.tsx`, `src/motion/BackToTop.tsx`

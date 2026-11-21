@@ -116,9 +116,7 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
                   <i
                     aria-hidden="true"
                     className={
-                      site.status === 'active'
-                        ? 'status-pulse'
-                        : 'status-pulse status-pulse--muted'
+                      site.status === 'active' ? 'status-pulse' : 'status-pulse status-pulse--muted'
                     }
                   />
                   {site.status === 'active' ? 'CURRENT' : 'ARCHIVED'}

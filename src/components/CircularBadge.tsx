@@ -15,19 +15,11 @@ export const CircularBadge = memo(function CircularBadge() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <path
-            d="M 68, 68 m -54, 0 a 54,54 0 1,1 108,0 a 54,54 0 1,1 -108,0"
-            id={pathId}
-          />
+          <path d="M 68, 68 m -54, 0 a 54,54 0 1,1 108,0 a 54,54 0 1,1 -108,0" id={pathId} />
         </defs>
         <circle cx="68" cy="68" fill="currentColor" r="2.5" />
         <text className="circular-badge-text">
-          <textPath
-            href={`#${pathId}`}
-            lengthAdjust="spacing"
-            startOffset="0%"
-            textLength="335"
-          >
+          <textPath href={`#${pathId}`} lengthAdjust="spacing" startOffset="0%" textLength="335">
             {BADGE_COPY}
           </textPath>
         </text>

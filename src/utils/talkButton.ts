@@ -45,12 +45,15 @@ export function initTalkButton(): () => void {
   };
 
   const contact = document.getElementById('contact');
-  const trigger = ScrollTrigger.create({
+  const triggerConfig: ScrollTrigger.Vars = {
     start: () => window.innerHeight * 1.5,
-    endTrigger: contact ?? undefined,
     end: contact ? 'top 60%' : 'max',
     onToggle: (self) => setVisible(self.isActive),
-  });
+  };
+  if (contact) {
+    triggerConfig.endTrigger = contact;
+  }
+  const trigger = ScrollTrigger.create(triggerConfig);
 
   return () => {
     trigger.kill();

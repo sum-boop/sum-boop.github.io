@@ -11,7 +11,8 @@ type ShowToastFn = (toast: ToastPayload) => void;
 const STYLE_ID = 'micro-interactions-style';
 const BUTTON_SELECTOR =
   '.button, .btn, .btn-signal, .btn-ghost, .btn-icon, .icon-button, .nav-cta, .feed-filter, .corridor-chip, .channel-tab, .vms-tab, .form-submit';
-const MAGNETIC_SELECTOR = '.nav-cta, .form-submit, .button--primary:not(.magnetic-button), .btn-signal';
+const MAGNETIC_SELECTOR =
+  '.nav-cta, .form-submit, .button--primary:not(.magnetic-button), .btn-signal';
 
 const INJECTED_CSS = `
 /* Task A4: Theme-aware Micro-Interactions */
@@ -579,7 +580,9 @@ export function useMicroInteractions(showToast: ShowToastFn): void {
 
       const glide = desktopNav.querySelector<HTMLElement>('.mi-nav-glide');
       if (!glide) return;
-      const activeLink = desktopNav.querySelector<HTMLElement>('.nav-link[aria-current="location"]');
+      const activeLink = desktopNav.querySelector<HTMLElement>(
+        '.nav-link[aria-current="location"]',
+      );
       if (activeLink) {
         const containerRect = desktopNav.getBoundingClientRect();
         const linkRect = activeLink.getBoundingClientRect();
@@ -673,8 +676,14 @@ export function useMicroInteractions(showToast: ShowToastFn): void {
           const maxOffset = 6;
           const halfSpanX = Math.max(1, rect.width / 2 + 60);
           const halfSpanY = Math.max(1, rect.height / 2 + 60);
-          const tx = Math.max(-maxOffset, Math.min(maxOffset, ((event.clientX - cx) / halfSpanX) * maxOffset * 1.4));
-          const ty = Math.max(-maxOffset, Math.min(maxOffset, ((event.clientY - cy) / halfSpanY) * maxOffset * 1.4));
+          const tx = Math.max(
+            -maxOffset,
+            Math.min(maxOffset, ((event.clientX - cx) / halfSpanX) * maxOffset * 1.4),
+          );
+          const ty = Math.max(
+            -maxOffset,
+            Math.min(maxOffset, ((event.clientY - cy) / halfSpanY) * maxOffset * 1.4),
+          );
 
           const state = magneticStates.get(el) ?? {
             currentX: 0,

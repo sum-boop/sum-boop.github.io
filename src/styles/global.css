@@ -231,7 +231,10 @@ section[id] {
   font-size: 1rem;
   font-weight: 400;
   cursor: pointer;
-  transition: color 180ms ease, border-color 180ms ease, letter-spacing 180ms ease;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    letter-spacing 180ms ease;
 }
 
 .lab-underline-link:hover {
@@ -364,7 +367,9 @@ section[id] {
   letter-spacing: 0;
   white-space: nowrap;
   opacity: 0.76;
-  transition: opacity 180ms ease, color 180ms ease;
+  transition:
+    opacity 180ms ease,
+    color 180ms ease;
 }
 
 .nav-link:hover,
@@ -404,7 +409,7 @@ section[id] {
 
 .site-header[data-nav-tone='light'] .menu-toggle {
   border-color: rgba(34, 34, 106, 0.14);
-  color: #22226A;
+  color: #22226a;
   background-color: rgba(250, 250, 247, 0.72);
 }
 
@@ -666,7 +671,10 @@ section[id] {
   color: var(--color-indigo);
   background-color: var(--color-surface);
   cursor: pointer;
-  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background-color 160ms ease;
 }
 
 .icon-button:hover {
@@ -706,13 +714,12 @@ section[id] {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(
-      circle 68vw at var(--spotlight-x) var(--spotlight-y),
-      rgba(213, 32, 74, 0.88) 0%,
-      rgba(130, 12, 46, 0.56) 44%,
-      rgba(22, 2, 8, 0.94) 85%
-    );
+  background: radial-gradient(
+    circle 68vw at var(--spotlight-x) var(--spotlight-y),
+    rgba(213, 32, 74, 0.88) 0%,
+    rgba(130, 12, 46, 0.56) 44%,
+    rgba(22, 2, 8, 0.94) 85%
+  );
 }
 
 .hero-curtain-grain {
@@ -1217,13 +1224,25 @@ section[id] {
 
 .venn-circle--crimson {
   left: 4%;
-  background: conic-gradient(from 25deg, #ff004d 0deg, rgba(255, 0, 77, 0.72) 190deg, rgba(255, 0, 77, 0.22) 320deg, transparent 360deg);
+  background: conic-gradient(
+    from 25deg,
+    #ff004d 0deg,
+    rgba(255, 0, 77, 0.72) 190deg,
+    rgba(255, 0, 77, 0.22) 320deg,
+    transparent 360deg
+  );
   mix-blend-mode: multiply;
 }
 
 .venn-circle--indigo {
   right: 4%;
-  background: conic-gradient(from 200deg, #3e3db3 0deg, rgba(62, 61, 179, 0.78) 185deg, rgba(62, 61, 179, 0.25) 320deg, transparent 360deg);
+  background: conic-gradient(
+    from 200deg,
+    #3e3db3 0deg,
+    rgba(62, 61, 179, 0.78) 185deg,
+    rgba(62, 61, 179, 0.25) 320deg,
+    transparent 360deg
+  );
   mix-blend-mode: multiply;
 }
 
@@ -1441,7 +1460,9 @@ html[data-theme='dark'] .venn-circle--indigo {
   border: 1px dashed var(--color-border-strong);
   border-radius: 0;
   background-color: var(--color-surface);
-  transition: border-color 160ms ease, background-color 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .employer-chip:hover {
@@ -1511,7 +1532,9 @@ html[data-theme='dark'] .venn-circle--indigo {
   border-radius: 0;
   background-color: var(--color-surface);
   cursor: pointer;
-  transition: border-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .skill-card:hover {
@@ -1998,7 +2021,9 @@ html[data-theme='dark'] .venn-circle--indigo {
   background-color: var(--color-surface);
   text-align: left;
   cursor: pointer;
-  transition: border-color 160ms ease, background-color 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
 
 .site-row--active {
@@ -2065,7 +2090,9 @@ html[data-theme='dark'] .venn-circle--indigo {
   font-size: 0.94rem;
   font-weight: 500;
   cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
 }
 
 .feed-filter:hover {
@@ -2715,7 +2742,9 @@ button.feed-card.feed-card--vms-active {
   font-size: 1.5rem;
   font-weight: 400;
   cursor: pointer;
-  transition: color 160ms ease, border-color 160ms ease;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
 }
 
 .contact-lets-chat-link:hover {
@@ -2883,7 +2912,9 @@ button.feed-card.feed-card--vms-active {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 0;
   background-color: #0a0a0e;
-  transition: border-color 160ms ease, transform 160ms var(--ease-out);
+  transition:
+    border-color 160ms ease,
+    transform 160ms var(--ease-out);
 }
 
 .social-card:hover {
@@ -3048,7 +3079,9 @@ button.feed-card.feed-card--vms-active {
   background-color: #000000;
   font-size: 0.96rem;
   resize: vertical;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .form-field input:focus,
@@ -3065,7 +3098,9 @@ button.feed-card.feed-card--vms-active {
   font-size: 0.9rem;
   pointer-events: none;
   transform-origin: left top;
-  transition: transform 160ms var(--ease-out), color 160ms ease;
+  transition:
+    transform 160ms var(--ease-out),
+    color 160ms ease;
 }
 
 .form-field input:focus + label,
@@ -4216,7 +4251,12 @@ button.feed-card.feed-card--vms-active {
     display: grid;
     place-items: center;
     padding: 0;
-    background: radial-gradient(circle at 38% 36%, #e14270 0%, #d63360 66%, rgba(214, 51, 96, 0.35) 100%);
+    background: radial-gradient(
+      circle at 38% 36%,
+      #e14270 0%,
+      #d63360 66%,
+      rgba(214, 51, 96, 0.35) 100%
+    );
     font-size: 1rem;
     box-shadow: 0 0 42px rgba(214, 51, 96, 0.42);
   }
@@ -4266,13 +4306,12 @@ button.feed-card.feed-card--vms-active {
   }
 
   .hero-curtain::before {
-    background:
-      radial-gradient(
-        circle 98vw at 50% 24%,
-        rgba(213, 32, 74, 0.96) 0%,
-        rgba(130, 12, 46, 0.62) 48%,
-        rgba(22, 2, 8, 0.96) 86%
-      );
+    background: radial-gradient(
+      circle 98vw at 50% 24%,
+      rgba(213, 32, 74, 0.96) 0%,
+      rgba(130, 12, 46, 0.62) 48%,
+      rgba(22, 2, 8, 0.96) 86%
+    );
   }
 
   .hero-orb-stage {
@@ -4541,7 +4580,7 @@ button.feed-card.feed-card--vms-active {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle at 65% 30%, #FF223A, #A80486 45%, #3B1D8F 75%, #2A0410);
+  background: radial-gradient(circle at 65% 30%, #ff223a, #a80486 45%, #3b1d8f 75%, #2a0410);
   box-shadow:
     0 0 80px rgba(255, 34, 58, 0.32),
     0 0 140px rgba(168, 4, 134, 0.24);
@@ -4639,7 +4678,9 @@ button.feed-card.feed-card--vms-active {
   border-radius: 50%;
   color: #ffffff;
   background: transparent;
-  transition: border-color 200ms ease, background-color 200ms ease;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
   animation: hero-bounce 2s ease-in-out infinite;
 }
 
@@ -4649,7 +4690,8 @@ button.feed-card.feed-card--vms-active {
 }
 
 @keyframes hero-bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -4687,7 +4729,10 @@ button.feed-card.feed-card--vms-active {
   background-color: #0a0a0e;
   color: #ffffff;
   text-decoration: none;
-  transition: border-color 240ms ease, background-color 240ms ease, transform 240ms ease;
+  transition:
+    border-color 240ms ease,
+    background-color 240ms ease,
+    transform 240ms ease;
 }
 
 .hero-panel-card-5lab:hover {
@@ -5051,7 +5096,9 @@ button.feed-card.feed-card--vms-active {
   border: 1px solid var(--hairline);
   background-color: transparent;
   color: var(--ink);
-  transition: border-color 220ms ease, transform 220ms ease;
+  transition:
+    border-color 220ms ease,
+    transform 220ms ease;
 }
 
 .skill-cell-5lab:hover,
@@ -5155,7 +5202,9 @@ button.feed-card.feed-card--vms-active {
 .experience-editorial-row-5lab {
   padding-block: 2.25rem;
   border-bottom: 1px dotted var(--hairline);
-  transition: transform 220ms ease, border-color 220ms ease;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease;
 }
 
 .experience-editorial-row-5lab:hover {
@@ -5349,7 +5398,9 @@ button.feed-card.feed-card--vms-active {
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  transition: border-color 200ms ease, transform 200ms ease;
+  transition:
+    border-color 200ms ease,
+    transform 200ms ease;
 }
 
 .site-row-5lab:hover,
@@ -5400,7 +5451,9 @@ button.feed-card.feed-card--vms-active {
   border: 1px dotted var(--hairline);
   background-color: transparent;
   color: var(--ink);
-  transition: border-color 200ms ease, transform 200ms ease;
+  transition:
+    border-color 200ms ease,
+    transform 200ms ease;
 }
 
 .credential-card-5lab:hover {
@@ -5495,7 +5548,9 @@ button.feed-card.feed-card--vms-active {
   font: 500 1rem var(--font-body);
   cursor: pointer;
   box-shadow: 0 0 35px rgba(255, 34, 58, 0.45);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .contact-lets-chat-btn-5lab:hover {
@@ -5520,7 +5575,9 @@ button.feed-card.feed-card--vms-active {
   font: 600 clamp(1.1rem, 2vw, 1.65rem) var(--font-mono);
   color: #ffffff;
   text-decoration: none;
-  transition: color 200ms ease, border-color 200ms ease;
+  transition:
+    color 200ms ease,
+    border-color 200ms ease;
 }
 
 .contact-big-link:hover {
@@ -5802,7 +5859,11 @@ button.feed-card.feed-card--vms-active {
   }
 }
 
-
-
-
-
+/* Performance: Isolate offscreen complex layout subtrees until scroll approaches */
+#footprint,
+#operations,
+#experience,
+#certifications {
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}

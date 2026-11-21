@@ -200,7 +200,9 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
   // BriefCam & Smart Client L4 state
   const [showBriefCam, setShowBriefCam] = useState(false);
   const [briefCamModule, setBriefCamModule] = useState<'review' | 'respond' | 'research'>('review');
-  const [consoleTab, setConsoleTab] = useState<'views' | 'exports' | 'search' | 'alarms' | 'monitor'>('views');
+  const [consoleTab, setConsoleTab] = useState<
+    'views' | 'exports' | 'search' | 'alarms' | 'monitor'
+  >('views');
 
   const initialResolvedTheme = forceTheme ?? resolveLiveTheme(theme);
   const explodeTargetRef = useRef(0);
@@ -585,6 +587,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         softboxLight.color.copy(state.softbox);
         softboxLight.intensity = state.softboxIntensity;
       }
+
 
       if (bloomPass) {
         bloomPass.strength = state.bloomStrength;

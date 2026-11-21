@@ -28,12 +28,13 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   }
 
   const instance = new Lenis({
-    duration: 1.2,
+    duration: 1.1,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     orientation: 'vertical',
     gestureOrientation: 'vertical',
     smoothWheel: true,
-    touchMultiplier: 2,
+    touchMultiplier: 1,
+    syncTouch: false,
   });
 
   lenisInstance = instance;
@@ -43,7 +44,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
     lenisInstance?.raf(time * 1000);
   };
   gsap.ticker.add(tickerCallback);
-  gsap.ticker.lagSmoothing(0);
+  gsap.ticker.lagSmoothing(500, 33);
 
   // Navbar remains visible at all scroll positions to match 5lab.co navigation chrome
   const header = document.getElementById('site-navigation');
@@ -82,8 +83,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
         trigger: heading,
         start: 'top 85%',
         end: 'bottom top',
-        onEnter: () =>
-          scrambleReveal(heading, { duration: 0.55, chars: 'upperAndLowerCase' }),
+        onEnter: () => scrambleReveal(heading, { duration: 0.55, chars: 'upperAndLowerCase' }),
         onLeave: () => restoreScramble(heading),
         onLeaveBack: () => restoreScramble(heading),
       });
@@ -92,7 +92,9 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   });
 
   // Fade-and-rise reveals for cards, paragraphs, and images
-  const revealElements = document.querySelectorAll('.work-card-5lab, .skill-cell-5lab, .experience-editorial-row-5lab, .credential-card-5lab, .footprint-gmap-card-5lab, .briefcam-alert-card, .employer-chip, .about-metric');
+  const revealElements = document.querySelectorAll(
+    '.work-card-5lab, .skill-cell-5lab, .experience-editorial-row-5lab, .credential-card-5lab, .footprint-gmap-card-5lab, .briefcam-alert-card, .employer-chip, .about-metric',
+  );
   revealElements.forEach((el) => {
     const st = ScrollTrigger.create({
       trigger: el,
@@ -102,7 +104,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
         gsap.fromTo(
           el,
           { y: 40, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out' }
+          { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out' },
         );
       },
     });
@@ -110,7 +112,9 @@ export function initSmoothScroll(): { destroy: () => void } | null {
   });
 
   // Subtle Parallax on large imagery / cards
-  const parallaxItems = document.querySelectorAll('.identity-image, .workstation-frame-5lab, .footprint-gmap-card-5lab');
+  const parallaxItems = document.querySelectorAll(
+    '.identity-image, .workstation-frame-5lab, .footprint-gmap-card-5lab',
+  );
   parallaxItems.forEach((item) => {
     const st = ScrollTrigger.create({
       trigger: item,
@@ -135,7 +139,8 @@ export function initSmoothScroll(): { destroy: () => void } | null {
     const target = document.getElementById(hash.slice(1));
     if (!target || !lenisInstance) return;
     event.preventDefault();
-    const fromNav = anchor.closest('#site-navigation, .mobile-nav-overlay, [data-curtain]') !== null;
+    const fromNav =
+      anchor.closest('#site-navigation, .mobile-nav-overlay, [data-curtain]') !== null;
     if (fromNav) {
       // 5lab-style page transition: curtain closes, we jump while covered, curtain opens.
       playPageCurtain(() => {

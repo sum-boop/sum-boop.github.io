@@ -7,7 +7,7 @@ import * as THREE from 'three';
 const CCTVShader = {
   uniforms: {
     uTime: { value: 0 },
-    uSeed: { value: 1.0 }
+    uSeed: { value: 1.0 },
   },
   vertexShader: `
     varying vec2 vUv;
@@ -36,7 +36,7 @@ const CCTVShader = {
       col += noise;
       gl_FragColor = vec4(col, 1.0);
     }
-  `
+  `,
 };
 
 function ScreenFrame({
@@ -154,7 +154,13 @@ function ScreenFrame({
       }}
     >
       {/* Bezel */}
-      <RoundedBox args={[width, height, 0.06]} radius={0.05} smoothness={4} castShadow receiveShadow>
+      <RoundedBox
+        args={[width, height, 0.06]}
+        radius={0.05}
+        smoothness={4}
+        castShadow
+        receiveShadow
+      >
         <primitive object={bezelMat} attach="material" />
       </RoundedBox>
 
@@ -261,7 +267,7 @@ function TabButton({ label, active, onClick, position }) {
   const { scale, emissive } = useSpring({
     scale: hovered ? 1.05 : 1,
     emissive: hovered || active ? 1.8 : 0.6,
-    config: { tension: 300, friction: 20 }
+    config: { tension: 300, friction: 20 },
   });
 
   return (
@@ -338,7 +344,7 @@ export default function HolographicScreens({ activeTab, setActiveTab, onFocus, c
         mat.uniforms.uTime.value = t;
       }
     });
-    setPlayheadX(-1.0 + (t * 0.3) % 2.0);
+    setPlayheadX(-1.0 + ((t * 0.3) % 2.0));
   });
 
   const cwt1 = useMemo(() => {
@@ -539,9 +545,7 @@ export default function HolographicScreens({ activeTab, setActiveTab, onFocus, c
         </group>
 
         {/* Content area for BriefCamEngine */}
-        <group position={[0, -0.1, 0]}>
-          {children}
-        </group>
+        <group position={[0, -0.1, 0]}>{children}</group>
       </ScreenFrame>
 
       {/* 5. HEATMAP SCREEN (4.6, 1.25, -0.9) */}

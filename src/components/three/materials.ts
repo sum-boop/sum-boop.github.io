@@ -193,7 +193,7 @@ function createDustTexture(): THREE.CanvasTexture {
 
 function formatLiveTimecode(t: number): string {
   const totalSec = Math.floor(t);
-  const hh = String(19 + Math.floor(totalSec / 3600) % 5).padStart(2, '0');
+  const hh = String(19 + (Math.floor(totalSec / 3600) % 5)).padStart(2, '0');
   const mm = String((42 + Math.floor(totalSec / 60)) % 60).padStart(2, '0');
   const ss = String(totalSec % 60).padStart(2, '0');
   const ff = String(Math.floor((t % 1) * 30)).padStart(2, '0');
@@ -483,10 +483,7 @@ export function drawSmartClientAuxCanvas(
   });
 }
 
-export function drawBriefCamCanvas(
-  canvas: HTMLCanvasElement,
-  state: SmartClientRenderState,
-): void {
+export function drawBriefCamCanvas(canvas: HTMLCanvasElement, state: SmartClientRenderState): void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const w = canvas.width;

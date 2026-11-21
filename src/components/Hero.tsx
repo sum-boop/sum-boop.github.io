@@ -203,7 +203,10 @@ export const Hero = memo(function Hero(props: HeroProps) {
             </div>
             <div className="hero-panel-body">
               <h3>Deployments &amp; Cameras</h3>
-              <p>32+ IP cameras across Patli-NCR logistics hubs, Milestone XProtect VMS &amp; GIGO gate control.</p>
+              <p>
+                32+ IP cameras across Patli-NCR logistics hubs, Milestone XProtect VMS &amp; GIGO
+                gate control.
+              </p>
             </div>
             <div className="hero-panel-action">
               <span>View live deployments</span>
@@ -218,7 +221,10 @@ export const Hero = memo(function Hero(props: HeroProps) {
             </div>
             <div className="hero-panel-body">
               <h3>3D Command Workstation</h3>
-              <p>Interactive 3D VMS control room simulator, BriefCam L4 video analytics &amp; alarm telemetry.</p>
+              <p>
+                Interactive 3D VMS control room simulator, BriefCam L4 video analytics &amp; alarm
+                telemetry.
+              </p>
             </div>
             <div className="hero-panel-action">
               <span>Launch workstation</span>

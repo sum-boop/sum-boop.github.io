@@ -130,7 +130,9 @@ export function splitText(
     return Array.from(el.querySelectorAll<HTMLElement>('[data-split-unit="true"]'));
   }
 
-  const originalText = (el.dataset.originalText ?? el.textContent ?? '').replace(/\s+/g, ' ').trim();
+  const originalText = (el.dataset.originalText ?? el.textContent ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
   if (originalText) {
     el.dataset.originalText = originalText;
     if (!el.getAttribute('aria-label')) {

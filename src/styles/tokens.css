@@ -105,15 +105,15 @@ html[data-theme='dark'] {
 }
 
 [data-tone='light'] {
-  --ink: #22226A;
+  --ink: #22226a;
   --ink-muted: rgba(34, 34, 106, 0.62);
   --hairline: rgba(34, 34, 106, 0.14);
 
-  --color-ink: #22226A;
+  --color-ink: #22226a;
   --color-ink-secondary: rgba(34, 34, 106, 0.78);
   --color-ink-muted: rgba(34, 34, 106, 0.62);
-  --color-indigo: #22226A;
-  --color-foreground: #22226A;
+  --color-indigo: #22226a;
+  --color-foreground: #22226a;
   --color-text-secondary: rgba(34, 34, 106, 0.78);
   --color-text-muted: rgba(34, 34, 106, 0.62);
   --color-surface: rgba(34, 34, 106, 0.04);
@@ -124,7 +124,7 @@ html[data-theme='dark'] {
 }
 
 [data-tone='dark'] {
-  --ink: #FFFFFF;
+  --ink: #ffffff;
   --ink-muted: #888888;
   --hairline: rgba(255, 255, 255, 0.12);
 }

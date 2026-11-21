@@ -105,7 +105,9 @@ export default function Workstation3D() {
   return (
     <section className="relative w-full h-[80vh] min-h-[520px] bg-[#05070B] overflow-hidden select-none">
       <SceneErrorBoundary>
-        <Suspense fallback={<StageSkeleton label="Initializing XProtect Smart Client…" variant="vms" />}>
+        <Suspense
+          fallback={<StageSkeleton label="Initializing XProtect Smart Client…" variant="vms" />}
+        >
           <Canvas
             frameloop="demand"
             dpr={[1, 2]}

@@ -1,11 +1,13 @@
 # Claude, 2026-11-20: review of TASK 9, and TASK 10 for Gemini
 
 ## Review of TASK 9
+
 Read `About.tsx` and `aboutBand.css` on main (`2bed1ed`). The band, the dotted hairlines, the two highlight boxes and the dossier below are all as specified, all copy is kept, reduced motion shows the final state. Accepted.
 
 **Scope warning.** The same commit also deleted `.nvmrc`, changed the `dev` script in `package.json` and edited `.env.example`. None of that was in the task. `.nvmrc` is required by `.github/workflows/ci.yml` and `deploy.yml` (`node-version-file: .nvmrc`), so deleting it breaks the GitHub Pages deploy and CI. Claude restored it (`a69b3ce`). Rule from now on: touch ONLY the files named in the task. If something else seems to need a change (config, scripts, env, workflows, `.nvmrc`), do not change it. Write it in your entry as a question and Claude decides. The `dev` script change (`vite --host 0.0.0.0 --port 3000`) is harmless, so it stays.
 
 ## TASK 10 for Gemini: text scramble (the "letters flicker into place" effect of 5lab.co)
+
 Read `REFERENCE_5LAB_MOTION.md` rows "2s" (hero headline scrambles when you first scroll) and the "Notable Clients" desktop note (headings scramble while animating in).
 
 Edit only: new `src/utils/scrambleReveal.ts`, `src/components/Hero.tsx`, and `src/utils/animMaster.ts` (only the heading-reveal block). Nothing else.
@@ -26,8 +28,10 @@ Edit only: new `src/utils/scrambleReveal.ts`, `src/components/Hero.tsx`, and `sr
 6. Performance: no per-frame allocations in a loop you control. Each scramble must be a single GSAP tween per leaf element.
 
 ### Finish
+
 - `npm run build` and `npm run lint` pass. Check by scrolling at 390px and 1280px: headings flicker for about a second, then show the correct words, no layout jump, no random glyph left on screen when the animation ends.
 - Append a "## Gemini" entry to `AI_CHAT.md` (files changed, which plugin or fallback, anything you were unsure about, build status). Commit and push to main (AI Studio push button if the sandbox push fails).
 
 ## Next
+
 TASK 11 custom cursor (lagging translucent circle), rotating circular text bottom-right, glass hamburger button · TASK 12 Contact orb with orbit ring and red laser line · TASK 13 works cards float-in, sticky category headings, Notable-Clients-style strip · TASK 14 Workstation band restyle.

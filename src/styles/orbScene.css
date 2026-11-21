@@ -429,7 +429,9 @@
   text-decoration: none;
   border-bottom: 1px solid rgba(248, 56, 88, 0.45);
   padding-bottom: 0.2rem;
-  transition: color 160ms ease, border-color 160ms ease;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
 }
 
 .orb-lilac-cta:hover {
@@ -475,7 +477,9 @@
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
-  transition: opacity 180ms ease, color 180ms ease;
+  transition:
+    opacity 180ms ease,
+    color 180ms ease;
 }
 
 .orb-about-link:hover {

@@ -480,10 +480,7 @@ export function buildSurveillanceAssembly(materials: MaterialBundle): Surveillan
   bGlassMesh.renderOrder = 3;
   briefcamMonitor.add(bGlassMesh);
 
-  const bLedBar = new THREE.Mesh(
-    new THREE.BoxGeometry(0.28, 0.012, 0.018),
-    materials.accentTrim,
-  );
+  const bLedBar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.012, 0.018), materials.accentTrim);
   geometries.push(bLedBar.geometry);
   bLedBar.position.set(0, -0.44, 0.036);
   briefcamMonitor.add(bLedBar);

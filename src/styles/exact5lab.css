@@ -110,18 +110,18 @@ html #hero .hero-line-indent-exact {
 
 @media (max-width: 767px) {
   html #hero.hero-section-5lab {
-    justify-content: flex-end;
+    justify-content: center;
     padding: 5.5rem var(--gutter) 4.25rem;
   }
 
   html #hero .hero-content-shell-5lab {
-    justify-content: flex-end;
+    justify-content: center;
     min-height: auto;
   }
 
   html #hero .hero-orb-layer {
-    --orb-size: min(50vw, 200px);
-    --orb-top: 34%;
+    --orb-size: min(48vw, 190px);
+    --orb-top: 50%;
   }
 
   html #hero .hero-title-5lab-exact {
@@ -131,7 +131,7 @@ html #hero .hero-line-indent-exact {
   }
 
   html #hero .hero-line {
-    white-space: nowrap;
+    white-space: normal;
   }
 
   html #hero .hero-line-indent-exact {
@@ -249,7 +249,6 @@ html #contact .contact-big-link:hover {
     margin: 2.5rem auto 1.5rem;
   }
 }
-
 
 /* --- Works: one large card per screen, arrow before the title (5lab /works) --- */
 html #operations .works-group-5lab {

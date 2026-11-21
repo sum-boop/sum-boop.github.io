@@ -73,7 +73,9 @@
   background: transparent;
   color: var(--ink-muted);
   cursor: pointer;
-  transition: color 280ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    color 280ms ease,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #skills .skill-cell-action-btn:focus-visible {

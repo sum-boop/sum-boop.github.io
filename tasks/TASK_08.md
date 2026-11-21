@@ -1,12 +1,15 @@
 # Claude, 2026-11-19: review of TASK 7, and TASK 8 for Gemini
 
 ## Rule update from the user (applies from now on)
+
 The user gave Claude a free hand: existing content, including the 3D workstation, About, Skills, Experience, Footprint and Credentials, may be restructured, restyled, moved or re-laid-out to match 5lab.co. The one condition is: do not lose the meaning. Every fact, number, link, deployment, employer, credential and feature must still exist somewhere on the page (you may move it, shrink it, group it or put it behind a click). Rule 3 in `AI_CHAT.md` is relaxed to this. Never invent facts about Sumit. If a task needs new wording, reuse the existing copy and say in your entry which wording you changed.
 
 ## Review of TASK 7
+
 Read `src/components/OrbScene.tsx` on main (`762130f`). It matches the brief: sticky stage, one scrubbed timeline, disc with crosshair and 48 dots, two circles with multiply blend moving to the Venn offsets, drawn hairlines, both labels as real links with the original panel text, caption, reduced-motion branch, `gsap.matchMedia` for desktop and mobile. TASK 7 is accepted from the code. (Claude still cannot see the live render.)
 
 ## TASK 8 for Gemini: orb scene, part 2 (iris orb, orbit ring, lilac wash)
+
 Goal: finish the scene so it ends like 5lab.co's "About" hand-off: the two circles merge into one dark indigo orb with a mark in the middle, a dotted orbit ring circles it, and a soft lilac panel wipes in from the left. Read `REFERENCE_5LAB_MOTION.md` rows "9-11s" and "12s About".
 
 Edit only `src/components/OrbScene.tsx`, `src/styles/orbScene.css`, and `src/utils/pagePalette.ts` only if the scene's tone needs a tweak. Do not touch other sections.
@@ -25,9 +28,11 @@ Continue the SAME timeline (positions 0 to 1 over the whole scene, `scrub: true`
 10. Performance: only `transform`, `opacity`, `clip-path`. Do not add `filter: blur` on large elements while scrolling. The soft streak blur may be baked into the gradient or kept to the small streak layers only. Add `will-change: transform, opacity` to the orb layers only while the scene is on screen (set it via ScrollTrigger `onToggle`).
 
 ### Finish
+
 - `npm run build` and `npm run lint` must pass. Check at 390px and 1280px wide.
 - Append a "## Gemini" entry in `AI_CHAT.md`: files changed, anything you could not match, what you chose for the iris mark, build status.
 - Commit and push to main. If push fails in the sandbox, use the AI Studio GitHub push button and say so in the entry.
 
 ## Next
+
 TASK 9 will restyle About as the 5lab.co "Award-winning" band plus the highlight-box statement. The existing copy already fits the pattern: "Calm eyes. Clear records." becomes the highlighted pair, like "Designers who code + Coders who design". The operator dossier (photo, paragraphs, employers, metrics) stays, but moves lower and gets lighter. After that: TASK 10 text effects, TASK 11 cursor, circular text and glass menu, TASK 12 Contact orb, TASK 13 works cards and Notable-Clients-style strip, TASK 14 Workstation band restyle.

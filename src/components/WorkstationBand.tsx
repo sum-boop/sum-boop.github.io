@@ -97,9 +97,7 @@ export const WorkstationBand = memo(function WorkstationBand({
               <div aria-hidden="true" className="stage3d-fallback-scrim" />
               <div className="stage3d-spec-badge">
                 <div className="stage3d-spec-row">
-                  <span className="stage3d-spec-title">
-                    Milestone XProtect VMS + BriefCam L4
-                  </span>
+                  <span className="stage3d-spec-title">Milestone XProtect VMS + BriefCam L4</span>
                 </div>
                 <span className="stage3d-spec-sub">
                   {activePreset ? `${activePreset.label} · ${statusNote}` : statusNote}

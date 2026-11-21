@@ -17,7 +17,9 @@ export const Footer = memo(function Footer() {
       <div className="footer-shell-5lab">
         <div className="footer-left-5lab">
           <span>© 2026 {profile.name}. All rights reserved.</span>
-          <span aria-hidden="true" className="footer-sep-5lab">|</span>
+          <span aria-hidden="true" className="footer-sep-5lab">
+            |
+          </span>
           <span>Patli, Haryana, India</span>
         </div>
 

@@ -19,7 +19,14 @@ export type SpotlightCardProps = React.HTMLAttributes<HTMLDivElement> & {
   theme?: 'dark' | 'light';
 };
 
-type Palette = { surface: string; border: string; shadow: string; light: string; fill: number; edge: number };
+type Palette = {
+  surface: string;
+  border: string;
+  shadow: string;
+  light: string;
+  fill: number;
+  edge: number;
+};
 
 type Settings = {
   shape: SpotlightShape;
@@ -42,7 +49,7 @@ const THEMES: Record<'dark' | 'light', Palette> = {
     shadow: '0 24px 48px -24px rgba(0, 0, 0, 0.6)',
     light: '#ffffff',
     fill: 1,
-    edge: 1
+    edge: 1,
   },
   light: {
     surface: '#ffffff',
@@ -50,8 +57,8 @@ const THEMES: Record<'dark' | 'light', Palette> = {
     shadow: '0 1px 2px rgba(24, 24, 27, 0.04), 0 18px 40px -20px rgba(24, 24, 27, 0.16)',
     light: '#18181b',
     fill: 0.28,
-    edge: 0.7
-  }
+    edge: 0.7,
+  },
 };
 
 const SHAPES: SpotlightShape[] = ['circle', 'beam'];
@@ -117,7 +124,7 @@ const SpotlightCard = ({
     smoothing: clamp(smoothing, 0, 1),
     ambient,
     flare,
-    grain: clamp(grain, 0, 1)
+    grain: clamp(grain, 0, 1),
   };
   const settingsRef = useRef(settings);
   useEffect(() => {
@@ -136,7 +143,15 @@ const SpotlightCard = ({
     if (!root || !light || !noise || !edge) return undefined;
 
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-    const state = { x: 0, y: 0, presence: 0, flare: 0, time: Math.random() * 60, pressed: false, visible: true };
+    const state = {
+      x: 0,
+      y: 0,
+      presence: 0,
+      flare: 0,
+      time: Math.random() * 60,
+      pressed: false,
+      visible: true,
+    };
     const pointer = { x: 0, y: 0, active: false };
     const drawn = { light: '', edge: '', noise: '' };
     let focus: Element | null = null;
@@ -167,7 +182,8 @@ const SpotlightCard = ({
       }
       light.style.opacity = String(Math.min(1, state.presence * s.intensity * boost));
       edge.style.opacity = String(Math.min(1, state.presence * s.borderGlow * boost));
-      const grainy = s.grain > 0 ? gradient(s, size, state.x, state.y, '#000 0%, transparent 100%') : 'none';
+      const grainy =
+        s.grain > 0 ? gradient(s, size, state.x, state.y, '#000 0%, transparent 100%') : 'none';
       if (grainy !== drawn.noise) {
         drawn.noise = grainy;
         noise.style.webkitMaskImage = grainy;
@@ -194,7 +210,10 @@ const SpotlightCard = ({
       } else if (pointer.active) {
         tx = pointer.x - rect.left;
         ty = pointer.y - rect.top;
-        const gap = Math.hypot(Math.max(0, -tx, tx - rect.width), Math.max(0, -ty, ty - rect.height));
+        const gap = Math.hypot(
+          Math.max(0, -tx, tx - rect.width),
+          Math.max(0, -ty, ty - rect.height),
+        );
         if (gap === 0) target = 1;
         else if (s.proximity > 0) target = Math.max(0, 1 - gap / s.proximity) ** 2;
       }
@@ -209,7 +228,8 @@ const SpotlightCard = ({
         state.x = tx;
         state.y = ty;
       }
-      const follow = reduce || s.smoothing === 0 ? 1 : 1 - Math.exp(-dt / (0.015 + s.smoothing * 0.22));
+      const follow =
+        reduce || s.smoothing === 0 ? 1 : 1 - Math.exp(-dt / (0.015 + s.smoothing * 0.22));
       state.x += (tx - state.x) * follow;
       state.y += (ty - state.y) * follow;
       const fade = reduce ? 1 : 1 - Math.exp(-dt / (target > state.presence ? 0.1 : 0.32));
@@ -235,7 +255,12 @@ const SpotlightCard = ({
       pointer.x = event.clientX;
       pointer.y = event.clientY;
       pointer.active = true;
-      if (state.presence > 0 || settingsRef.current.proximity > 0 || root.contains(event.target as Node | null)) wake();
+      if (
+        state.presence > 0 ||
+        settingsRef.current.proximity > 0 ||
+        root.contains(event.target as Node | null)
+      )
+        wake();
     };
     const onOut = (event: PointerEvent) => {
       if (event.relatedTarget) return;
@@ -269,8 +294,8 @@ const SpotlightCard = ({
       if (pointer.active || state.presence > 0) wake();
     };
 
-    const observer = new IntersectionObserver(entries => {
-      state.visible = entries.some(entry => entry.isIntersecting);
+    const observer = new IntersectionObserver((entries) => {
+      state.visible = entries.some((entry) => entry.isIntersecting);
       if (state.visible) wake();
     });
     observer.observe(root);
@@ -309,7 +334,7 @@ const SpotlightCard = ({
           '--spotlight-card-surface': palette.surface,
           '--spotlight-card-border': palette.border,
           '--spotlight-card-shadow': palette.shadow,
-          ...style
+          ...style,
         } as React.CSSProperties
       }
       {...rest}

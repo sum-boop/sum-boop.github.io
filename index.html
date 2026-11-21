@@ -28,7 +28,10 @@
     <link
       as="style"
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400;1,6..72,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
-      onload="this.onload=null;this.rel='stylesheet'"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
       rel="preload"
     />
     <noscript>
@@ -38,9 +41,25 @@
       />
     </noscript>
     <style>
-      html{background:#000000;color:#ffffff;font-family:'Plus Jakarta Sans','Instrument Sans',system-ui,-apple-system,sans-serif}
-      html[data-theme="dark"]{background:#000000;color:#ffffff}
-      body{margin:0;background:inherit;color:inherit}
+      html {
+        background: #000000;
+        color: #ffffff;
+        font-family:
+          'Plus Jakarta Sans',
+          'Instrument Sans',
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      html[data-theme='dark'] {
+        background: #000000;
+        color: #ffffff;
+      }
+      body {
+        margin: 0;
+        background: inherit;
+        color: inherit;
+      }
     </style>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Sumit Anand" />

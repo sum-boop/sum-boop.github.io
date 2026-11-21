@@ -4,7 +4,11 @@ import '@/styles/servicesDark.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const SECTION_TONES: readonly { id: string; tone: 'hero' | 'light' | 'dark'; paletteTone: 'light' | 'dark' }[] = [
+const SECTION_TONES: readonly {
+  id: string;
+  tone: 'hero' | 'light' | 'dark';
+  paletteTone: 'light' | 'dark';
+}[] = [
   { id: 'hero', tone: 'hero', paletteTone: 'dark' },
   { id: 'scene', tone: 'light', paletteTone: 'light' },
   { id: 'about', tone: 'light', paletteTone: 'light' },

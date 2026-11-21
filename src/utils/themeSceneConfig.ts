@@ -176,7 +176,12 @@ function lerpNumber(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-function lerpHexInto(target: THREE.Color, darkHex: number, lightHex: number, t: number): THREE.Color {
+function lerpHexInto(
+  target: THREE.Color,
+  darkHex: number,
+  lightHex: number,
+  t: number,
+): THREE.Color {
   _darkColor.setHex(darkHex);
   _lightColor.setHex(lightHex);
   return target.copy(_darkColor).lerp(_lightColor, t);

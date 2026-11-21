@@ -143,11 +143,7 @@ export const OrbScene = memo(function OrbScene() {
           0.22,
         );
 
-        tl.to(
-          redCircleEl,
-          { xPercent: redX, yPercent: redY, rotation: 40, duration: 0.27 },
-          0.26,
-        )
+        tl.to(redCircleEl, { xPercent: redX, yPercent: redY, rotation: 40, duration: 0.27 }, 0.26)
           .to(
             redCircleEl,
             {

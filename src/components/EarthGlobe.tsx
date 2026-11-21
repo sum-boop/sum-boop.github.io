@@ -304,10 +304,7 @@ function projectPoint(
   return { px: x1, py: y2, pz: z2 };
 }
 
-export const EarthGlobe = memo(function EarthGlobe({
-  theme,
-  decorative = false,
-}: EarthGlobeProps) {
+export const EarthGlobe = memo(function EarthGlobe({ theme, decorative = false }: EarthGlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasFailed, setCanvasFailed] = useState(false);
@@ -680,9 +677,7 @@ export const EarthGlobe = memo(function EarthGlobe({
       ) : (
         <canvas
           aria-label={
-            decorative
-              ? undefined
-              : 'Interactive 3D Earth globe highlighting Patli, Haryana, India'
+            decorative ? undefined : 'Interactive 3D Earth globe highlighting Patli, Haryana, India'
           }
           className="earth-canvas"
           height={480}

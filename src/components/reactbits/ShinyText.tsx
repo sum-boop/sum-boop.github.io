@@ -49,9 +49,9 @@ interface Settings {
 }
 
 const EASINGS: Record<Easing, (t: number) => number> = {
-  linear: t => t,
-  smooth: t => 0.5 - Math.cos(Math.PI * t) / 2,
-  snappy: t => (t < 0.5 ? 16 * Math.pow(t, 5) : 1 - Math.pow(-2 * t + 2, 5) / 2)
+  linear: (t) => t,
+  smooth: (t) => 0.5 - Math.cos(Math.PI * t) / 2,
+  snappy: (t) => (t < 0.5 ? 16 * Math.pow(t, 5) : 1 - Math.pow(-2 * t + 2, 5) / 2),
 };
 const TRIGGERS: Trigger[] = ['loop', 'hover', 'view'];
 const FALLOFF = [0, 0.2, 0.4, 0.6, 0.8, 1];
@@ -68,11 +68,16 @@ const parseColor = (value: string): number[] | null => {
   paint.fillStyle = value;
   const resolved = String(paint.fillStyle);
   if (resolved.startsWith('#')) {
-    return [1, 3, 5].map(i => parseInt(resolved.slice(i, i + 2), 16)).concat(1);
+    return [1, 3, 5].map((i) => parseInt(resolved.slice(i, i + 2), 16)).concat(1);
   }
   const parts = resolved.match(/[\d.]+/g);
   if (!parts || parts.length < 3) return null;
-  return [Number(parts[0]), Number(parts[1]), Number(parts[2]), parts.length > 3 ? Number(parts[3]) : 1];
+  return [
+    Number(parts[0]),
+    Number(parts[1]),
+    Number(parts[2]),
+    parts.length > 3 ? Number(parts[3]) : 1,
+  ];
 };
 
 const blend = (from: number[], to: number[], amount: number) => {
@@ -86,7 +91,10 @@ const blend = (from: number[], to: number[], amount: number) => {
   const to2 = to[2] ?? 0;
 
   const channel = (a: number, b: number) =>
-    Math.round(Math.pow(Math.pow(a / 255, 2.2) * (1 - amount) + Math.pow(b / 255, 2.2) * amount, 1 / 2.2) * 255);
+    Math.round(
+      Math.pow(Math.pow(a / 255, 2.2) * (1 - amount) + Math.pow(b / 255, 2.2) * amount, 1 / 2.2) *
+        255,
+    );
   const alpha = fromA * (1 - amount) + toA * amount;
   if (alpha <= 0) return 'rgba(0, 0, 0, 0)';
   const weigh = (a: number, b: number) => (a * fromA * (1 - amount) + b * toA * amount) / alpha;
@@ -116,7 +124,7 @@ const ShinyText = ({
   pauseOnHover = false,
   disabled = false,
   className = '',
-  style
+  style,
 }: ShinyTextProps) => {
   const rootRef = useRef<HTMLSpanElement>(null);
   const glowRef = useRef<HTMLSpanElement>(null);
@@ -138,7 +146,7 @@ const ShinyText = ({
     yoyo,
     followPointer,
     pauseOnHover,
-    disabled
+    disabled,
   };
   const settingsRef = useRef<Settings>(settingsObj);
   useEffect(() => {
@@ -168,7 +176,7 @@ const ShinyText = ({
       target: 0,
       visible: true,
       seen: false,
-      colors: ''
+      colors: '',
     };
     let base: number[] | null = null;
     let shine: number[] | null = null;
@@ -267,7 +275,8 @@ const ShinyText = ({
       if (following) {
         if (state.pos === null) state.pos = nearest();
         const stiffness = 220;
-        state.vel += ((state.target - state.pos) * stiffness - state.vel * 2 * Math.sqrt(stiffness)) * dt;
+        state.vel +=
+          ((state.target - state.pos) * stiffness - state.vel * 2 * Math.sqrt(stiffness)) * dt;
         state.pos += state.vel * dt;
         state.phase = 'follow';
         draw();
@@ -331,7 +340,8 @@ const ShinyText = ({
       const dy = -Math.cos(radians);
       const length = Math.abs(rect.width * dx) + Math.abs(rect.height * dy) || 1;
       const along =
-        (event.clientX - rect.left - rect.width / 2) * dx + (event.clientY - rect.top - rect.height / 2) * dy;
+        (event.clientX - rect.left - rect.width / 2) * dx +
+        (event.clientY - rect.top - rect.height / 2) * dy;
       return 50 + (along / length) * 100;
     };
 
@@ -356,8 +366,8 @@ const ShinyText = ({
       wake();
     };
 
-    const observer = new IntersectionObserver(entries => {
-      const visible = entries.some(item => item.isIntersecting);
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.some((item) => item.isIntersecting);
       state.visible = visible;
       const s = settingsRef.current!;
       if (!visible) return;

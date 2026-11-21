@@ -78,7 +78,8 @@ export const deployments = [
       'Continuous monitoring of high-value inventory zones, anomaly flagging, and coordinated escalation to shift managers. Zero-incident operational accuracy maintained across the current posting.',
     cardImage: lossPreventionImg,
     image: lossPreventionImg,
-    imageAlt: 'Illustrative reference image of a badge-controlled warehouse vault aisle with overhead dome cameras',
+    imageAlt:
+      'Illustrative reference image of a badge-controlled warehouse vault aisle with overhead dome cameras',
     tags: ['Loss Prevention', 'Incident Flagging', 'Escalation Protocols', 'Site Coordination'],
     gallery: [lossPreventionImg, surveillanceWallImg, forensicDeskImg],
   },
@@ -102,7 +103,8 @@ export const deployments = [
       'Timestamped footage extraction, chain-of-custody documentation, and cross-camera timeline reconstruction for internal loss investigations.',
     cardImage: forensicDeskImg,
     image: forensicDeskImg,
-    imageAlt: 'Illustrative reference image of an operator reviewing multiple surveillance timelines',
+    imageAlt:
+      'Illustrative reference image of an operator reviewing multiple surveillance timelines',
     tags: ['Footage Playback', 'Forensic Review', 'Chain of Custody', 'Reporting'],
     gallery: [forensicDeskImg, surveillanceWallImg, lossPreventionImg],
   },
@@ -150,7 +152,8 @@ export const deployments = [
       'Alarm-to-action dispatch, evacuation routing under live surveillance, fire safety inspections, and post-incident shift reporting.',
     cardImage: emergencyResponseImg,
     image: emergencyResponseImg,
-    imageAlt: 'Illustrative reference image of an emergency response and evacuation dispatch console',
+    imageAlt:
+      'Illustrative reference image of an emergency response and evacuation dispatch console',
     tags: ['Fire Safety', 'First Aid', 'Emergency Escalation', 'Shift Reporting'],
     gallery: [emergencyResponseImg, surveillanceWallImg, forensicDeskImg],
   },

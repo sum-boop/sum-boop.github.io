@@ -45,9 +45,7 @@ export const CameraFeedCard = memo(function CameraFeedCard({
   ].filter(Boolean);
 
   return (
-    <article
-      className={`work-card-5lab ${isSelectedFeed ? 'work-card-5lab--vms-active' : ''}`}
-    >
+    <article className={`work-card-5lab ${isSelectedFeed ? 'work-card-5lab--vms-active' : ''}`}>
       <button
         aria-label={`Open briefing: ${deployment.title}`}
         className="work-card-btn-5lab"

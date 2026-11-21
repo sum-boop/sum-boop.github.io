@@ -32,35 +32,51 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
   }, []);
 
   // Memoized geometries and materials
-  const deskMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: 0x0E141E,
-    metalness: 0.8,
-    roughness: 0.4,
-    clearcoat: 0.7,
-    clearcoatRoughness: 0.15,
-    reflectivity: 0.85,
-    normalMap: brushedMetalNormalMap,
-    normalScale: new THREE.Vector2(0.35, 0.35),
-  }), [brushedMetalNormalMap]);
+  const deskMat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: 0x0e141e,
+        metalness: 0.8,
+        roughness: 0.4,
+        clearcoat: 0.7,
+        clearcoatRoughness: 0.15,
+        reflectivity: 0.85,
+        normalMap: brushedMetalNormalMap,
+        normalScale: new THREE.Vector2(0.35, 0.35),
+      }),
+    [brushedMetalNormalMap],
+  );
 
-  const steelMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: 0x1A2230,
-    metalness: 0.8,
-    roughness: 0.3,
-  }), []);
+  const steelMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0x1a2230,
+        metalness: 0.8,
+        roughness: 0.3,
+      }),
+    [],
+  );
 
-  const ledMat = useMemo(() => new THREE.MeshBasicMaterial({
-    color: 0x22D3EE,
-  }), []);
+  const ledMat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0x22d3ee,
+      }),
+    [],
+  );
 
   const keyGeom = useMemo(() => new THREE.BoxGeometry(0.016, 0.01, 0.016), []);
-  const keyMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: 0x080C14,
-    roughness: 0.35,
-    metalness: 0.5,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.1,
-  }), []);
+  const keyMat = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: 0x080c14,
+        roughness: 0.35,
+        metalness: 0.5,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1,
+      }),
+    [],
+  );
 
   // Keyboard instance matrices setup
   const keyCount = 95;
@@ -164,7 +180,12 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
         {/* Thin Cyan Emissive LED Strip along front bottom edge */}
         <mesh ref={ledStripRef} position={[0, -0.4, 1.18]}>
           <boxGeometry args={[8.8, 0.015, 0.015]} />
-          <meshStandardMaterial color="#22D3EE" emissive="#22D3EE" emissiveIntensity={2.5} toneMapped={false} />
+          <meshStandardMaterial
+            color="#22D3EE"
+            emissive="#22D3EE"
+            emissiveIntensity={2.5}
+            toneMapped={false}
+          />
         </mesh>
 
         {/* Faint Under-Desk Glow Plane */}
@@ -192,7 +213,13 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
           <lineBasicMaterial color="#22D3EE" transparent opacity={0.4} />
         </lineSegments>
         {/* Ergonomic Rounded Mouse */}
-        <RoundedBox args={[0.07, 0.03, 0.12]} radius={0.015} smoothness={3} position={[0, 0.015, 0]} castShadow>
+        <RoundedBox
+          args={[0.07, 0.03, 0.12]}
+          radius={0.015}
+          smoothness={3}
+          position={[0, 0.015, 0]}
+          castShadow
+        >
           <meshStandardMaterial color="#1A2230" metalness={0.4} roughness={0.3} />
         </RoundedBox>
         {/* Tiny Cyan LED on mouse */}
@@ -305,16 +332,54 @@ export default function WorkstationConsole({ position = [0, 0, 0] }) {
           <primitive object={steelMat} attach="material" />
         </mesh>
         {/* Seat Cushion */}
-        <RoundedBox args={[0.55, 0.12, 0.55]} radius={0.04} smoothness={3} position={[0, 0.55, 0]} castShadow>
-          <meshPhysicalMaterial color={0x0B1018} roughness={0.4} metalness={0.1} sheen={1} sheenColor={0x22D3EE} />
+        <RoundedBox
+          args={[0.55, 0.12, 0.55]}
+          radius={0.04}
+          smoothness={3}
+          position={[0, 0.55, 0]}
+          castShadow
+        >
+          <meshPhysicalMaterial
+            color={0x0b1018}
+            roughness={0.4}
+            metalness={0.1}
+            sheen={1}
+            sheenColor={0x22d3ee}
+          />
         </RoundedBox>
         {/* Backrest */}
-        <RoundedBox args={[0.52, 0.75, 0.1]} radius={0.04} smoothness={3} position={[0, 0.98, -0.22]} rotation={[0.1, 0, 0]} castShadow>
-          <meshPhysicalMaterial color={0x0B1018} roughness={0.4} metalness={0.1} sheen={1} sheenColor={0x22D3EE} />
+        <RoundedBox
+          args={[0.52, 0.75, 0.1]}
+          radius={0.04}
+          smoothness={3}
+          position={[0, 0.98, -0.22]}
+          rotation={[0.1, 0, 0]}
+          castShadow
+        >
+          <meshPhysicalMaterial
+            color={0x0b1018}
+            roughness={0.4}
+            metalness={0.1}
+            sheen={1}
+            sheenColor={0x22d3ee}
+          />
         </RoundedBox>
         {/* Headrest */}
-        <RoundedBox args={[0.26, 0.14, 0.06]} radius={0.02} smoothness={3} position={[0, 1.42, -0.25]} rotation={[0.1, 0, 0]} castShadow>
-          <meshPhysicalMaterial color={0x0B1018} roughness={0.4} metalness={0.1} sheen={1} sheenColor={0x22D3EE} />
+        <RoundedBox
+          args={[0.26, 0.14, 0.06]}
+          radius={0.02}
+          smoothness={3}
+          position={[0, 1.42, -0.25]}
+          rotation={[0.1, 0, 0]}
+          castShadow
+        >
+          <meshPhysicalMaterial
+            color={0x0b1018}
+            roughness={0.4}
+            metalness={0.1}
+            sheen={1}
+            sheenColor={0x22d3ee}
+          />
         </RoundedBox>
       </group>
     </group>

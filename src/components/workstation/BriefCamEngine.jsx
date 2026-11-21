@@ -42,7 +42,7 @@ function ReviewSynopsis() {
         <meshStandardMaterial color="#0B1018" roughness={0.8} />
       </mesh>
       {/* Grid lines on track */}
-      <gridHelper args={[2.8, 14, 0x22D3EE, 0x1A2230]} position={[0, -0.49, 0]} />
+      <gridHelper args={[2.8, 14, 0x22d3ee, 0x1a2230]} position={[0, -0.49, 0]} />
 
       {/* Filter Chips */}
       <group position={[-1.2, 0.55, 0]}>
@@ -53,7 +53,8 @@ function ReviewSynopsis() {
 
       {/* Floating bounding boxes */}
       {boxData.map((b, i) => {
-        const color = b.type === 'vehicle' ? '#3B82F6' : b.type === 'person' ? '#22D3EE' : '#FBBF24';
+        const color =
+          b.type === 'vehicle' ? '#3B82F6' : b.type === 'person' ? '#22D3EE' : '#FBBF24';
         return (
           <group key={i} ref={(el) => (boxesRef.current[i] = el)} position={[b.x, b.y, b.z]}>
             <RoundedBox args={[0.25, 0.35, 0.2]} radius={0.02} smoothness={2}>
@@ -108,7 +109,13 @@ function FilterChip({ label, index }) {
           toneMapped={false}
         />
       </RoundedBox>
-      <Text position={[0, 0, 0.015]} fontSize={0.03} color="#E6F1FF" anchorX="center" anchorY="middle">
+      <Text
+        position={[0, 0, 0.015]}
+        fontSize={0.03}
+        color="#E6F1FF"
+        anchorX="center"
+        anchorY="middle"
+      >
         {label}
       </Text>
     </animated.group>
@@ -216,9 +223,20 @@ function ActionButton({ label, position, color }) {
       }}
     >
       <RoundedBox args={[0.55, 0.18, 0.02]} radius={0.02} smoothness={2}>
-        <meshStandardMaterial color="#1A2230" emissive={color} emissiveIntensity={emissive} toneMapped={false} />
+        <meshStandardMaterial
+          color="#1A2230"
+          emissive={color}
+          emissiveIntensity={emissive}
+          toneMapped={false}
+        />
       </RoundedBox>
-      <Text position={[0, 0, 0.015]} fontSize={0.025} color="#E6F1FF" anchorX="center" anchorY="middle">
+      <Text
+        position={[0, 0, 0.015]}
+        fontSize={0.025}
+        color="#E6F1FF"
+        anchorX="center"
+        anchorY="middle"
+      >
         {label}
       </Text>
     </animated.group>
@@ -246,8 +264,14 @@ function ResearchAnalytics() {
 
   const barGeom = useMemo(() => new THREE.BoxGeometry(0.12, 0.1, 0.04), []);
   const barMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#3B82F6', emissive: '#3B82F6', emissiveIntensity: 1.5, toneMapped: false }),
-    []
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#3B82F6',
+        emissive: '#3B82F6',
+        emissiveIntensity: 1.5,
+        toneMapped: false,
+      }),
+    [],
   );
 
   return (
@@ -278,30 +302,40 @@ function ResearchAnalytics() {
 
 // --- MAIN BriefCamEngine COMPONENT ---
 export function BriefCamEngine({ activeTab }) {
-  const { reviewOpacity, reviewY, respondOpacity, respondY, researchOpacity, researchY } = useSpring({
-    reviewOpacity: activeTab === 'REVIEW' ? 1 : 0,
-    reviewY: activeTab === 'REVIEW' ? 0 : -0.1,
-    respondOpacity: activeTab === 'RESPOND' ? 1 : 0,
-    respondY: activeTab === 'RESPOND' ? 0 : -0.1,
-    researchOpacity: activeTab === 'RESEARCH' ? 1 : 0,
-    researchY: activeTab === 'RESEARCH' ? 0 : -0.1,
-    config: { tension: 280, friction: 24 },
-  });
+  const { reviewOpacity, reviewY, respondOpacity, respondY, researchOpacity, researchY } =
+    useSpring({
+      reviewOpacity: activeTab === 'REVIEW' ? 1 : 0,
+      reviewY: activeTab === 'REVIEW' ? 0 : -0.1,
+      respondOpacity: activeTab === 'RESPOND' ? 1 : 0,
+      respondY: activeTab === 'RESPOND' ? 0 : -0.1,
+      researchOpacity: activeTab === 'RESEARCH' ? 1 : 0,
+      researchY: activeTab === 'RESEARCH' ? 0 : -0.1,
+      config: { tension: 280, friction: 24 },
+    });
 
   return (
     <group>
       {/* REVIEW VIEW */}
-      <animated.group style={{ opacity: reviewOpacity, positionY: reviewY }} visible={activeTab === 'REVIEW'}>
+      <animated.group
+        style={{ opacity: reviewOpacity, positionY: reviewY }}
+        visible={activeTab === 'REVIEW'}
+      >
         <ReviewSynopsis />
       </animated.group>
 
       {/* RESPOND VIEW */}
-      <animated.group style={{ opacity: respondOpacity, positionY: respondY }} visible={activeTab === 'RESPOND'}>
+      <animated.group
+        style={{ opacity: respondOpacity, positionY: respondY }}
+        visible={activeTab === 'RESPOND'}
+      >
         <RespondAlerts />
       </animated.group>
 
       {/* RESEARCH VIEW */}
-      <animated.group style={{ opacity: researchOpacity, positionY: researchY }} visible={activeTab === 'RESEARCH'}>
+      <animated.group
+        style={{ opacity: researchOpacity, positionY: researchY }}
+        visible={activeTab === 'RESEARCH'}
+      >
         <ResearchAnalytics />
       </animated.group>
     </group>
@@ -367,10 +401,20 @@ export function HeatmapFloorPlan() {
       </instancedMesh>
 
       {/* Room labels */}
-      <Text position={[-0.5, 0.2, -0.3]} fontSize={0.04} color="#22D3EE" rotation={[Math.PI / 2, 0, 0]}>
+      <Text
+        position={[-0.5, 0.2, -0.3]}
+        fontSize={0.04}
+        color="#22D3EE"
+        rotation={[Math.PI / 2, 0, 0]}
+      >
         LOBBY
       </Text>
-      <Text position={[0.4, 0.2, 0.3]} fontSize={0.04} color="#22D3EE" rotation={[Math.PI / 2, 0, 0]}>
+      <Text
+        position={[0.4, 0.2, 0.3]}
+        fontSize={0.04}
+        color="#22D3EE"
+        rotation={[Math.PI / 2, 0, 0]}
+      >
         SERVER ROOM
       </Text>
     </group>

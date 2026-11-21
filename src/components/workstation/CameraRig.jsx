@@ -70,7 +70,11 @@ export default function CameraRig({ focus = 'overview', enabled = true, onExit =
     // Subtle banking roll proportional to camera lateral travel distance
     const posDistance = smoothPosRef.current.distanceTo(_targetPos);
     const targetDistance = currentTargetRef.current.distanceTo(_targetLookAt);
-    const roll = THREE.MathUtils.clamp((_targetPos.x - smoothPosRef.current.x) * 0.008, -0.015, 0.015);
+    const roll = THREE.MathUtils.clamp(
+      (_targetPos.x - smoothPosRef.current.x) * 0.008,
+      -0.015,
+      0.015,
+    );
     state.camera.rotation.z = THREE.MathUtils.lerp(state.camera.rotation.z, roll, targetLerpAlpha);
 
     // Keep requesting frames under frameloop="demand" until camera settles completely

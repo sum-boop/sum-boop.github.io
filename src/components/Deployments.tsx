@@ -62,7 +62,7 @@ export const Deployments = memo(function Deployments({ onOpen }: DeploymentsProp
         <SectionHeading
           description="Illustrative feed imagery is not footage from the listed client sites. Filter synced directly with the Hero XProtect Smart Client console."
           eyebrow="Key deployments"
-          highlightWord="deployments."
+          italicAccent="deployments"
           id="operations-title"
           number="04"
           title="Camera feed deployments."

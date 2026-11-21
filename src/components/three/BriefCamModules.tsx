@@ -163,7 +163,11 @@ export function BriefCamOverlay({
               <div className="synopsis-grid-overlay" />
               {showPerson ? (
                 <m.div
-                  animate={isPlaying ? { x: [0, 36, 72, 0], opacity: [0.85, 1, 0.9, 0.85] } : { x: 0, opacity: 1 }}
+                  animate={
+                    isPlaying
+                      ? { x: [0, 36, 72, 0], opacity: [0.85, 1, 0.9, 0.85] }
+                      : { x: 0, opacity: 1 }
+                  }
                   className="synopsis-bbox synopsis-bbox--person"
                   style={{ top: '20%', left: '12%' }}
                   transition={{ duration: 6, repeat: isPlaying ? Infinity : 0, ease: 'easeInOut' }}
@@ -205,7 +209,11 @@ export function BriefCamOverlay({
                 onClick={() => setIsPlaying((prev) => !prev)}
                 type="button"
               >
-                {isPlaying ? <Pause aria-hidden="true" size={14} /> : <Play aria-hidden="true" size={14} />}
+                {isPlaying ? (
+                  <Pause aria-hidden="true" size={14} />
+                ) : (
+                  <Play aria-hidden="true" size={14} />
+                )}
               </button>
               <div className="briefcam-timeline-track">
                 <input
@@ -355,7 +363,8 @@ export function BriefCamOverlay({
                 </svg>
               </div>
               <div className="heatmap-label">
-                <BarChart3 aria-hidden="true" size={16} /> FLIPKART KALASH FLOOR PLAN · TRAJECTORY DENSITY MAP
+                <BarChart3 aria-hidden="true" size={16} /> FLIPKART KALASH FLOOR PLAN · TRAJECTORY
+                DENSITY MAP
               </div>
             </div>
           </div>

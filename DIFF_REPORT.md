@@ -16,6 +16,7 @@ Reference Baseline: `https://www.5lab.co/` (screenshots & tokens in `/REFERENCE_
 ## 2. Side-by-Side Comparison (`5lab.co` vs Implementation)
 
 ### Desktop (`1440×900`)
+
 - **Hero Curtain (`ref-1440-y0.png` vs `after-desktop-1440-hero.png`)**:
   - **Matched**: Deep crimson-to-obsidian radial canvas (`#060004` base with `#7a0c2e` / `#d5204a` interactive spotlight), centered glowing 3D crimson-indigo glass orb (`.hero-sphere-orb`), monumental staggered two-line H1 (`Sumit` + italic `Anand` / `Eyes on every hub.`), bottom-left terminal prompt (`> CCTV Operator & Surveillance Specialist · Patli, Haryana` with blinking block caret), bottom-center bounce chevron, and quarter-cropped rotating crimson corner stamp (`SUMIT ANAND • PATLI HARYANA • CCTV & VMS •` around `Contact`).
   - **Fixes Verified**: Resolved collapsed word gap (`SumitAnand` -> `Sumit Anand`), separated rotating ring text from `Contact` label, and removed the non-reference floating `SideSectionRail`.
@@ -28,12 +29,14 @@ Reference Baseline: `https://www.5lab.co/` (screenshots & tokens in `/REFERENCE_
   - **Matched**: Stark `#000000` canvas with subtle noise grain and ambient crimson-indigo glow, `"Let's talk about a role."` with `Newsreader` italic accent, glowing crimson `"Let's chat"` orb, red monospace channel labels (`DIRECT LINE · NO INTERMEDIARIES`, `DIRECT CHANNELS`, `READY`), direct contact channels, and interactive Composer form.
 
 ### Tablet (`768×1024`)
+
 - **Hero (`after-tablet-768-hero.png`)**:
   - **Matched**: Full-bleed edge-to-edge curtain, single-row top navigation (`Sumit Anand` left, 5 nav links right), centered orb & H1, constrained bottom-left prompt width (`max-width: calc(50vw - 56px)`) clear of the center chevron, and `.back-to-top` suppressed on the Hero viewport (`backToTopOnHeroTablet: 0`) so it never overlaps the bottom-right `Contact` stamp.
 - **Works & Contact (`after-tablet-768-works.png`, `after-tablet-768-contact.png`)**:
   - **Matched**: Clean top navbar separation, glowing circular `#d63360` `"Let's chat"` CTA orb, and `0px` horizontal overflow.
 
 ### Mobile (`390×844`)
+
 - **Hero & Menu Modal (`after-mobile-390-hero.png`, `after-mobile-390-menu.png`)**:
   - **Fix Verified**: Removed `scrollbar-gutter: stable;` from `html`, eliminating the 15px `#FCFBF9` right-edge white gutter so dark Hero, full-screen `#000000` Menu Modal (with orbital dotted rings & close circle button), and `#000000` Contact render cleanly to `390px` edge-to-edge (`scrollWidth === 390`).
   - **Matched**: Elevated glowing crimson orb above stacked 3-line H1 with dashed dividers (`Sumit Anand` / `Eyes on` / `every hub.`) and frosted circular hamburger button.
@@ -45,6 +48,7 @@ Reference Baseline: `https://www.5lab.co/` (screenshots & tokens in `/REFERENCE_
 ## 3. Preserved Domain Content & Interactive Features
 
 All portfolio identity, text, imagery, projects, skills, experience records, credentials, and interactive subsystems were preserved verbatim:
+
 - **3D XProtect Smart Client Workstation (`#hero-workstation`)**: Theme-aware Three.js command desk with orbit/pan controls, monitor focus zoom, Live / Playback / Smart Map / Alarms workspace tabs, BriefCam L4 analytics overlay, Clock, Theme switcher (`Light` / `Dark`), and `Ctrl+K` Command Palette.
 - **Security Profile & Skills (`#about`, `#skills`)**: Full bio, `Innovision Limited` & `A.P. Securitas Pvt. Ltd.` employer highlights, and all 4 skill clusters (20 skills).
 - **Regional Footprint (`#footprint`)**: Interactive Patli–NCR logistics corridor radar over orbital globe backdrop synced with XProtect Smart Map sites (`01`, `02`, `03 Corridor`).

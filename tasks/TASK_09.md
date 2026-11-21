@@ -5,16 +5,20 @@ Gemini keeps the coding. Same rules as `AI_CHAT.md` and `tasks/TASK_06.md` (free
 Before coding, read: `AI_CHAT.md`, `REFERENCE_5LAB_MOTION.md` (palette and motion, wins over older reference files), and this file. Project facts: React 18 + TypeScript + Vite, GSAP 3 + ScrollTrigger, Lenis, react-three-fiber, section roots carry `data-tone="light"` or `"dark"` (set by `src/utils/pagePalette.ts`), page background is the fixed `#page-bg` layer, CSS variables `--ink`, `--ink-muted`, `--hairline` exist on light sections. `npm run build` and `npm run lint` must pass with 0 errors.
 
 ## Review of TASK 8
+
 Read `src/components/OrbScene.tsx` on main (`a494dda`). Part 2 is in: labels and hairlines leave, circles merge, `.orb-iris` fades in with three rotating streaks and a lucide `Aperture` mark (not 5Lab's bolt), orbit ring with a dot, lilac clip-path wipe, "About me" link to `#about`, settle (scale 0.85, up 6vh) at the end, `orb-scene--active` toggled for `will-change`. Accepted from the code. Claude still has not seen the live render, so the first visual check will come from the user.
 
 ## TASK 9 for Gemini: About band and highlight statement
+
 Goal: the top of the About section should look like 5lab.co right after the orb: a centered stack of short lines separated by dotted hairlines, then a huge statement with two phrases inside solid indigo boxes (5lab.co does this with "Designers" and "Coders" in "Designers who code + Coders who design"). The existing copy already fits: "Calm eyes. Clear records." becomes the two highlighted phrases. The operator dossier below (photo card, paragraphs, buttons, employers, metrics) stays with all its content.
 
 Edit only: `src/components/About.tsx`, a NEW file `src/styles/aboutBand.css`. Do not touch other sections, data files, `animMaster.ts`, `pagePalette.ts`, Lenis.
 
 ### About.tsx
+
 1. Add imports: `gsap`, `ScrollTrigger` from `gsap/ScrollTrigger` (call `gsap.registerPlugin(ScrollTrigger)` once at module level), `useEffect`, `useReducedMotion` from `@/hooks/useReducedMotion`, and `import '@/styles/aboutBand.css';`.
 2. Replace ONLY the current `<header className="about-statement-header" id="designer-header">` block. Keep the existing eyebrow (`ChoreoReveal as="p" className="section-eyebrow"`) exactly. New structure:
+
 ```
 <header className="about-band-5lab" id="designer-header" ref={bandRef}>
   {/* existing eyebrow, unchanged */}
@@ -32,17 +36,19 @@ Edit only: `src/components/About.tsx`, a NEW file `src/styles/aboutBand.css`. Do
 </header>
 <p className="about-dossier-eyebrow">Operator dossier</p>
 ```
-   The old sentence is only split and rearranged, no words lost. The `<h2>` keeps `id="about-title"` so `aria-labelledby` still works. Use the class name `about-statement-5lab` (NOT `about-statement-text`) so `animMaster.ts` does not animate the h2 a second time.
-3. Everything after the header (`about-layout` and below) stays verbatim.
-4. Motion (skip it entirely when `useReducedMotion()` is true: the default CSS state is the final visible state):
-   - Inside `gsap.context(..., bandRef)`, reverted on cleanup.
-   - `.about-band-line-inner`: `gsap.set({ yPercent: 110 })`, then `gsap.to({ yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.12 })` with `scrollTrigger: { trigger: '.about-band-lines', start: 'top 85%', once: true }`.
-   - `.about-band-line`: animate the custom property `--line` from 0 to 1 (hairline draws left to right), duration 0.8, same stagger and trigger.
-   - `.about-hl`: animate `--hl` from 0 to 1 (box wipes in from the left), duration 0.7, stagger 0.2, trigger `.about-statement-5lab` at `top 80%`, `once: true`.
-   - The h2 text must never be hidden with `opacity: 0`, so the words are always readable even if JS fails.
+
+The old sentence is only split and rearranged, no words lost. The `<h2>` keeps `id="about-title"` so `aria-labelledby` still works. Use the class name `about-statement-5lab` (NOT `about-statement-text`) so `animMaster.ts` does not animate the h2 a second time. 3. Everything after the header (`about-layout` and below) stays verbatim. 4. Motion (skip it entirely when `useReducedMotion()` is true: the default CSS state is the final visible state):
+
+- Inside `gsap.context(..., bandRef)`, reverted on cleanup.
+- `.about-band-line-inner`: `gsap.set({ yPercent: 110 })`, then `gsap.to({ yPercent: 0, duration: 0.9, ease: 'power3.out', stagger: 0.12 })` with `scrollTrigger: { trigger: '.about-band-lines', start: 'top 85%', once: true }`.
+- `.about-band-line`: animate the custom property `--line` from 0 to 1 (hairline draws left to right), duration 0.8, same stagger and trigger.
+- `.about-hl`: animate `--hl` from 0 to 1 (box wipes in from the left), duration 0.7, stagger 0.2, trigger `.about-statement-5lab` at `top 80%`, `once: true`.
+- The h2 text must never be hidden with `opacity: 0`, so the words are always readable even if JS fails.
 
 ### aboutBand.css (plain CSS)
+
 Values to use:
+
 - `@property --line` and `@property --hl`: `syntax: '<number>'; inherits: false; initial-value: 1;`.
 - `.about-band-5lab`: `text-align: center; padding-block: clamp(4rem, 10vw, 8rem) clamp(2rem, 5vw, 4rem); color: var(--ink);`
 - `.about-band-lines`: `max-width: 900px; margin: 2rem auto 0; font-size: clamp(1.6rem, 4.2vw, 3.2rem); font-weight: 500; line-height: 1.2; letter-spacing: -0.02em;`
@@ -56,9 +62,11 @@ Values to use:
 - `@media (prefers-reduced-motion: reduce)`: no transitions or animations, final state shown.
 
 ### Checks
+
 - `npm run build` and `npm run lint` pass. Check at 390px and 1280px wide: no horizontal scroll, the statement wraps nicely, highlight boxes do not break in an ugly way across lines (`box-decoration-break: clone`), no white text on the off-white page.
 - Old selectors `.about-statement-header`, `.about-statement-text`, `.about-dimmed-text` in `global.css` may stay for now. Only remove them if nothing else uses them (grep first) and say so in your entry.
 - Append your `## Gemini` entry to `AI_CHAT.md`. Commit and push to main.
 
 ## Next (for later, one at a time)
+
 TASK 10 text effects (scramble on headings, word swap) · TASK 11 custom cursor, rotating circular text, glass menu button · TASK 12 Contact orb with orbit ring and red laser line · TASK 13 works cards float-in, sticky category headings, Notable-Clients-style strip · TASK 14 Workstation band restyle.

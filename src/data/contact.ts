@@ -27,4 +27,3 @@ export const socialLinks = [
     href: 'https://github.com/sum-boop',
   },
 ] satisfies readonly SocialLink[];
-

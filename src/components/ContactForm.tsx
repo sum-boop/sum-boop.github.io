@@ -1,14 +1,6 @@
 import { LayoutGroup, m } from 'framer-motion';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import {
-  ArrowRight,
-  Check,
-  Copy,
-  Mail,
-  MessageCircle,
-  MessageSquare,
-  Send,
-} from 'lucide-react';
+import { ArrowRight, Check, Copy, Mail, MessageCircle, MessageSquare, Send } from 'lucide-react';
 import { contact } from '@/data/contact';
 import { motionDurations, motionEasings, motionSprings } from '@/motion';
 import { useToast } from './ToastProvider';
@@ -345,9 +337,7 @@ export function ContactForm() {
           <div className={`form-field ${fieldErrors.email ? 'form-field--invalid' : ''}`}>
             <input
               aria-describedby={
-                fieldErrors.email
-                  ? 'contact-email-error contact-email-help'
-                  : 'contact-email-help'
+                fieldErrors.email ? 'contact-email-error contact-email-help' : 'contact-email-help'
               }
               aria-invalid={Boolean(fieldErrors.email)}
               autoComplete="email"
@@ -428,11 +418,7 @@ export function ContactForm() {
             </>
           ) : succeeded ? (
             <>
-              <svg
-                aria-hidden="true"
-                className="mi-check-svg"
-                viewBox="0 0 24 24"
-              >
+              <svg aria-hidden="true" className="mi-check-svg" viewBox="0 0 24 24">
                 <path className="mi-check-path" d="M5 13l4 4L19 7" />
               </svg>
               <span>TRANSMITTED</span>

@@ -80,11 +80,7 @@ function ConcentricDotArcs() {
   );
 }
 
-export const Navbar = memo(function Navbar({
-  theme,
-  onToggleTheme,
-  onOpenPalette,
-}: NavbarProps) {
+export const Navbar = memo(function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
@@ -226,9 +222,33 @@ export const Navbar = memo(function Navbar({
             type="button"
           >
             <svg aria-hidden="true" className="hamburger-svg" viewBox="0 0 32 32">
-              <line stroke="currentColor" strokeLinecap="round" strokeWidth="2" x1="6" x2="26" y1="11" y2="11" />
-              <line stroke="currentColor" strokeLinecap="round" strokeWidth="2" x1="12" x2="26" y1="16" y2="16" />
-              <line stroke="currentColor" strokeLinecap="round" strokeWidth="2" x1="18" x2="26" y1="21" y2="21" />
+              <line
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth="2"
+                x1="6"
+                x2="26"
+                y1="11"
+                y2="11"
+              />
+              <line
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth="2"
+                x1="12"
+                x2="26"
+                y1="16"
+                y2="16"
+              />
+              <line
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth="2"
+                x1="18"
+                x2="26"
+                y1="21"
+                y2="21"
+              />
             </svg>
           </button>
         </nav>

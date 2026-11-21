@@ -282,7 +282,12 @@ export function useFootprintScrollStory(
       isPinnedMode = true;
     };
 
-    const applyStepState = (index: number, progress: number, total: number, notifyCallback: boolean) => {
+    const applyStepState = (
+      index: number,
+      progress: number,
+      total: number,
+      notifyCallback: boolean,
+    ) => {
       const steps = getStepElements();
       steps.forEach((stepEl, i) => {
         if (i === index) {

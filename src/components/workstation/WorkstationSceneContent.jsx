@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Environment, ContactShadows, Sparkles, PerformanceMonitor } from '@react-three/drei';
-import { EffectComposer, Bloom, ChromaticAberration, Vignette, Noise } from '@react-three/postprocessing';
+import {
+  EffectComposer,
+  Bloom,
+  ChromaticAberration,
+  Vignette,
+  Noise,
+} from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 
 import WorkstationConsole from './WorkstationConsole';
@@ -40,7 +46,14 @@ export default function WorkstationSceneContent({ tab, setTab, focus, setFocus }
       <pointLight position={[0, 2.2, -1.5]} color="#22D3EE" intensity={35} distance={8} />
       <pointLight position={[-1.2, 1.2, 0.5]} color="#FBBF24" intensity={8} distance={3} />
 
-      <Sparkles count={120} scale={[12, 5, 8]} size={2} speed={0.25} opacity={0.5} color="#22D3EE" />
+      <Sparkles
+        count={120}
+        scale={[12, 5, 8]}
+        size={2}
+        speed={0.25}
+        opacity={0.5}
+        color="#22D3EE"
+      />
 
       <PerformanceMonitor
         onDecline={() => setDegraded(true)}
