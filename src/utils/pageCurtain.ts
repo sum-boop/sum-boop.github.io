@@ -103,8 +103,10 @@ export function playPageCurtain(onCovered: () => void): void {
   tl.to([left, right], { xPercent: 0, duration: 0.45, ease: 'power3.inOut' })
     .to(seam, { opacity: 1, duration: 0.15 }, '-=0.15')
     .to(mark, { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' }, '-=0.1')
+    .to({}, { duration: 0.3 })
+    // Jump only now, so the target section's entrance animations play while the curtain opens.
     .call(onCovered)
-    .to({}, { duration: 0.35 })
+    .to({}, { duration: 0.12 })
     .to(mark, { opacity: 0, scale: 1.1, duration: 0.2, ease: 'power2.in' })
     .to(seam, { opacity: 0, duration: 0.15 }, '<')
     .to(left, { xPercent: -100, duration: 0.55, ease: 'power3.inOut' })
