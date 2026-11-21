@@ -6,6 +6,7 @@ import './styles/tokens.css';
 import './styles/global.css';
 import './styles/orbScene.css';
 import './motion/motion.css';
+import './styles/layout.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('The portfolio root element is missing.');
