@@ -6,11 +6,11 @@ export const profile = {
   headline: 'Sumit Anand — eyes on every hub.',
   location: 'Patli, Haryana, India',
   heroSummary:
-    "CCTV Operator & Surveillance Specialist commanding Milestone XProtect VMS Smart Client consoles, multi-channel CP Plus arrays, and high-throughput GIGO gate control across India's largest logistics hubs.",
+    "CCTV Operator and Surveillance Specialist running Milestone XProtect Smart Client consoles, multi-channel CP Plus camera arrays and high-throughput GIGO gate control across India's largest logistics hubs.",
   aboutHeading: 'Precision Monitoring & Asset Protection',
   aboutParagraphs: [
-    'Specializing in real-time multi-camera monitoring, Milestone XProtect VMS playback investigations, high-accuracy vehicle & driver data logging, and incident review across mega logistics operations — including the Flipkart Kalash Mega Hub and Ekart Logistics.',
-    'Expert operator of multi-screen Milestone XProtect Smart Client consoles, CP Plus CCTV arrays, digital GIGO gate entry systems, and zero-error Excel logging pipelines. Consistent enforcer of loss prevention protocols and fire-safety procedures across high-volume warehouse zones.',
+    'Specialist in real-time multi-camera monitoring, Milestone XProtect playback investigations, accurate vehicle and driver data logging, and incident review across mega logistics operations, including the Flipkart Kalash Mega Hub and Ekart Logistics.',
+    'Expert operator of multi-screen Milestone XProtect Smart Client consoles, CP Plus CCTV arrays and digital GIGO gate-entry systems, keeping zero-error Excel logs. Consistent enforcer of loss-prevention protocols and fire-safety procedures across high-volume warehouse zones.',
   ],
   heroMetrics: [
     { value: '2+', label: 'Years Ops' },
