@@ -10,10 +10,10 @@ export const contact = {
   mapUrl: 'https://maps.app.goo.gl/brgxxLcyxQtzzsxT9',
   resumePath: 'assets/sumit-anand-resume.pdf',
   availability:
-    'Available for CCTV operations, surveillance shifts, and gate-control roles across logistics, manufacturing, and industrial facilities. Direct lines below — no intermediaries.',
+    'Available for CCTV operations, surveillance shifts and gate-control roles across logistics, manufacturing and industrial facilities. Reach me directly below, with no intermediaries.',
   hireAvailability:
-    'Send a pre-filled message straight to WhatsApp, Email, or SMS in one tap — zero forms stuck in a database.',
-  responseTime: 'I respond within 24 hours.',
+    'Send a pre-filled message to WhatsApp, Email or SMS in one tap. Nothing is stored on a server.',
+  responseTime: 'I reply within 24 hours.',
 } satisfies ContactDetails;
 
 /**
