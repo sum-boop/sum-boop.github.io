@@ -114,3 +114,50 @@ body.menu-open .circular-badge {
     animation: none;
   }
 }
+
+/* ===== Hero proportions (5lab: one big statement, a smaller orb with a thin ring, crimson fading to black) ===== */
+#hero.hero-section-5lab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 30%,
+    rgba(10, 1, 4, 0.55) 62%,
+    rgba(0, 0, 0, 0.94) 100%
+  );
+}
+
+#hero .hero-orb-layer {
+  --orb-size: min(36vh, 380px);
+  --orb-top: 33%;
+}
+
+#hero .hero-orb-layer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: var(--orb-top);
+  width: calc(var(--orb-size) * 1.7);
+  height: calc(var(--orb-size) * 1.7);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+}
+
+#hero .hero-title-5lab-exact {
+  font-size: clamp(3.25rem, 9.5vw, 10rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 767px) {
+  #hero .hero-orb-layer {
+    --orb-size: min(62vw, 270px);
+    --orb-top: 30%;
+  }
+}
