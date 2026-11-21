@@ -1,0 +1,84 @@
+/* 5lab-exact pass: always-visible nav, centered hero headline behind the orb, Contact orb as a centerpiece */
+
+/* --- Top menu: 5lab keeps it visible on every section --- */
+html header.site-header.site-header--hidden {
+  transform: none;
+}
+html header.site-header .nav-link {
+  font-size: 0.95rem;
+}
+
+/* --- Hero: headline mid-screen, orb in FRONT of the text, crimson fading to black --- */
+html #hero .hero-orb-layer {
+  z-index: 2;
+  --orb-size: min(30vh, 320px);
+  --orb-top: 52%;
+}
+html #hero .hero-content-shell-5lab {
+  justify-content: center;
+}
+html #hero .hero-eyebrow-wrapper-5lab {
+  order: 2;
+  margin: 2.5rem 0 0;
+}
+html #hero .hero-title-5lab-exact {
+  margin: 0;
+  font-size: clamp(3rem, 8.2vw, 8.5rem);
+  line-height: 1.04;
+}
+html #hero .hero-line {
+  will-change: transform;
+}
+html #hero .hero-line-indent-exact {
+  padding-left: clamp(2rem, 14vw, 14rem);
+}
+@media (max-width: 767px) {
+  html #hero .hero-orb-layer {
+    --orb-size: min(52vw, 230px);
+    --orb-top: 52%;
+  }
+  html #hero .hero-title-5lab-exact {
+    font-size: clamp(2.6rem, 13vw, 4rem);
+  }
+  html #hero .hero-line-indent-exact {
+    padding-left: 1.75rem;
+  }
+}
+
+/* --- Contact: orb is a centerpiece to the right of the headline, with a soft pink halo --- */
+html #contact .contact-cta-hero-5lab {
+  min-height: min(100svh, 780px);
+  padding-bottom: 6rem;
+}
+html #contact .contact-orb-block {
+  position: absolute;
+  top: 44%;
+  right: 14%;
+  margin: 0;
+  z-index: 1;
+}
+html #contact .contact-orb-block::before {
+  content: '';
+  position: absolute;
+  inset: -120%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 62, 117, 0.4) 0%, rgba(232, 62, 117, 0.12) 38%, rgba(232, 62, 117, 0) 66%);
+  pointer-events: none;
+}
+html #contact .contact-orb-laser-wrap {
+  width: 62vh;
+}
+@media (max-width: 767px) {
+  html #contact .contact-cta-hero-5lab {
+    min-height: 0;
+    padding-bottom: 20rem;
+  }
+  html #contact .contact-orb-block {
+    top: auto;
+    bottom: 4.5rem;
+    right: 18%;
+  }
+  html #contact .contact-orb-laser-wrap {
+    width: 46vh;
+  }
+}
