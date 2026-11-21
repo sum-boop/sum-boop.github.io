@@ -52,7 +52,7 @@ function buildDispatchLinks(fields: {
   return {
     whatsappUrl: `https://wa.me/${contact.whatsappNumber}?text=${encodedText}`,
     mailtoUrl: `mailto:${contact.email}?subject=${subject}&body=${encodedText}`,
-    smsUrl: `sms:+${contact.whatsappNumber}?body=${encodedText}`,
+    smsUrl: `sms:+${contact.whatsappNumber}?&body=${encodedText}`,
     plainText,
   };
 }
@@ -190,37 +190,32 @@ export function ContactForm() {
 
       setSubmitPhase('loading');
 
+      // Dispatch quickly so the browser still treats it as part of the click (popup blockers).
       prepareTimerRef.current = window.setTimeout(() => {
         prepareTimerRef.current = null;
         setSubmitPhase('success');
         setLastDispatch(prepared);
 
-        showToast({
-          type: 'success',
-          title: 'TRANSMITTED',
-          message: `${channelLabel} prepared. Opening with your message…`,
-        });
-
-        redirectTimerRef.current = window.setTimeout(() => {
-          redirectTimerRef.current = null;
-          try {
-            triggerAnchorDispatch(targetHref, channel === 'whatsapp');
-          } catch {
-            clearDispatchTimers();
-            setSubmitPhase('idle');
-            showToast({
-              type: 'error',
-              title: 'Launch blocked',
-              message: `Use the ${channelLabel} link below to open manually.`,
-            });
-          }
-        }, 700);
+        try {
+          triggerAnchorDispatch(targetHref, channel === 'whatsapp');
+          showToast({
+            type: 'success',
+            title: 'TRANSMITTED',
+            message: `${channelLabel} opened with your message.`,
+          });
+        } catch {
+          showToast({
+            type: 'error',
+            title: 'Launch blocked',
+            message: `Use the ${channelLabel} link below to open manually.`,
+          });
+        }
 
         resetTimerRef.current = window.setTimeout(() => {
           resetTimerRef.current = null;
           setSubmitPhase('idle');
-        }, 2500);
-      }, 900);
+        }, 2200);
+      }, 450);
     } catch {
       clearDispatchTimers();
       setSubmitPhase('idle');

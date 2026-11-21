@@ -1,0 +1,52 @@
+/* Hero typography: stronger hierarchy between the headline, its serif-italic accent and the role line. */
+
+html #hero .hero-title-5lab-exact {
+  font-weight: 600;
+  font-size: clamp(3.4rem, 8vw, 8rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 6px 36px rgba(23, 3, 8, 0.5);
+}
+
+html #hero .hero-line + .hero-line {
+  margin-top: 0.04em;
+}
+
+html #hero .hero-title-5lab-exact .hero-italic-accent {
+  font-size: 1.05em;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  padding-right: 0.04em;
+}
+
+/* Role + location line */
+html #hero .hero-eyebrow-wrapper-5lab {
+  margin-top: clamp(2rem, 3.5vw, 3rem);
+  padding-top: 1.25rem;
+  font-size: clamp(0.74rem, 0.9vw, 0.86rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  color: #ffffff;
+}
+
+html #hero .hero-location-5lab {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+@media (max-width: 767px) {
+  html #hero .hero-title-5lab-exact {
+    font-size: clamp(2.5rem, 11vw, 3.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  html #hero .hero-eyebrow-wrapper-5lab {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+  }
+}
