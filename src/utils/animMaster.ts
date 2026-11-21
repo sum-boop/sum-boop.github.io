@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { restoreScramble, scrambleReveal } from '@/utils/scrambleReveal';
 import { playPageCurtain } from '@/utils/pageCurtain';
+import { initTalkButton } from '@/utils/talkButton';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,7 @@ let tickerCallback: ((time: number) => void) | null = null;
 let anchorClickHandler: ((event: MouseEvent) => void) | null = null;
 let scrollTriggers: ScrollTrigger[] = [];
 let scrambledHeadings: HTMLElement[] = [];
+let disposeTalkButton: (() => void) | null = null;
 
 export function initSmoothScroll(): { destroy: () => void } | null {
   if (typeof window === 'undefined') return null;
@@ -133,7 +135,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
     const target = document.getElementById(hash.slice(1));
     if (!target || !lenisInstance) return;
     event.preventDefault();
-    const fromNav = anchor.closest('#site-navigation, .mobile-nav-overlay') !== null;
+    const fromNav = anchor.closest('#site-navigation, .mobile-nav-overlay, [data-curtain]') !== null;
     if (fromNav) {
       // 5lab-style page transition: curtain closes, we jump while covered, curtain opens.
       playPageCurtain(() => {
@@ -148,6 +150,7 @@ export function initSmoothScroll(): { destroy: () => void } | null {
     }
   };
   document.addEventListener('click', anchorClickHandler);
+  disposeTalkButton = initTalkButton();
 
   return {
     destroy: () => destroySmoothScroll(),
@@ -168,6 +171,10 @@ export function destroySmoothScroll(): void {
   if (anchorClickHandler) {
     document.removeEventListener('click', anchorClickHandler);
     anchorClickHandler = null;
+  }
+  if (disposeTalkButton) {
+    disposeTalkButton();
+    disposeTalkButton = null;
   }
   if (tickerCallback) {
     gsap.ticker.remove(tickerCallback);
