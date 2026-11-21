@@ -1,0 +1,59 @@
+/* Polish layer: one accessible accent system and small typography refinements.
+   Accent on dark surfaces: #F83858. Buttons that carry white text use #D6213F
+   (about 5:1 contrast with white) instead of the brighter accent (about 3.7:1). */
+
+::selection {
+  background: #f83858;
+  color: #ffffff;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+html .section-description,
+html .body-copy {
+  max-width: 62ch;
+  line-height: 1.68;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #f83858;
+  outline-offset: 3px;
+}
+
+/* Contact: one red family instead of three */
+html #contact .channel-tab-pill,
+html #contact .email-draft-link {
+  background-color: #d6213f;
+}
+
+html #contact .email-draft-link:hover {
+  background-color: #b81a35;
+}
+
+html #contact .form-submit:hover:not(:disabled) {
+  border-color: #d6213f;
+  background-color: #d6213f;
+}
+
+html #contact .channel-tab--active {
+  border-color: #d6213f;
+}
+
+/* Text on the glossy pink orbs: soft shadow keeps small white labels legible */
+#talk-button,
+html #contact .contact-lets-chat-btn-5lab {
+  text-shadow: 0 1px 3px rgba(60, 0, 30, 0.7);
+}
