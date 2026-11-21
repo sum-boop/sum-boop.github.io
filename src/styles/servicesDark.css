@@ -1,6 +1,20 @@
 /* Services band, dark phase (5lab /services): the section turns black and the four
    skill categories become dark glass cards. Colors flow from data-tone="dark" tokens. */
 
+/* All section titles: the accent word is a serif italic (5lab), not a highlighted box.
+   The solid indigo highlight boxes stay only in the About statement (.about-hl). */
+html .section-heading h2 mark.editorial-highlight {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.008em;
+}
+
 html #skills[data-tone='dark'] {
   background: #000;
   color: var(--ink);
