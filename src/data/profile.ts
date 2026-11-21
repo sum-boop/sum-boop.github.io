@@ -2,15 +2,15 @@ import type { PortfolioProfile } from '../types/portfolio';
 
 export const profile = {
   name: 'Sumit Anand',
-  role: 'CCTV Operator & Surveillance Specialist',
+  role: 'CCTV Operator & Networked Security Systems Specialist',
   headline: 'Sumit Anand — eyes on every hub.',
   location: 'Patli, Haryana, India',
   heroSummary:
-    "CCTV Operator and Surveillance Specialist running Milestone XProtect Smart Client consoles, multi-channel CP Plus camera arrays and high-throughput GIGO gate control across India's largest logistics hubs.",
+    "CCTV Operator with 2+ years in large-scale logistics hubs. I run Milestone XProtect consoles and CP Plus camera networks, and keep high-volume gate entry and exit accurate, logged and secure.",
   aboutHeading: 'Precision Monitoring & Asset Protection',
   aboutParagraphs: [
-    'Specialist in real-time multi-camera monitoring, Milestone XProtect playback investigations, accurate vehicle and driver data logging, and incident review across mega logistics operations, including the Flipkart Kalash Mega Hub and Ekart Logistics.',
-    'Expert operator of multi-screen Milestone XProtect Smart Client consoles, CP Plus CCTV arrays and digital GIGO gate-entry systems, keeping zero-error Excel logs. Consistent enforcer of loss-prevention protocols and fire-safety procedures across high-volume warehouse zones.',
+    'I watch over some of India\'s busiest logistics sites, including the Flipkart Kalash Mega Hub and Ekart Logistics. My work covers live multi-camera monitoring, footage playback and incident flagging, plus accurate vehicle and personnel logging at the gate.',
+    'I am comfortable on both sides of the system: operating Milestone XProtect and CP Plus NVR/DVR consoles, and keeping the IP network behind them healthy with IPv4 addressing, switch and router setup, and ping/ipconfig diagnostics. The result is high video uptime, zero-incident accuracy and fast escalation when something is off.',
   ],
   heroMetrics: [
     { value: '2+', label: 'Years Ops' },

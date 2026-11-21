@@ -1,5 +1,5 @@
 import { Award, GraduationCap } from 'lucide-react';
-import { certifications, education } from '@/data/certifications';
+import { certifications, educationRecords } from '@/data/certifications';
 import { SectionHeading } from './SectionHeading';
 
 export function Credentials() {
@@ -20,15 +20,20 @@ export function Credentials() {
         />
 
         <div className="credentials-layout-5lab">
-          {/* Education Card */}
-          <article className="credential-card-5lab credential-card-5lab--featured">
-            <div className="credential-card-header-5lab">
-              <span className="credential-mono-tag">00 / EDUCATION</span>
-              <GraduationCap aria-hidden="true" size={20} />
-            </div>
-            <h3 className="credential-card-title-5lab">{education}</h3>
-            <p className="credential-card-desc-5lab">Senior Secondary Education · Panchitthri</p>
-          </article>
+          {/* Education */}
+          {educationRecords.map((record, index) => (
+            <article
+              className="credential-card-5lab credential-card-5lab--featured"
+              key={record.title}
+            >
+              <div className="credential-card-header-5lab">
+                <span className="credential-mono-tag">0{index} / EDUCATION</span>
+                <GraduationCap aria-hidden="true" size={20} />
+              </div>
+              <h3 className="credential-card-title-5lab">{record.title}</h3>
+              <p className="credential-card-desc-5lab">{record.detail}</p>
+            </article>
+          ))}
 
           {/* Certifications Grid */}
           <div className="certifications-grid-5lab">
