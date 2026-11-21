@@ -1,10 +1,12 @@
-import { memo, useRef } from 'react';
+import { Suspense, lazy, memo, useRef } from 'react';
 import { ArrowUpRight, Cpu, Network, ScanEye, ShieldCheck } from 'lucide-react';
 import { type VmsViewMode, useVms } from '@/context/VmsContext';
 import { skillCategories, skillTicker } from '@/data/skills';
 import { VelocityMarquee } from '@/motion';
 import '@/styles/skillsBand.css';
 import { SectionHeading } from './SectionHeading';
+
+const SilverSpheres = lazy(() => import('@/components/three/SilverSpheres'));
 
 const icons = [ScanEye, Network, Cpu, ShieldCheck] as const;
 const CATEGORY_VMS_MODES: readonly VmsViewMode[] = ['live', 'playback', 'smart-map', 'alarms'];
@@ -16,6 +18,9 @@ export const Skills = memo(function Skills() {
   return (
     <section aria-labelledby="skills-title" className="content-section-5lab skills-section-5lab" id="skills">
       <div className="section-inner">
+        <Suspense fallback={<div aria-hidden="true" className="skills-spheres" />}>
+          <SilverSpheres />
+        </Suspense>
         <div className="skills-band-layout">
           <SectionHeading
             description="A working toolkit across Milestone XProtect Smart Client consoles, connectivity, gate operations, and safety response."
