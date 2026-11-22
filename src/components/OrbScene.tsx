@@ -355,12 +355,12 @@ export const OrbScene = memo(function OrbScene() {
               Deployments &amp; Cameras
             </span>
             <span aria-hidden="true" className="orb-sub-slot orb-sub-slot--alt" ref={opsSubBRef}>
-              32+ Live Feeds · NCR
+              Live Feeds · NCR
             </span>
           </p>
           <p className="orb-label-copy">
-            32+ IP cameras across Patli-NCR logistics hubs, Milestone XProtect VMS &amp; GIGO gate
-            control.
+            Live IP camera monitoring across Patli-NCR logistics hubs, Milestone XProtect VMS &amp;
+            GIGO gate control.
           </p>
         </div>
 
