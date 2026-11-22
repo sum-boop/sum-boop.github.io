@@ -1192,7 +1192,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
               onClick={() =>
                 setSelectedPart({
                   id: 'operator-profile',
-                  label: 'Operator: Sumit Anand · Shift Lead',
+                  label: 'Operator: Sumit Anand · Gate Control & Surveillance',
                   spec: 'Flipkart Kalash Mega Hub · Milestone XProtect Smart Client',
                   sectionId: 'about',
                   actionLabel: 'Operator Profile',
