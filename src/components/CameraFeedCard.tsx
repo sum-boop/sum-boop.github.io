@@ -35,12 +35,10 @@ export const CameraFeedCard = memo(function CameraFeedCard({
 
   const siteLabel =
     deployment.site === 'Flipkart Kalash Mega Hub' ? 'Flipkart Kalash' : 'Ekart Logistics';
-  const cameraLabel = deployment.cardCameras ? `${deployment.cardCameras} cameras` : null;
   const tagLineParts = [
     `0${index + 1}`,
     siteLabel,
     deployment.cardPeriod,
-    cameraLabel,
     deployment.cardMetric,
   ].filter(Boolean);
 

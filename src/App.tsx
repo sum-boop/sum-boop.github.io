@@ -299,12 +299,6 @@ function AppContent() {
                 <small>DURATION</small>
                 <strong>{activeDeployment.period}</strong>
               </div>
-              <div>
-                <small>CAMERAS</small>
-                <strong>
-                  {activeDeployment.cameras === null ? '—' : activeDeployment.cameras}
-                </strong>
-              </div>
             </div>
             <p className="modal-description" id="dialog-description">
               {activeDeployment.description}
