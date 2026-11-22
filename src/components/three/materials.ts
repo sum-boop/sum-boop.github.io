@@ -200,6 +200,305 @@ function formatLiveTimecode(t: number): string {
   return `${hh}:${mm}:${ss}:${ff}`;
 }
 
+/* ------------------------------------------------------------------------- */
+/* Smart Client screen painting helpers (2D canvas → 3D monitor textures)     */
+/* ------------------------------------------------------------------------- */
+
+type Ctx = CanvasRenderingContext2D;
+type Paint = string | CanvasGradient | CanvasPattern;
+
+const UI_SANS = '"Plus Jakarta Sans", "Instrument Sans", system-ui, sans-serif';
+const UI_MONO = '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace';
+
+const UI = {
+  bgTop: '#0a1120',
+  bgBottom: '#050810',
+  panel: '#0e1626',
+  hairline: 'rgba(148, 163, 184, 0.16)',
+  text: '#eef3fb',
+  textMuted: '#8b9bb5',
+  cyan: '#22d3ee',
+  sky: '#38bdf8',
+  blue: '#2563eb',
+  green: '#34d399',
+  amber: '#fbbf24',
+  red: '#f87171',
+  violet: '#a5b4fc',
+} as const;
+
+function roundRectPath(ctx: Ctx, x: number, y: number, w: number, h: number, r: number): void {
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+function fillRound(
+  ctx: Ctx,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+  paint: Paint,
+): void {
+  roundRectPath(ctx, x, y, w, h, r);
+  ctx.fillStyle = paint;
+  ctx.fill();
+}
+
+function strokeRound(
+  ctx: Ctx,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+  paint: Paint,
+  lineWidth: number,
+): void {
+  roundRectPath(ctx, x, y, w, h, r);
+  ctx.strokeStyle = paint;
+  ctx.lineWidth = lineWidth;
+  ctx.stroke();
+}
+
+function verticalGradient(
+  ctx: Ctx,
+  y0: number,
+  y1: number,
+  from: string,
+  to: string,
+): CanvasGradient {
+  const grad = ctx.createLinearGradient(0, y0, 0, y1);
+  grad.addColorStop(0, from);
+  grad.addColorStop(1, to);
+  return grad;
+}
+
+function horizontalGradient(
+  ctx: Ctx,
+  x0: number,
+  x1: number,
+  from: string,
+  to: string,
+): CanvasGradient {
+  const grad = ctx.createLinearGradient(x0, 0, x1, 0);
+  grad.addColorStop(0, from);
+  grad.addColorStop(1, to);
+  return grad;
+}
+
+function drawText(
+  ctx: Ctx,
+  text: string,
+  x: number,
+  y: number,
+  font: string,
+  color: string,
+  align: CanvasTextAlign = 'left',
+): void {
+  ctx.font = font;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y);
+  ctx.textAlign = 'left';
+}
+
+function drawCornerBrackets(
+  ctx: Ctx,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  len: number,
+  color: string,
+  lineWidth: number,
+): void {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x, y + len);
+  ctx.lineTo(x, y);
+  ctx.lineTo(x + len, y);
+  ctx.moveTo(x + w - len, y);
+  ctx.lineTo(x + w, y);
+  ctx.lineTo(x + w, y + len);
+  ctx.moveTo(x + w, y + h - len);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x + w - len, y + h);
+  ctx.moveTo(x + len, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x, y + h - len);
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+}
+
+function drawLogoChip(ctx: Ctx, x: number, y: number, size: number): void {
+  const grad = ctx.createLinearGradient(x, y, x + size, y + size);
+  grad.addColorStop(0, UI.cyan);
+  grad.addColorStop(1, UI.blue);
+  fillRound(ctx, x, y, size, size, size * 0.3, grad);
+
+  const inset = size * 0.28;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = Math.max(2, size * 0.1);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x + inset, y + inset);
+  ctx.lineTo(x + size - inset, y + size - inset);
+  ctx.moveTo(x + size - inset, y + inset);
+  ctx.lineTo(x + inset, y + size - inset);
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+}
+
+function drawChip(
+  ctx: Ctx,
+  text: string,
+  x: number,
+  y: number,
+  font: string,
+  textColor: string,
+  background: string,
+  anchor: 'left' | 'right',
+): void {
+  ctx.font = font;
+  const padX = 10;
+  const chipH = 24;
+  const chipW = Math.ceil(ctx.measureText(text).width) + padX * 2;
+  const chipX = anchor === 'left' ? x : x - chipW;
+  fillRound(ctx, chipX, y, chipW, chipH, 8, background);
+  drawText(ctx, text, chipX + padX, y + chipH / 2 + 0.5, font, textColor);
+}
+
+function drawScreenHeader(
+  ctx: Ctx,
+  w: number,
+  title: string,
+  subtitle: string,
+  accent: string,
+): void {
+  ctx.fillStyle = 'rgba(15, 24, 41, 0.96)';
+  ctx.fillRect(0, 0, w, 56);
+  ctx.fillStyle = horizontalGradient(ctx, 0, w, accent, 'rgba(37, 99, 235, 0.12)');
+  ctx.fillRect(0, 55, w, 1.5);
+  drawLogoChip(ctx, 18, 12, 32);
+  drawText(ctx, title, 62, 21, `700 16px ${UI_SANS}`, UI.text);
+  drawText(ctx, subtitle, 62, 40, `500 11.5px ${UI_SANS}`, UI.textMuted);
+}
+
+function drawFeedScene(
+  ctx: Ctx,
+  x: number,
+  y: number,
+  cw: number,
+  ch: number,
+  idx: number,
+  t: number,
+  color: string,
+  subject: string,
+): void {
+  ctx.save();
+  roundRectPath(ctx, x, y, cw, ch, 12);
+  ctx.clip();
+
+  ctx.fillStyle = verticalGradient(ctx, y, y + ch, '#111d35', '#060b15');
+  ctx.fillRect(x, y, cw, ch);
+
+  const horizon = y + ch * 0.46;
+  const vanishX = x + cw * (idx % 2 === 0 ? 0.44 : 0.56);
+
+  // Warehouse floor falling away from the horizon
+  ctx.fillStyle = verticalGradient(
+    ctx,
+    horizon,
+    y + ch,
+    'rgba(148, 163, 184, 0.10)',
+    'rgba(148, 163, 184, 0.02)',
+  );
+  ctx.fillRect(x, horizon, cw, y + ch - horizon);
+
+  // Dock doors along the back wall
+  for (let i = 0; i < 6; i++) {
+    fillRound(
+      ctx,
+      x + cw * (0.06 + i * 0.155),
+      horizon - ch * 0.24,
+      cw * 0.11,
+      ch * 0.2,
+      3,
+      'rgba(148, 163, 184, 0.09)',
+    );
+  }
+
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, horizon);
+  ctx.lineTo(x + cw, horizon);
+  ctx.stroke();
+
+  // Lane perspective lines
+  ctx.strokeStyle = 'rgba(34, 211, 238, 0.15)';
+  for (let i = -3; i <= 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(vanishX, horizon);
+    ctx.lineTo(vanishX + i * cw * 0.3, y + ch);
+    ctx.stroke();
+  }
+
+  // Tracked subject drifting through the frame
+  const isPerson = subject === 'PERSON';
+  const travel = (t * (14 + idx * 4) + idx * 90) % (cw + 120);
+  const subjectW = isPerson ? 20 : 74;
+  const subjectH = isPerson ? 46 : 34;
+  const subjectX = x - 60 + travel;
+  const subjectY = y + ch * 0.62 - subjectH / 2 + (idx % 2) * 8;
+  fillRound(
+    ctx,
+    subjectX,
+    subjectY,
+    subjectW,
+    subjectH,
+    isPerson ? 8 : 6,
+    'rgba(203, 213, 225, 0.16)',
+  );
+  drawCornerBrackets(ctx, subjectX - 5, subjectY - 5, subjectW + 10, subjectH + 10, 8, color, 1.8);
+  drawText(ctx, subject, subjectX - 5, subjectY - 14, `700 9.5px ${UI_MONO}`, color);
+
+  // Soft scan sweep
+  const sweepY = y + ((t * 40 + idx * 55) % ch);
+  const sweep = ctx.createLinearGradient(0, sweepY - 14, 0, sweepY + 14);
+  sweep.addColorStop(0, 'rgba(34, 211, 238, 0)');
+  sweep.addColorStop(0.5, 'rgba(34, 211, 238, 0.12)');
+  sweep.addColorStop(1, 'rgba(34, 211, 238, 0)');
+  ctx.fillStyle = sweep;
+  ctx.fillRect(x, sweepY - 14, cw, 28);
+
+  // Lens vignette
+  const vignette = ctx.createRadialGradient(
+    x + cw / 2,
+    y + ch / 2,
+    ch * 0.25,
+    x + cw / 2,
+    y + ch / 2,
+    cw * 0.62,
+  );
+  vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  vignette.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(x, y, cw, ch);
+
+  ctx.restore();
+}
+
 export function drawSmartClientPrimaryCanvas(
   canvas: HTMLCanvasElement,
   state: SmartClientRenderState,
@@ -211,22 +510,21 @@ export function drawSmartClientPrimaryCanvas(
   const t = state.time ?? 0;
   const recBlink = Math.sin(t * 5.2) > -0.15;
 
-  ctx.fillStyle = '#090e18';
+  ctx.fillStyle = verticalGradient(ctx, 0, h, UI.bgTop, UI.bgBottom);
   ctx.fillRect(0, 0, w, h);
 
-  ctx.fillStyle = '#101929';
-  ctx.fillRect(0, 0, w, 58);
-  ctx.fillStyle = '#00e5ff';
-  ctx.fillRect(0, 56, w, 2);
+  // Application header
+  drawScreenHeader(ctx, w, 'MILESTONE XPROTECT', 'Smart Client', UI.cyan);
 
-  ctx.fillStyle = '#f1f5f9';
-  ctx.font = '700 20px sans-serif';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('MILESTONE XPROTECT', 24, 29);
-
-  ctx.fillStyle = '#7dd3fc';
-  ctx.font = '600 14px monospace';
-  ctx.fillText(`SECTOR 01 · ${formatLiveTimecode(t)}`, 264, 29);
+  const siteName = state.siteId === 'ekart' ? 'EKART LOGISTICS' : 'FLIPKART KALASH';
+  drawText(
+    ctx,
+    `${siteName} · ${formatLiveTimecode(t)}`,
+    288,
+    28,
+    `600 12.5px ${UI_MONO}`,
+    UI.sky,
+  );
 
   const tabs: Array<{ id: VmsViewMode; label: string }> = [
     { id: 'live', label: 'LIVE' },
@@ -234,146 +532,250 @@ export function drawSmartClientPrimaryCanvas(
     { id: 'smart-map', label: 'SMART MAP' },
     { id: 'alarms', label: 'ALARMS' },
   ];
-
-  let tabX = 564;
-  for (const tab of tabs) {
+  const tabW = 94;
+  const tabGap = 6;
+  const tabsW = tabs.length * tabW + (tabs.length - 1) * tabGap;
+  const tabsX = w - 20 - tabsW;
+  fillRound(ctx, tabsX - 5, 11, tabsW + 10, 34, 11, 'rgba(6, 10, 18, 0.8)');
+  strokeRound(ctx, tabsX - 5, 11, tabsW + 10, 34, 11, UI.hairline, 1);
+  tabs.forEach((tab, i) => {
+    const tx = tabsX + i * (tabW + tabGap);
     const active = tab.id === state.mode;
-    const tw = 104;
-    ctx.fillStyle = active ? '#0284c7' : '#162235';
-    ctx.fillRect(tabX, 13, tw, 32);
-    ctx.fillStyle = active ? '#ffffff' : '#94a3b8';
-    ctx.font = '700 13px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(tab.label, tabX + tw / 2, 29);
-    tabX += tw + 8;
-  }
-  ctx.textAlign = 'left';
+    if (active) {
+      fillRound(ctx, tx, 14, tabW, 28, 8, horizontalGradient(ctx, tx, tx + tabW, UI.blue, UI.sky));
+    }
+    drawText(
+      ctx,
+      tab.label,
+      tx + tabW / 2,
+      28.5,
+      `700 11.5px ${UI_MONO}`,
+      active ? '#ffffff' : UI.textMuted,
+      'center',
+    );
+  });
 
   const feeds = [
     {
-      code: 'CAM-01 · GATE GIGO IN',
+      code: 'GATE · GIGO IN',
+      name: 'Gate · GIGO In',
       zone: 'Flipkart Kalash · Lane A',
       feed: 'op2',
-      color: '#34d399',
+      color: UI.green,
+      subject: 'VEHICLE',
     },
-    { code: 'CAM-09 · DOCK APRON', zone: '32-Ch CP Plus Matrix', feed: 'op1', color: '#00e5ff' },
     {
-      code: 'CAM-17 · HIGH-VALUE BAY',
-      zone: 'Loss Prevention Zone',
+      code: 'DOCK APRON',
+      name: 'Dock Apron',
+      zone: 'Loading bays',
+      feed: 'op1',
+      color: UI.cyan,
+      subject: 'VEHICLE',
+    },
+    {
+      code: 'HIGH-VALUE BAY',
+      name: 'High-Value Bay',
+      zone: 'Loss prevention zone',
       feed: 'op3',
-      color: '#f59e0b',
+      color: UI.amber,
+      subject: 'PERSON',
     },
     {
-      code: 'CAM-24 · PERIMETER NORTH',
-      zone: state.siteId === 'ekart' ? 'Ekart Logistics' : 'Dispatch Corridor',
+      code: 'PERIMETER NORTH',
+      name: 'Perimeter North',
+      zone: state.siteId === 'ekart' ? 'Ekart Logistics' : 'Dispatch corridor',
       feed: 'op4',
-      color: '#818cf8',
+      color: UI.violet,
+      subject: 'VEHICLE',
     },
+  ].map((cam) => ({
+    ...cam,
+    highlighted:
+      (state.mode === 'playback' && cam.feed === 'op4') ||
+      (state.mode === 'alarms' && cam.feed === 'op3') ||
+      state.feedId === cam.feed,
+  }));
+
+  // Layout
+  const pad = 16;
+  const gap = 12;
+  const bodyY = 70;
+  const timelineH = 74;
+  const timelineY = h - 14 - timelineH;
+  const bodyH = timelineY - gap - bodyY;
+  const sideW = 168;
+  const gridX = pad + sideW + gap;
+  const gridW = w - gridX - pad;
+  const cellW = (gridW - gap) / 2;
+  const cellH = (bodyH - gap) / 2;
+
+  // Left navigation pane (views + system status)
+  fillRound(ctx, pad, bodyY, sideW, bodyH, 14, UI.panel);
+  strokeRound(ctx, pad, bodyY, sideW, bodyH, 14, UI.hairline, 1);
+  drawText(ctx, 'VIEWS', pad + 16, bodyY + 22, `700 10.5px ${UI_MONO}`, UI.textMuted);
+
+  feeds.forEach((cam, idx) => {
+    const rowY = bodyY + 38 + idx * 42;
+    if (cam.highlighted) {
+      fillRound(ctx, pad + 8, rowY, sideW - 16, 34, 9, 'rgba(56, 189, 248, 0.12)');
+      fillRound(ctx, pad + 8, rowY + 8, 3, 18, 2, cam.color);
+    }
+    ctx.fillStyle = cam.color;
+    ctx.beginPath();
+    ctx.arc(pad + 24, rowY + 17, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    drawText(
+      ctx,
+      cam.name,
+      pad + 38,
+      rowY + 17.5,
+      `600 12.5px ${UI_SANS}`,
+      cam.highlighted ? UI.text : '#b6c4d9',
+    );
+  });
+
+  const systemTitleY = bodyY + 38 + feeds.length * 42 + 12;
+  drawText(ctx, 'SYSTEM', pad + 16, systemTitleY, `700 10.5px ${UI_MONO}`, UI.textMuted);
+  const systemRows = [
+    { label: 'Recording', status: 'ONLINE', tone: UI.green },
+    { label: 'Archive', status: 'HEALTHY', tone: UI.cyan },
+    { label: 'Gate log', status: 'SYNCED', tone: UI.amber },
   ];
+  systemRows.forEach((row, idx) => {
+    const rowY = systemTitleY + 16 + idx * 34;
+    fillRound(ctx, pad + 8, rowY, sideW - 16, 28, 8, 'rgba(148, 163, 184, 0.06)');
+    drawText(ctx, row.label, pad + 20, rowY + 14.5, `600 12px ${UI_SANS}`, '#b6c4d9');
+    drawText(
+      ctx,
+      row.status,
+      pad + sideW - 18,
+      rowY + 14.5,
+      `700 10px ${UI_MONO}`,
+      row.tone,
+      'right',
+    );
+  });
 
-  const pad = 18;
-  const topY = 74;
-  const bottomBarH = 74;
-  const cellW = (w - pad * 3) / 2;
-  const cellH = (h - topY - bottomBarH - pad * 2) / 2;
-
+  // 2x2 live view grid
   feeds.forEach((cam, idx) => {
     const col = idx % 2;
     const row = Math.floor(idx / 2);
-    const x = pad + col * (cellW + pad);
-    const y = topY + row * (cellH + pad);
-    const isHighlighted =
-      (state.mode === 'playback' && cam.feed === 'op4') ||
-      (state.mode === 'alarms' && cam.feed === 'op3') ||
-      state.feedId === cam.feed;
+    const x = gridX + col * (cellW + gap);
+    const y = bodyY + row * (cellH + gap);
+    const alarmCell = state.mode === 'alarms' && idx === 2;
+    const boxColor = alarmCell ? UI.amber : cam.color;
 
-    ctx.fillStyle = '#0d1524';
-    ctx.fillRect(x, y, cellW, cellH);
+    drawFeedScene(ctx, x, y, cellW, cellH, idx, t, boxColor, cam.subject);
 
-    // Moving simulated corridor perspective & traffic box
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.22)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x + 28, y + cellH - 18);
-    ctx.lineTo(x + cellW * 0.34, y + cellH * 0.4);
-    ctx.lineTo(x + cellW * 0.66, y + cellH * 0.4);
-    ctx.lineTo(x + cellW - 28, y + cellH - 18);
-    ctx.stroke();
-
-    // Animated horizontal CCTV scan sweep inside viewport
-    const sweepY = y + 36 + ((t * 48 + idx * 45) % Math.max(40, cellH - 60));
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.08)';
-    ctx.fillRect(x + 4, sweepY, cellW - 8, 8);
-
-    // Moving detection bounding box
-    const boxShiftX = Math.sin(t * 1.4 + idx * 1.7) * (cellW * 0.16);
-    const boxShiftY = Math.cos(t * 1.1 + idx) * 8;
-    ctx.strokeStyle = state.mode === 'alarms' && idx === 2 ? '#f59e0b' : cam.color;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + cellW * 0.42 + boxShiftX, y + cellH * 0.44 + boxShiftY, 58, 38);
-
-    ctx.strokeStyle = isHighlighted ? cam.color : 'rgba(148, 163, 184, 0.22)';
-    ctx.lineWidth = isHighlighted ? 3 : 1.5;
-    ctx.strokeRect(x, y, cellW, cellH);
-
-    // Camera overlay header strip + blinking REC indicator
-    ctx.fillStyle = 'rgba(8, 12, 22, 0.88)';
-    ctx.fillRect(x + 6, y + 6, cellW - 12, 28);
+    // Camera name tag
+    ctx.font = `700 11px ${UI_MONO}`;
+    const tagW = Math.ceil(ctx.measureText(cam.code).width) + 34;
+    fillRound(ctx, x + 8, y + 8, tagW, 24, 8, 'rgba(6, 10, 18, 0.8)');
     ctx.fillStyle = cam.color;
-    ctx.fillRect(x + 12, y + 15, 10, 10);
+    ctx.beginPath();
+    ctx.arc(x + 20, y + 20, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    drawText(ctx, cam.code, x + 30, y + 20.5, `700 11px ${UI_MONO}`, UI.text);
 
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '700 13px monospace';
-    ctx.fillText(cam.code, x + 30, y + 20);
-
+    // REC badge
+    const recW = 58;
+    const recX = x + cellW - 8 - recW;
+    fillRound(ctx, recX, y + 8, recW, 24, 8, 'rgba(6, 10, 18, 0.8)');
     if (recBlink || idx % 2 === 0) {
-      ctx.fillStyle = idx === 2 && state.mode === 'alarms' ? '#f59e0b' : '#ef4444';
+      ctx.fillStyle = alarmCell ? UI.amber : UI.red;
       ctx.beginPath();
-      ctx.arc(x + cellW - 44, y + 20, 4.5, 0, Math.PI * 2);
+      ctx.arc(recX + 15, y + 20, 3.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = '#f87171';
-      ctx.font = '700 11px monospace';
-      ctx.fillText('REC', x + cellW - 35, y + 20);
     }
+    drawText(
+      ctx,
+      'REC',
+      recX + 25,
+      y + 20.5,
+      `700 10.5px ${UI_MONO}`,
+      alarmCell ? UI.amber : '#fca5a5',
+    );
 
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 12px monospace';
-    ctx.fillText(cam.zone, x + 14, y + cellH - 16);
+    drawText(ctx, cam.zone, x + 14, y + cellH - 15, `500 11.5px ${UI_SANS}`, UI.textMuted);
+
+    strokeRound(
+      ctx,
+      x,
+      y,
+      cellW,
+      cellH,
+      12,
+      cam.highlighted ? cam.color : UI.hairline,
+      cam.highlighted ? 2.5 : 1,
+    );
   });
 
-  // Bottom Timeline / Sequence Scrubber
-  const barY = h - bottomBarH + 8;
-  ctx.fillStyle = '#0f1726';
-  ctx.fillRect(pad, barY, w - pad * 2, 54);
-  ctx.strokeStyle = 'rgba(0, 229, 255, 0.28)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(pad, barY, w - pad * 2, 54);
+  // Timeline / sequence scrubber
+  fillRound(ctx, pad, timelineY, w - pad * 2, timelineH, 14, UI.panel);
+  strokeRound(ctx, pad, timelineY, w - pad * 2, timelineH, 14, UI.hairline, 1);
 
-  const trackX = pad + 18;
-  const trackW = w - pad * 2 - 36;
-  ctx.fillStyle = state.mode === 'playback' ? '#e11d48' : '#0284c7';
-  ctx.fillRect(trackX, barY + 30, trackW, 10);
-  ctx.fillStyle = '#34d399';
-  ctx.fillRect(trackX + trackW * 0.18, barY + 30, trackW * 0.22, 10);
-  ctx.fillStyle = '#f59e0b';
-  ctx.fillRect(trackX + trackW * 0.64, barY + 26, 8, 18);
-
-  const baseHeadRatio = state.mode === 'playback' ? 0.64 : 0.84;
-  const headX = trackX + trackW * (baseHeadRatio + Math.sin(t * 0.45) * 0.04);
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(headX - 2, barY + 22, 4, 26);
-
-  ctx.fillStyle = '#cbd5e1';
-  ctx.font = '600 13px monospace';
   const modeStatus =
     state.mode === 'playback'
-      ? 'TIMELINE SCRUB · 1080P ARCHIVE LOCK · EXPORT READY'
+      ? 'PLAYBACK · ARCHIVE LOCKED · EXPORT READY'
       : state.mode === 'alarms'
-        ? 'ALARM SEQUENCE · GIGO & PERIMETER TRIGGERS ACTIVE'
+        ? 'ALARM SEQUENCE · GATE & PERIMETER TRIGGERS ACTIVE'
         : state.mode === 'smart-map'
-          ? 'GIS CORRIDOR LINKED · PATLI HUB ACTIVE'
-          : 'RECORDING SERVER · 32 CHANNELS · 24/7 UPTIME';
-  ctx.fillText(modeStatus, trackX, barY + 14);
+          ? 'SMART MAP LINKED · PATLI HUB ACTIVE'
+          : 'LIVE · RECORDING SERVER ONLINE · 24/7';
+  drawText(ctx, modeStatus, pad + 20, timelineY + 18, `600 11.5px ${UI_MONO}`, UI.textMuted);
+  drawText(
+    ctx,
+    formatLiveTimecode(t),
+    w - pad - 20,
+    timelineY + 18,
+    `700 11.5px ${UI_MONO}`,
+    UI.text,
+    'right',
+  );
+
+  const trackX = pad + 22;
+  const trackW = w - pad * 2 - 44;
+  const trackY = timelineY + 34;
+  const isPlayback = state.mode === 'playback';
+  const headRatio = Math.min(
+    0.98,
+    Math.max(0.02, (isPlayback ? 0.64 : 0.84) + Math.sin(t * 0.45) * 0.04),
+  );
+  const headX = trackX + trackW * headRatio;
+
+  fillRound(ctx, trackX, trackY, trackW, 8, 4, 'rgba(148, 163, 184, 0.14)');
+  fillRound(
+    ctx,
+    trackX,
+    trackY,
+    trackW * headRatio,
+    8,
+    4,
+    isPlayback
+      ? horizontalGradient(ctx, trackX, headX, '#e11d48', '#fb7185')
+      : horizontalGradient(ctx, trackX, headX, UI.blue, UI.cyan),
+  );
+  fillRound(ctx, trackX + trackW * 0.18, trackY - 5, trackW * 0.14, 4, 2, UI.green);
+  fillRound(ctx, trackX + trackW * 0.5, trackY - 5, trackW * 0.06, 4, 2, UI.green);
+  fillRound(ctx, trackX + trackW * 0.64 - 3, trackY - 8, 6, 24, 3, UI.amber);
+
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.32)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i <= 48; i++) {
+    const tickX = trackX + (trackW * i) / 48;
+    ctx.moveTo(tickX, trackY + 16);
+    ctx.lineTo(tickX, trackY + (i % 6 === 0 ? 26 : 21));
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+  ctx.fillRect(headX - 4, trackY - 12, 8, 36);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(headX - 1.5, trackY - 12, 3, 36);
+  ctx.beginPath();
+  ctx.arc(headX, trackY - 12, 4.5, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 export function drawSmartClientAuxCanvas(
@@ -386,100 +788,163 @@ export function drawSmartClientAuxCanvas(
   const h = canvas.height;
   const t = state.time ?? 0;
 
-  ctx.fillStyle = '#090e18';
+  ctx.fillStyle = verticalGradient(ctx, 0, h, UI.bgTop, UI.bgBottom);
   ctx.fillRect(0, 0, w, h);
 
-  ctx.fillStyle = '#101929';
-  ctx.fillRect(0, 0, w, 54);
-  ctx.fillStyle = '#f59e0b';
-  ctx.fillRect(0, 52, w, 2);
-
-  ctx.fillStyle = '#f1f5f9';
-  ctx.font = '700 18px monospace';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(
-    state.mode === 'alarms' ? 'XPROTECT ALARM MANAGER' : 'XPROTECT SMART MAP · NCR',
-    20,
-    27,
+  drawScreenHeader(
+    ctx,
+    w,
+    state.mode === 'alarms' ? 'ALARM MANAGER' : 'SMART MAP · NCR',
+    'XProtect Smart Client',
+    UI.amber,
   );
 
-  const mapTop = 72;
-  const mapH = 340;
-  ctx.fillStyle = '#0d1626';
-  ctx.fillRect(20, mapTop, w - 40, mapH);
-  ctx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(20, mapTop, w - 40, mapH);
+  // Map viewport
+  const mapX = 20;
+  const mapY = 72;
+  const mapW = w - 40;
+  const mapH = 330;
 
-  ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
-  ctx.lineWidth = 2;
+  ctx.save();
+  roundRectPath(ctx, mapX, mapY, mapW, mapH, 16);
+  ctx.clip();
+
+  const mapBase = ctx.createRadialGradient(
+    mapX + mapW * 0.5,
+    mapY + mapH * 0.45,
+    20,
+    mapX + mapW * 0.5,
+    mapY + mapH * 0.45,
+    mapW * 0.75,
+  );
+  mapBase.addColorStop(0, '#12213a');
+  mapBase.addColorStop(1, '#070c16');
+  ctx.fillStyle = mapBase;
+  ctx.fillRect(mapX, mapY, mapW, mapH);
+
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(48, mapTop + 260);
-  ctx.bezierCurveTo(180, mapTop + 220, 320, mapTop + 140, w - 50, mapTop + 80);
+  for (let gx = mapX + 40; gx < mapX + mapW; gx += 40) {
+    ctx.moveTo(gx, mapY);
+    ctx.lineTo(gx, mapY + mapH);
+  }
+  for (let gy = mapY + 40; gy < mapY + mapH; gy += 40) {
+    ctx.moveTo(mapX, gy);
+    ctx.lineTo(mapX + mapW, gy);
+  }
   ctx.stroke();
 
+  // Road network
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.11)';
+  ctx.lineWidth = 8;
   ctx.beginPath();
-  ctx.moveTo(80, mapTop + 60);
-  ctx.lineTo(w - 70, mapTop + 290);
+  ctx.moveTo(mapX + 10, mapY + 270);
+  ctx.bezierCurveTo(mapX + 150, mapY + 230, mapX + 300, mapY + 150, mapX + mapW - 10, mapY + 86);
+  ctx.moveTo(mapX + 70, mapY + 20);
+  ctx.lineTo(mapX + mapW - 60, mapY + mapH - 20);
   ctx.stroke();
+  ctx.lineCap = 'butt';
 
   const flipkartActive = state.siteId === 'flipkart';
-  const fx = w * 0.42;
-  const fy = mapTop + 150;
-  const pulseRadius = 22 + ((t * 18) % 26);
+  const fx = w * 0.38;
+  const fy = mapY + 130;
+  const ex = w * 0.66;
+  const ey = mapY + 240;
 
-  ctx.strokeStyle = `rgba(0, 229, 255, ${Math.max(0.1, 0.7 - (pulseRadius - 22) / 36)})`;
+  // Corridor link between the two sites
+  ctx.strokeStyle = 'rgba(34, 211, 238, 0.55)';
   ctx.lineWidth = 2;
+  ctx.setLineDash([6, 6]);
+  ctx.lineDashOffset = -t * 12;
   ctx.beginPath();
-  ctx.arc(fx, fy, pulseRadius, 0, Math.PI * 2);
+  ctx.moveTo(fx, fy);
+  ctx.lineTo(ex, ey);
   ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.lineDashOffset = 0;
 
-  ctx.fillStyle = '#00e5ff';
-  ctx.beginPath();
-  ctx.arc(fx, fy, 9, 0, Math.PI * 2);
-  ctx.fill();
+  // Site pins (the active site pulses)
+  const pulse = (t * 14) % 26;
+  const drawPin = (px: number, py: number, color: string, active: boolean): void => {
+    if (active) {
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = Math.max(0.08, 0.6 - pulse / 40);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(px, py, 14 + pulse, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = 'rgba(6, 10, 18, 0.9)';
+    ctx.beginPath();
+    ctx.arc(px, py, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(px, py, active ? 8 : 6, 0, Math.PI * 2);
+    ctx.fill();
+  };
+  drawPin(fx, fy, UI.cyan, flipkartActive);
+  drawPin(ex, ey, UI.amber, !flipkartActive);
 
-  ctx.fillStyle = '#e2e8f0';
-  ctx.font = '700 14px monospace';
-  ctx.fillText('FLIPKART KALASH HUB (32 CAM)', fx + 18, fy - 6);
+  drawChip(
+    ctx,
+    'FLIPKART KALASH HUB',
+    fx + 18,
+    fy - 12,
+    `700 11.5px ${UI_MONO}`,
+    UI.text,
+    'rgba(6, 10, 18, 0.82)',
+    'left',
+  );
+  drawChip(
+    ctx,
+    'EKART LOGISTICS',
+    ex - 18,
+    ey - 12,
+    `700 11.5px ${UI_MONO}`,
+    UI.text,
+    'rgba(6, 10, 18, 0.82)',
+    'right',
+  );
+  ctx.restore();
+  strokeRound(ctx, mapX, mapY, mapW, mapH, 16, 'rgba(34, 211, 238, 0.22)', 1.5);
 
-  const ex = w * 0.62;
-  const ey = mapTop + 250;
-  ctx.fillStyle = !flipkartActive ? '#f59e0b' : '#94a3b8';
-  ctx.beginPath();
-  ctx.arc(ex, ey, 8, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#cbd5e1';
-  ctx.font = '600 13px monospace';
-  ctx.fillText('EKART LOGISTICS (12 CAM)', ex - 160, ey + 24);
+  drawChip(
+    ctx,
+    'LIVE SITE MAP',
+    mapX + 12,
+    mapY + 12,
+    `700 10.5px ${UI_MONO}`,
+    UI.textMuted,
+    'rgba(6, 10, 18, 0.72)',
+    'left',
+  );
 
-  const queueY = mapTop + mapH + 24;
-  ctx.fillStyle = '#7dd3fc';
-  ctx.font = '700 14px monospace';
-  ctx.fillText('SYSTEM & GIGO TELEMETRY', 20, queueY);
+  // System & gate telemetry
+  const queueY = mapY + mapH + 24;
+  drawText(ctx, 'SYSTEM & GATE TELEMETRY', 20, queueY, `700 11.5px ${UI_MONO}`, UI.sky);
 
   const rows = [
-    { k: 'SERVER', v: 'XProtect Corporate · Online', tone: '#34d399' },
-    { k: 'GATE GIGO', v: 'Synced · 100% Log Accuracy', tone: '#00e5ff' },
+    { k: 'SERVER', v: 'XProtect VMS · Online', tone: UI.green },
+    { k: 'GATE GIGO', v: 'Synced · 100% Log Accuracy', tone: UI.cyan },
     {
       k: 'ACTIVE HUB',
       v: flipkartActive ? 'Flipkart Kalash, Patli' : 'Ekart Logistics, HR',
-      tone: '#f59e0b',
+      tone: UI.amber,
     },
-    { k: 'PLAYBACK', v: 'NVR Pool Nominal · 24/7', tone: '#818cf8' },
+    { k: 'PLAYBACK', v: 'Archive Nominal · 24/7', tone: UI.violet },
   ];
 
   rows.forEach((row, idx) => {
-    const ry = queueY + 26 + idx * 48;
-    ctx.fillStyle = '#121b2b';
-    ctx.fillRect(20, ry, w - 40, 38);
-    ctx.fillStyle = row.tone;
-    ctx.fillRect(20, ry, 4, 38);
-    ctx.font = '700 13px monospace';
-    ctx.fillText(row.k, 36, ry + 19);
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '500 13px sans-serif';
-    ctx.fillText(row.v, 148, ry + 19);
+    const ry = queueY + 20 + idx * 46;
+    fillRound(ctx, 20, ry, w - 40, 38, 10, UI.panel);
+    strokeRound(ctx, 20, ry, w - 40, 38, 10, UI.hairline, 1);
+    fillRound(ctx, 20, ry + 8, 3, 22, 2, row.tone);
+    drawText(ctx, row.k, 36, ry + 19.5, `700 11px ${UI_MONO}`, row.tone);
+    drawText(ctx, row.v, 134, ry + 19.5, `500 12.5px ${UI_SANS}`, UI.text);
   });
 }
 
@@ -490,70 +955,84 @@ export function drawBriefCamCanvas(canvas: HTMLCanvasElement, state: SmartClient
   const h = canvas.height;
   const t = state.time ?? 0;
 
-  ctx.fillStyle = '#080d17';
+  ctx.fillStyle = verticalGradient(ctx, 0, h, UI.bgTop, UI.bgBottom);
   ctx.fillRect(0, 0, w, h);
 
-  ctx.fillStyle = '#0f1829';
-  ctx.fillRect(0, 0, w, 54);
-  ctx.fillStyle = '#00e5ff';
-  ctx.fillRect(0, 52, w, 2);
+  drawScreenHeader(ctx, w, 'BRIEFCAM ANALYTICS · LPR', 'Video content analytics', UI.cyan);
 
-  ctx.fillStyle = '#f1f5f9';
-  ctx.font = '700 17px monospace';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('BRIEFCAM ANALYTICS · LPR', 20, 27);
+  // Gate bay motion spectrum
+  const panelX = 20;
+  const panelY = 72;
+  const panelW = w - 40;
+  const panelH = 172;
+  fillRound(ctx, panelX, panelY, panelW, panelH, 14, UI.panel);
+  strokeRound(ctx, panelX, panelY, panelW, panelH, 14, UI.hairline, 1);
+  drawText(ctx, 'GATE BAY MOTION', panelX + 16, panelY + 22, `700 11.5px ${UI_MONO}`, UI.sky);
 
-  // Live LPR Gate Telemetry Spectrum Bars
-  ctx.fillStyle = '#0d1524';
-  ctx.fillRect(20, 74, w - 40, 180);
-  ctx.strokeStyle = 'rgba(0, 229, 255, 0.24)';
-  ctx.strokeRect(20, 74, w - 40, 180);
+  const baseY = panelY + panelH - 18;
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i < 4; i++) {
+    const gy = baseY - 28 - i * 24;
+    ctx.moveTo(panelX + 16, gy);
+    ctx.lineTo(panelX + panelW - 16, gy);
+  }
+  ctx.stroke();
 
-  ctx.fillStyle = '#7dd3fc';
-  ctx.font = '700 13px monospace';
-  ctx.fillText('GATE BAY MOTION SPECTRUM', 34, 98);
-
-  const bars = 16;
-  const barW = (w - 92) / bars;
+  const bars = 18;
+  const barSlot = (panelW - 32) / bars;
   for (let i = 0; i < bars; i++) {
     const val = 0.25 + 0.7 * Math.abs(Math.sin(t * 2.1 + i * 0.55));
-    const bh = 104 * val;
-    const bx = 36 + i * barW;
-    const by = 236 - bh;
-    ctx.fillStyle = i % 5 === 0 ? '#f59e0b' : '#00e5ff';
-    ctx.fillRect(bx, by, Math.max(6, barW - 6), bh);
+    const barH = 96 * val;
+    const bx = panelX + 16 + i * barSlot + 2;
+    const by = baseY - barH;
+    const warm = i % 5 === 0;
+    const grad = verticalGradient(
+      ctx,
+      by,
+      baseY,
+      warm ? UI.amber : UI.cyan,
+      warm ? 'rgba(245, 158, 11, 0.25)' : 'rgba(37, 99, 235, 0.3)',
+    );
+    fillRound(ctx, bx, by, Math.max(6, barSlot - 5), barH, 3, grad);
   }
 
-  // Gate Vehicle / Container ID Logs
+  // Live plate stream (plates are masked sample data)
+  drawText(ctx, 'LIVE LPR STREAM', 20, 270, `700 11.5px ${UI_MONO}`, UI.textMuted);
+
   const entries = [
-    { plate: 'HR-55-AK-4821', bay: 'DOCK 04 IN', status: 'VERIFIED', tone: '#34d399' },
-    { plate: 'HR-38-TR-1094', bay: 'GIGO GATE A', status: 'CLEARED', tone: '#00e5ff' },
-    { plate: 'DL-01-GC-7720', bay: 'PERIMETER E', status: 'CHECKED', tone: '#38bdf8' },
-    { plate: 'HR-26-LP-9312', bay: 'HIGH-VAL BAY', status: 'ALERT OK', tone: '#f59e0b' },
+    { plate: 'HR-55-AK-••••', bay: 'DOCK IN', status: 'VERIFIED', tone: UI.green },
+    { plate: 'HR-38-TR-••••', bay: 'GIGO GATE', status: 'CLEARED', tone: UI.cyan },
+    { plate: 'DL-01-GC-••••', bay: 'PERIMETER', status: 'CHECKED', tone: UI.sky },
+    { plate: 'HR-26-LP-••••', bay: 'HIGH-VALUE BAY', status: 'ALERT OK', tone: UI.amber },
   ];
 
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '700 13px monospace';
-  ctx.fillText('LIVE LPR & CONTAINER STREAM', 20, 286);
-
   entries.forEach((item, idx) => {
-    const ey = 310 + idx * 78;
-    ctx.fillStyle = '#111a2b';
-    ctx.fillRect(20, ey, w - 40, 62);
-    ctx.fillStyle = item.tone;
-    ctx.fillRect(20, ey, 4, 62);
+    const ey = 288 + idx * 76;
+    fillRound(ctx, 20, ey, w - 40, 62, 12, UI.panel);
+    strokeRound(ctx, 20, ey, w - 40, 62, 12, UI.hairline, 1);
+    fillRound(ctx, 20, ey + 12, 3, 38, 2, item.tone);
 
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '700 15px monospace';
-    ctx.fillText(item.plate, 38, ey + 22);
-
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '500 12px monospace';
-    ctx.fillText(`${item.bay} · ${formatLiveTimecode(t + idx * 14)}`, 38, ey + 44);
-
-    ctx.fillStyle = item.tone;
-    ctx.font = '700 12px monospace';
-    ctx.fillText(item.status, w - 110, ey + 31);
+    drawText(ctx, item.plate, 38, ey + 22, `700 15px ${UI_MONO}`, UI.text);
+    drawText(
+      ctx,
+      `${item.bay} · ${formatLiveTimecode(t + idx * 14)}`,
+      38,
+      ey + 44,
+      `500 11.5px ${UI_MONO}`,
+      UI.textMuted,
+    );
+    drawChip(
+      ctx,
+      item.status,
+      w - 34,
+      ey + 19,
+      `700 10.5px ${UI_MONO}`,
+      item.tone,
+      'rgba(148, 163, 184, 0.1)',
+      'right',
+    );
   });
 }
 
@@ -677,7 +1156,7 @@ export function createSurveillanceMaterials(
   const portLed = new THREE.MeshStandardMaterial({
     color: 0x34d399,
     emissive: 0x10b981,
-    emissiveIntensity: 1.75,
+    emissiveIntensity: 1.45,
     metalness: 0.15,
     roughness: 0.25,
   });
@@ -685,7 +1164,7 @@ export function createSurveillanceMaterials(
   const alarmKey = new THREE.MeshStandardMaterial({
     color: 0xf59e0b,
     emissive: 0xf59e0b,
-    emissiveIntensity: 1.25,
+    emissiveIntensity: 1.05,
     metalness: 0.2,
     roughness: 0.32,
   });
@@ -701,7 +1180,7 @@ export function createSurveillanceMaterials(
   const warmAccentLed = new THREE.MeshStandardMaterial({
     color: 0xfbbf24,
     emissive: 0xf59e0b,
-    emissiveIntensity: 1.9,
+    emissiveIntensity: 1.55,
     metalness: 0.2,
     roughness: 0.2,
   });
@@ -854,10 +1333,10 @@ export function applyInterpolatedThemeToMaterials(
   }
   bundle.accentTrim.emissiveIntensity = themeState.accentTrimEmissiveIntensity;
 
-  // Tone down neon bloom drivers slightly in light mode so details stay rich instead of white-hot
-  bundle.portLed.emissiveIntensity = 1.75 - t * 0.72;
-  bundle.alarmKey.emissiveIntensity = 1.25 - t * 0.45;
-  bundle.warmAccentLed.emissiveIntensity = 1.9 - t * 0.78;
+  // Tone down neon bloom drivers slightly (more in light mode) so details stay rich instead of white-hot
+  bundle.portLed.emissiveIntensity = 1.45 - t * 0.6;
+  bundle.alarmKey.emissiveIntensity = 1.05 - t * 0.38;
+  bundle.warmAccentLed.emissiveIntensity = 1.55 - t * 0.64;
   bundle.keycap.emissiveIntensity = 0.25 - t * 0.1;
 }
 
