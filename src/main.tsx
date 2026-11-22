@@ -8,6 +8,7 @@ import './styles/orbScene.css';
 import './motion/motion.css';
 import './styles/layout.css';
 import './styles/heroType.css';
+import './styles/visibility.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('The portfolio root element is missing.');

@@ -1,0 +1,62 @@
+/* Readability pass: every label and muted line stays clearly legible on both light and dark sections. */
+
+/* Dark sections / black surfaces: lift dim white text (was 0.45–0.56 alpha) */
+html .mobile-nav-sublink,
+html .mobile-nav-footer-meta,
+html .contact-section--obsidian .section-eyebrow,
+html .contact-terminal > a small,
+html .social-card-meta small,
+html .social-card-arrow,
+html .social-pill-5lab small,
+html .form-help,
+html .footer-signature small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Section labels and meta lines follow the tone of the section they sit in */
+html [data-tone='light'] :is(.section-eyebrow, .credential-mono-tag, .work-card-tagline-5lab, .site-client-5lab, .experience-meta-row, .eyebrow-line, .mono-label) {
+  color: rgba(34, 34, 106, 0.84);
+}
+
+html [data-tone='dark'] :is(.section-eyebrow, .credential-mono-tag, .work-card-tagline-5lab, .site-client-5lab, .experience-meta-row, .eyebrow-line, .mono-label) {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Keep the red section number readable on both tones */
+html [data-tone='light'] .section-eyebrow span {
+  color: #c41b38;
+}
+
+html [data-tone='dark'] .section-eyebrow span {
+  color: #ff5470;
+}
+
+/* Floor for tiny mono labels (nothing below ~12px) */
+html .contact-terminal > a small,
+html .social-card-meta small,
+html .social-pill-5lab small,
+html .credential-mono-tag,
+html .mono-label,
+html .eyebrow-line,
+html .composer-mono-label {
+  font-size: max(0.75rem, 12px);
+  letter-spacing: 0.08em;
+}
+
+/* Body copy: comfortable measure and line-height */
+html .content-section-5lab p {
+  line-height: 1.65;
+}
+
+/* Visible keyboard focus everywhere */
+html :is(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid #ff5470;
+  outline-offset: 3px;
+}
+
+/* Fixed round badge and Talk button must never cover the last lines of the footer on phones */
+@media (max-width: 767px) {
+  html footer {
+    padding-bottom: calc(1.5rem + 72px);
+  }
+}
