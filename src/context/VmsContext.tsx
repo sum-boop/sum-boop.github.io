@@ -29,7 +29,7 @@ export const VMS_WORKSPACE_PRESETS: readonly VmsWorkspacePreset[] = [
     sectionId: 'operations',
     deploymentCategory: 'All deployments',
     siteFocus: 'flipkart',
-    statusNote: '32+ feeds active · XProtect Smart Client matrix',
+    statusNote: 'Live feeds active · XProtect Smart Client matrix',
   },
   {
     id: 'playback',

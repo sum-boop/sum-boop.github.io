@@ -44,7 +44,7 @@ export const PART_FOCUS_TARGETS: Record<string, CameraFocusTarget> = {
   },
   'recording-server': {
     id: 'recording-server',
-    label: 'XProtect Recording Server (32+ Ch)',
+    label: 'XProtect Recording Server',
     position: [1.35, 0.78, 2.05],
     target: [0.0, 0.36, -0.18],
   },

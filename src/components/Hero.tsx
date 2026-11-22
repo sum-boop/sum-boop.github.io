@@ -204,8 +204,8 @@ export const Hero = memo(function Hero(props: HeroProps) {
             <div className="hero-panel-body">
               <h3>Deployments &amp; Cameras</h3>
               <p>
-                32+ IP cameras across Patli-NCR logistics hubs, Milestone XProtect VMS &amp; GIGO
-                gate control.
+                Live IP camera monitoring across Patli-NCR logistics hubs, Milestone XProtect VMS
+                &amp; GIGO gate control.
               </p>
             </div>
             <div className="hero-panel-action">
