@@ -3,10 +3,17 @@ updates:
   - package-ecosystem: npm
     directory: '/'
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 8
+      interval: monthly
+    open-pull-requests-limit: 3
+    # Major bumps (React 19, r3f 9, drei 10, postprocessing 3, TypeScript 7) break this build; upgrade by hand.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    groups:
+      minor-and-patch:
+        update-types: ['minor', 'patch']
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 3
