@@ -59,7 +59,7 @@ export function BriefCamOverlay({
       badgeClass: 'alert-badge',
       title: 'Watchlist Subject Identified · Gate GIGO Entry',
       detail: 'High-confidence biometric match against authorized contractor registry #902.',
-      meta: 'Camera 01 · Flipkart Kalash Mega Hub · 12s ago',
+      meta: 'Gate GIGO · Flipkart Kalash Mega Hub · 12s ago',
       actionType: 'acknowledge' as const,
     },
     {
@@ -70,7 +70,7 @@ export function BriefCamOverlay({
       badgeClass: 'alert-badge alert-badge--amber',
       title: 'Commercial Fleet HR-26-CQ-9918 · Dock 04',
       detail: 'Inbound transport vehicle cleared via automated GIGO gate log.',
-      meta: 'Camera 09 · Apron Perimeter · 1m ago',
+      meta: 'Dock Apron · Perimeter · 1m ago',
       actionType: 'inspect' as const,
     },
     {
@@ -81,7 +81,7 @@ export function BriefCamOverlay({
       badgeClass: 'alert-badge alert-badge--cyan',
       title: 'Restricted Perimeter Breach Warning',
       detail: 'Personnel detected near fire exit corridor after shift hours.',
-      meta: 'Camera 24 · North Perimeter · 4m ago',
+      meta: 'Perimeter North · 4m ago',
       actionType: 'synopsis' as const,
     },
   ];
@@ -337,7 +337,7 @@ export function BriefCamOverlay({
               <div className="briefcam-metric-box">
                 <small>PEAK TRAFFIC HOUR</small>
                 <strong className="tabular-nums">14:00 – 16:00</strong>
-                <span>32 active camera channels</span>
+                <span>Multi-camera coverage</span>
               </div>
             </div>
 
