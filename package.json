@@ -20,7 +20,7 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@react-spring/three": "^10.1.2",
-    "@react-three/drei": "^9.122.0",
+    "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^8.18.0",
     "@react-three/postprocessing": "^2.19.1",
     "@types/three": "^0.187.0",
