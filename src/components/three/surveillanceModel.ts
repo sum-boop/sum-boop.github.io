@@ -261,7 +261,7 @@ export function buildSurveillanceAssembly(materials: MaterialBundle): Surveillan
     serverGroup,
     {
       id: 'recording-server',
-      label: 'XProtect Recording Server (32+ Ch)',
+      label: 'XProtect Recording Server',
       spec: '8-bay RAID archiving · Dual-stream NVR retention & playback index',
       sectionId: 'operations',
       vmsMode: 'playback',
@@ -398,7 +398,7 @@ export function buildSurveillanceAssembly(materials: MaterialBundle): Surveillan
     {
       id: 'smart-client-wall',
       label: 'Milestone XProtect Smart Client',
-      spec: '2x2 Multi-Camera Quad + Sequence Timeline Scrubber · 32+ feeds',
+      spec: '2x2 Multi-Camera Quad + Sequence Timeline Scrubber · live feeds',
       sectionId: 'operations',
       vmsMode: 'live',
       actionLabel: 'View Deployments',
