@@ -42,7 +42,6 @@ export interface CareerSite {
   role: string;
   period: string;
   status: DeploymentStatus;
-  cameras: number;
   type: string;
 }
 
@@ -60,8 +59,6 @@ export interface DeploymentBriefing {
   site: string;
   cardPeriod: string;
   period: string;
-  cardCameras: number;
-  cameras: number | null;
   status: DeploymentStatus;
   category: string;
   cardMetric?: string;

@@ -9,7 +9,6 @@ export const careerSites = [
     role: 'Security Systems & Gate Control Operator',
     period: '2025 – Present',
     status: 'active',
-    cameras: 32,
     type: 'Mega Hub',
   },
   {
@@ -20,7 +19,6 @@ export const careerSites = [
     role: 'Security Guard & Surveillance Operator',
     period: '2023 – 2024',
     status: 'past',
-    cameras: 12,
     type: 'Logistics',
   },
 ] satisfies readonly CareerSite[];

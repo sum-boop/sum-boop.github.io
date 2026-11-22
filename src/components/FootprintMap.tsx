@@ -17,7 +17,6 @@ interface CorridorNode {
   client: string;
   location: string;
   period: string;
-  cameras: number;
   status: 'active' | 'past';
   coordsLabel: string;
   osmUrl: string;
@@ -35,7 +34,6 @@ const CORRIDOR_NODES: readonly CorridorNode[] = careerSites.map((site) => {
     client: site.client,
     location: site.location,
     period: site.period,
-    cameras: site.cameras,
     status: site.status,
     coordsLabel: isFlipkart ? '28.450° N, 76.850° E' : '28.426° N, 76.915° E',
     osmUrl: isFlipkart
@@ -192,7 +190,6 @@ export const FootprintMap = memo(function FootprintMap({ theme }: FootprintMapPr
                 <span aria-hidden="true" className="corridor-pin-core" />
                 <span className="corridor-pin-label">
                   <strong>{node.title}</strong>
-                  <small>{node.cameras} cam</small>
                 </span>
               </button>
             );
@@ -222,10 +219,6 @@ export const FootprintMap = memo(function FootprintMap({ theme }: FootprintMapPr
             <div>
               <small>PERIOD</small>
               {activeNode.period}
-            </div>
-            <div>
-              <small>CAMERAS</small>
-              {activeNode.cameras} ch
             </div>
           </div>
           <p className="footprint-details-copy">

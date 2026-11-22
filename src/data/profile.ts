@@ -14,7 +14,7 @@ export const profile = {
   ],
   heroMetrics: [
     { value: '2+', label: 'Years Ops' },
-    { value: '32+', label: 'Cameras Monitored' },
+    { value: '24/7', label: 'Video Uptime' },
     { value: '100%', label: 'Log Accuracy' },
   ],
   careerMetrics: [

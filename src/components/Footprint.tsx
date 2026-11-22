@@ -1,6 +1,6 @@
-import { Suspense, lazy, memo, useCallback, useRef, useState } from 'react';
+import { Suspense, lazy, memo, useCallback, useRef } from 'react';
 import { ArrowUpRight, MapPin } from 'lucide-react';
-import { type VmsSiteFocus, useVms } from '@/context/VmsContext';
+import { useVms } from '@/context/VmsContext';
 import { contact } from '@/data/contact';
 import { careerSites } from '@/data/experience';
 import type { ThemeMode } from '@/hooks/useTheme';
@@ -18,25 +18,13 @@ interface FootprintProps {
 
 export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
   const { activeSiteId, setActiveSiteId } = useVms();
-  const [corridorOverviewActive, setCorridorOverviewActive] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const stepListRef = useRef<HTMLDivElement>(null);
 
-  const totalCameras = careerSites.reduce((sum, site) => sum + site.cameras, 0);
-
   const handleStoryStepChange = useCallback(
     (stepIndex: number) => {
-      if (stepIndex === 1) {
-        setCorridorOverviewActive(false);
-        setActiveSiteId('ekart');
-      } else if (stepIndex === 2) {
-        setCorridorOverviewActive(true);
-        setActiveSiteId('flipkart');
-      } else {
-        setCorridorOverviewActive(false);
-        setActiveSiteId('flipkart');
-      }
+      setActiveSiteId(stepIndex >= 1 ? 'ekart' : 'flipkart');
     },
     [setActiveSiteId],
   );
@@ -46,10 +34,8 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
   });
 
   const handleSelectSite = useCallback(
-    (siteId: string, isCorridorOverview = false) => {
-      setCorridorOverviewActive(isCorridorOverview);
-      const focusSite: VmsSiteFocus = siteId === 'ekart' ? 'ekart' : 'flipkart';
-      setActiveSiteId(focusSite);
+    (siteId: string) => {
+      setActiveSiteId(siteId === 'ekart' ? 'ekart' : 'flipkart');
     },
     [setActiveSiteId],
   );
@@ -102,7 +88,7 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
           role="group"
         >
           {careerSites.map((site, index) => {
-            const isSelected = !corridorOverviewActive && activeSiteId === site.id;
+            const isSelected = activeSiteId === site.id;
             return (
               <button
                 aria-pressed={isSelected}
@@ -125,25 +111,9 @@ export const Footprint = memo(function Footprint({ theme }: FootprintProps) {
                 <span className="site-client-5lab">
                   {site.client} · {site.period}
                 </span>
-                <span className="site-camera-count-5lab tabular-nums">{site.cameras} cameras</span>
               </button>
             );
           })}
-          <button
-            aria-pressed={corridorOverviewActive}
-            className={`site-row-5lab ${corridorOverviewActive ? 'site-row-5lab--active' : ''}`}
-            onClick={() => handleSelectSite('flipkart', true)}
-            type="button"
-          >
-            <span className="site-index-5lab">03</span>
-            <span className="site-row-state-5lab">
-              <i aria-hidden="true" className="status-pulse" />
-              CORRIDOR
-            </span>
-            <strong className="site-name-5lab">Patli–NCR Freight Corridor</strong>
-            <span className="site-client-5lab">KMP Expressway · NH-48 Smart Map</span>
-            <span className="site-camera-count-5lab tabular-nums">{totalCameras} cameras</span>
-          </button>
         </div>
       </div>
     </section>

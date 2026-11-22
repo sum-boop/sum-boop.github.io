@@ -16,14 +16,24 @@ export const contact = {
   responseTime: 'I reply within 24 hours.',
 } satisfies ContactDetails;
 
-/**
- * Verified developer & portfolio profile link.
- */
+/** Public profiles. */
 export const socialLinks = [
+  {
+    id: 'linkedin',
+    label: 'LinkedIn',
+    handle: 'sumit-anand',
+    href: 'https://www.linkedin.com/in/sumit-anand-109526297',
+  },
   {
     id: 'github',
     label: 'GitHub',
     handle: '@sum-boop',
     href: 'https://github.com/sum-boop',
+  },
+  {
+    id: 'instagram',
+    label: 'Instagram',
+    handle: '@iykyk_1.7',
+    href: 'https://www.instagram.com/iykyk_1.7/',
   },
 ] satisfies readonly SocialLink[];
