@@ -67,7 +67,8 @@ function makeRoundedBox(w: number, h: number, d: number, radius = 0.03): THREE.B
   const rawGeo = new THREE.ExtrudeGeometry(shape, {
     depth: d,
     bevelEnabled: true,
-    bevelSegments: 2,
+    curveSegments: 10,
+    bevelSegments: 4,
     steps: 1,
     bevelSize: 0.012,
     bevelThickness: 0.012,
@@ -145,6 +146,14 @@ export function buildSurveillanceAssembly(materials: MaterialBundle): Surveillan
   plinthMesh.castShadow = true;
   plinthMesh.receiveShadow = true;
   root.add(plinthMesh);
+
+  // Thin luminous lip around the plinth edge for a premium, floating-base read
+  const plinthLipGeo = new THREE.TorusGeometry(1.945, 0.0055, 8, 128);
+  geometries.push(plinthLipGeo);
+  const plinthLip = new THREE.Mesh(plinthLipGeo, materials.accentTrim);
+  plinthLip.rotation.x = Math.PI / 2;
+  plinthLip.position.y = 0.04;
+  root.add(plinthLip);
 
   const dialGeo = new THREE.CircleGeometry(1.6, 64);
   geometries.push(dialGeo);
