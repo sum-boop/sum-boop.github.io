@@ -56,7 +56,25 @@ export function Contact() {
     return () => ctx.revert();
   }, [prefersReducedMotion]);
 
-  function markCopied() {
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(contact.email);
+    } catch {
+      const area = document.createElement('textarea');
+      area.value = contact.email;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      try {
+        document.execCommand('copy');
+      } catch {
+        return;
+      } finally {
+        document.body.removeChild(area);
+      }
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   }
@@ -254,7 +272,7 @@ export function Contact() {
               </div>
 
               <div className="terminal-actions-5lab">
-                <button className="copy-email-btn-5lab" onClick={markCopied} type="button">
+                <button className="copy-email-btn-5lab" onClick={copyEmail} type="button">
                   {copied ? (
                     <Check aria-hidden="true" size={14} />
                   ) : (
