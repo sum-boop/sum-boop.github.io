@@ -61,7 +61,7 @@ export const WorkstationBand = memo(function WorkstationBand({
           </div>
           <div className="workstation-utility-strip">
             <p className="workstation-note">
-              Drag anywhere to orbit 360° · Scroll to pan · Click any monitor to inspect
+              Drag to look around · Click any monitor, deck or rack unit to inspect
             </p>
             <div className="workstation-actions">
               <Clock className="workstation-clock" variant="nav" />

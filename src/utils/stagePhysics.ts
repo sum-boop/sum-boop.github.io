@@ -19,58 +19,58 @@ export interface CameraFocusTarget {
 export const HERO_OVERVIEW_CAMERA: CameraFocusTarget = {
   id: 'overview',
   label: 'Command Overview',
-  position: [3.1, 2.04, 4.15],
-  target: [-0.55, 0.74, 0.02],
+  position: [2.55, 1.85, 3.95],
+  target: [0.5, 0.86, -0.05],
 };
 
 export const PART_FOCUS_TARGETS: Record<string, CameraFocusTarget> = {
   'smart-client-wall': {
     id: 'smart-client-wall',
     label: 'Milestone XProtect Smart Client',
-    position: [-0.15, 1.42, 2.05],
-    target: [-0.22, 1.32, -0.04],
+    position: [0.0, 1.32, 1.55],
+    target: [0.0, 1.3, -0.3],
   },
   'smart-map-display': {
     id: 'smart-map-display',
     label: 'XProtect Smart Map & Alarm Queue',
-    position: [1.52, 1.46, 2.02],
-    target: [0.68, 1.32, 0.06],
+    position: [0.57, 1.35, 1.42],
+    target: [1.13, 1.3, -0.18],
   },
   'briefcam-telemetry': {
     id: 'briefcam-telemetry',
     label: 'BriefCam Analytics & GIGO LPR',
-    position: [-1.72, 1.44, 1.96],
-    target: [-0.92, 1.32, 0.14],
+    position: [-0.54, 1.35, 1.42],
+    target: [-1.1, 1.3, -0.18],
   },
   'recording-server': {
     id: 'recording-server',
     label: 'XProtect Recording Server',
-    position: [1.35, 0.78, 2.05],
-    target: [0.0, 0.36, -0.18],
+    position: [2.0, 0.7, 1.8],
+    target: [2.2, 0.46, 0.33],
   },
   'poe-switch': {
     id: 'poe-switch',
     label: '24-Port PoE+ Surveillance Switch',
-    position: [-1.15, 0.92, 1.95],
-    target: [0.0, 0.56, -0.18],
+    position: [1.95, 0.85, 1.7],
+    target: [2.2, 0.64, 0.33],
   },
   'ptz-console': {
     id: 'ptz-console',
     label: 'PTZ Joystick & Jog-Shuttle Deck',
-    position: [0.68, 0.98, 2.08],
-    target: [0.22, 0.28, 0.64],
+    position: [0.9, 1.45, 1.5],
+    target: [1.04, 0.88, 0.34],
   },
   'operator-keyboard': {
     id: 'operator-keyboard',
-    label: 'Backlit Operator Console Deck',
-    position: [-0.42, 1.02, 2.12],
-    target: [-0.38, 0.26, 0.64],
+    label: 'Operator Keyboard & Mouse',
+    position: [-0.2, 1.5, 1.45],
+    target: [-0.18, 0.82, 0.32],
   },
   plinth: {
     id: 'plinth',
-    label: 'Control Desk Telemetry Base',
-    position: [2.45, 1.75, 3.1],
-    target: [0.0, 0.58, 0.04],
+    label: 'Operator Control Desk',
+    position: [2.2, 1.7, 3.2],
+    target: [0.3, 0.8, 0.0],
   },
 };
 

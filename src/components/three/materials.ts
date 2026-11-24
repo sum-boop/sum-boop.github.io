@@ -12,40 +12,40 @@ export interface FinishPreset {
   chassisColor: number;
   chassisMetalness: number;
   chassisRoughness: number;
-  trimColor: number;
   armColor: number;
 }
 
+/**
+ * All finishes are matte (powder-coated / soft-touch plastic). Nothing here mirrors the room,
+ * so the workstation reads like a real desk setup instead of a chrome render.
+ */
 export const FINISH_PRESETS: Record<FinishId, FinishPreset> = {
   slate: {
     id: 'slate',
-    label: 'Obsidian Console',
-    swatch: '#1c2432',
-    chassisColor: 0x182131,
-    chassisMetalness: 0.84,
-    chassisRoughness: 0.24,
-    trimColor: 0x00e5ff,
-    armColor: 0x101723,
+    label: 'Matte Graphite',
+    swatch: '#252b34',
+    chassisColor: 0x181c23,
+    chassisMetalness: 0.04,
+    chassisRoughness: 0.82,
+    armColor: 0x2c323b,
   },
   titanium: {
     id: 'titanium',
-    label: 'Brushed Titanium',
-    swatch: '#94a3b8',
-    chassisColor: 0x8a97aa,
-    chassisMetalness: 0.92,
-    chassisRoughness: 0.19,
-    trimColor: 0x38bdf8,
-    armColor: 0x242f40,
+    label: 'Matte Steel',
+    swatch: '#7a8594',
+    chassisColor: 0x6f7a89,
+    chassisMetalness: 0.06,
+    chassisRoughness: 0.8,
+    armColor: 0x4a5463,
   },
   alabaster: {
     id: 'alabaster',
-    label: 'Nordic Alabaster',
-    swatch: '#e5e9f0',
-    chassisColor: 0xd8dfe9,
-    chassisMetalness: 0.28,
-    chassisRoughness: 0.34,
-    trimColor: 0x0284c7,
-    armColor: 0x222d3f,
+    label: 'Matte Alabaster',
+    swatch: '#d9dee6',
+    chassisColor: 0xcdd3dc,
+    chassisMetalness: 0.02,
+    chassisRoughness: 0.86,
+    armColor: 0x8a93a1,
   },
 };
 
@@ -59,10 +59,10 @@ export interface SmartClientRenderState {
 
 export interface MaterialBundle {
   plinth: THREE.MeshStandardMaterial;
-  deskSlab: THREE.MeshPhysicalMaterial;
-  deskGrid: THREE.MeshStandardMaterial;
+  deskSlab: THREE.MeshStandardMaterial;
+  deskMat: THREE.MeshStandardMaterial;
   contactShadow: THREE.MeshBasicMaterial;
-  chassis: THREE.MeshPhysicalMaterial;
+  chassis: THREE.MeshStandardMaterial;
   serverFaceplate: THREE.MeshStandardMaterial;
   armMetal: THREE.MeshStandardMaterial;
   switchBody: THREE.MeshStandardMaterial;
@@ -70,11 +70,6 @@ export interface MaterialBundle {
   keycap: THREE.MeshStandardMaterial;
   portLed: THREE.MeshStandardMaterial;
   alarmKey: THREE.MeshStandardMaterial;
-  accentTrim: THREE.MeshStandardMaterial;
-  warmAccentLed: THREE.MeshStandardMaterial;
-  holoWire: THREE.MeshBasicMaterial;
-  dustParticle: THREE.PointsMaterial;
-  screenGlass: THREE.MeshPhysicalMaterial;
   primaryScreen: THREE.MeshBasicMaterial;
   auxScreen: THREE.MeshBasicMaterial;
   briefcamScreen: THREE.MeshBasicMaterial;
@@ -87,63 +82,26 @@ export interface MaterialBundle {
   textures: THREE.Texture[];
 }
 
-function createDeskGridTexture(maxAnisotropy: number): THREE.CanvasTexture {
-  const size = 1024;
+/** Radial alpha mask so the floor fades out softly instead of ending in a hard disc edge. */
+function createFloorFadeTexture(): THREE.CanvasTexture {
+  const size = 256;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d');
   if (ctx) {
-    const cx = size / 2;
-    const cy = size / 2;
-    ctx.clearRect(0, 0, size, size);
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.78)';
-    ctx.lineWidth = 2.4;
-    for (let r = 130; r <= 470; r += 85) {
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.42)';
-    ctx.lineWidth = 1.6;
-    for (let i = 0; i < 24; i++) {
-      const a = (i * Math.PI) / 12;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a) * 130, cy + Math.sin(a) * 130);
-      ctx.lineTo(cx + Math.cos(a) * 470, cy + Math.sin(a) * 470);
-      ctx.stroke();
-    }
+    const c = size / 2;
+    const grad = ctx.createRadialGradient(c, c, size * 0.12, c, c, size * 0.5);
+    // alphaMap reads the green channel, so paint an opaque grayscale mask (white = solid floor)
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.55, '#d9d9d9');
+    grad.addColorStop(1, '#000000');
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
   }
   const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = maxAnisotropy;
-  tex.needsUpdate = true;
-  return tex;
-}
-
-function createBrushedMetalRoughnessTexture(maxAnisotropy: number): THREE.DataTexture {
-  const width = 256;
-  const height = 256;
-  const data = new Uint8Array(width * height * 4);
-  for (let y = 0; y < height; y++) {
-    const streak = 140 + Math.sin(y * 0.65) * 24 + Math.cos(y * 1.9) * 14;
-    for (let x = 0; x < width; x++) {
-      const grain = ((x * 37 + y * 13) % 19) - 9;
-      const v = Math.max(88, Math.min(228, Math.round(streak + grain)));
-      const idx = (y * width + x) * 4;
-      data[idx] = v;
-      data[idx + 1] = v;
-      data[idx + 2] = v;
-      data[idx + 3] = 255;
-    }
-  }
-  const tex = new THREE.DataTexture(data, width, height);
-  tex.wrapS = THREE.RepeatWrapping;
-  tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(3, 1);
-  tex.anisotropy = maxAnisotropy;
   tex.needsUpdate = true;
   return tex;
 }
@@ -160,28 +118,6 @@ function createContactShadowTexture(): THREE.CanvasTexture {
     grad.addColorStop(0, 'rgba(2, 6, 14, 0.94)');
     grad.addColorStop(0.55, 'rgba(2, 6, 14, 0.45)');
     grad.addColorStop(1, 'rgba(2, 6, 14, 0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-  }
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.needsUpdate = true;
-  return tex;
-}
-
-function createDustTexture(): THREE.CanvasTexture {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    const c = size / 2;
-    const grad = ctx.createRadialGradient(c, c, 0, c, c, c);
-    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.72)');
-    grad.addColorStop(0.72, 'rgba(255, 255, 255, 0.18)');
-    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
   }
@@ -472,15 +408,6 @@ function drawFeedScene(
   );
   drawCornerBrackets(ctx, subjectX - 5, subjectY - 5, subjectW + 10, subjectH + 10, 8, color, 1.8);
   drawText(ctx, subject, subjectX - 5, subjectY - 14, `700 9.5px ${UI_MONO}`, color);
-
-  // Soft scan sweep
-  const sweepY = y + ((t * 40 + idx * 55) % ch);
-  const sweep = ctx.createLinearGradient(0, sweepY - 14, 0, sweepY + 14);
-  sweep.addColorStop(0, 'rgba(34, 211, 238, 0)');
-  sweep.addColorStop(0.5, 'rgba(34, 211, 238, 0.12)');
-  sweep.addColorStop(1, 'rgba(34, 211, 238, 0)');
-  ctx.fillStyle = sweep;
-  ctx.fillRect(x, sweepY - 14, cw, 28);
 
   // Lens vignette
   const vignette = ctx.createRadialGradient(
@@ -1037,16 +964,14 @@ export function drawBriefCamCanvas(canvas: HTMLCanvasElement, state: SmartClient
 }
 
 export function createSurveillanceMaterials(
-  isSoftwareGl: boolean,
+  _isSoftwareGl: boolean,
   maxAnisotropy: number,
   initialFinish: FinishId,
   initialScreenState: SmartClientRenderState,
 ): MaterialBundle {
   const preset = FINISH_PRESETS[initialFinish];
-  const deskGridTex = createDeskGridTexture(maxAnisotropy);
-  const brushedRoughnessTex = createBrushedMetalRoughnessTexture(maxAnisotropy);
   const contactShadowTex = createContactShadowTexture();
-  const dustTex = createDustTexture();
+  const floorFadeTex = createFloorFadeTexture();
 
   const primaryCanvas = document.createElement('canvas');
   primaryCanvas.width = 1024;
@@ -1075,33 +1000,25 @@ export function createSurveillanceMaterials(
   briefcamTexture.anisotropy = maxAnisotropy;
   briefcamTexture.needsUpdate = true;
 
+  // Fully matte, non-metallic surfaces: no clearcoat, no roughness maps, no mirror-like reflections.
   const plinth = new THREE.MeshStandardMaterial({
-    color: 0x0b101b,
-    metalness: 0.35,
-    roughness: 0.72,
-  });
-
-  const deskSlab = new THREE.MeshPhysicalMaterial({
-    color: 0x151e2d,
-    metalness: 0.76,
-    roughness: 0.28,
-    roughnessMap: brushedRoughnessTex,
-    anisotropy: 0.8,
-    clearcoat: 0.42,
-    clearcoatRoughness: 0.2,
-  });
-
-  const deskGrid = new THREE.MeshStandardMaterial({
-    map: deskGridTex,
-    color: 0x00e5ff,
+    color: 0x151a22,
+    metalness: 0,
+    roughness: 0.96,
     transparent: true,
-    opacity: 0.44,
-    metalness: 0.25,
-    roughness: 0.55,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -1,
-    polygonOffsetUnits: -1,
+    alphaMap: floorFadeTex,
+  });
+
+  const deskSlab = new THREE.MeshStandardMaterial({
+    color: 0x3a3f49,
+    metalness: 0,
+    roughness: 0.88,
+  });
+
+  const deskMat = new THREE.MeshStandardMaterial({
+    color: 0x14181f,
+    metalness: 0,
+    roughness: 1,
   });
 
   const contactShadow = new THREE.MeshBasicMaterial({
@@ -1111,129 +1028,66 @@ export function createSurveillanceMaterials(
     depthWrite: false,
   });
 
-  const chassis = new THREE.MeshPhysicalMaterial({
+  const chassis = new THREE.MeshStandardMaterial({
     color: preset.chassisColor,
     metalness: preset.chassisMetalness,
     roughness: preset.chassisRoughness,
-    roughnessMap: brushedRoughnessTex,
-    anisotropy: 0.78,
-    clearcoat: 0.38,
-    clearcoatRoughness: 0.22,
   });
 
   const serverFaceplate = new THREE.MeshStandardMaterial({
-    color: 0x0c1424,
-    metalness: 0.52,
-    roughness: 0.48,
+    color: 0x12161c,
+    metalness: 0.1,
+    roughness: 0.74,
   });
 
   const armMetal = new THREE.MeshStandardMaterial({
     color: preset.armColor,
-    metalness: 0.88,
-    roughness: 0.22,
+    metalness: 0.12,
+    roughness: 0.7,
   });
 
   const switchBody = new THREE.MeshStandardMaterial({
-    color: 0x162033,
-    metalness: 0.84,
-    roughness: 0.26,
+    color: 0x1b2028,
+    metalness: 0.08,
+    roughness: 0.76,
   });
 
   const cable = new THREE.MeshStandardMaterial({
-    color: 0x0f1a2c,
-    metalness: 0.22,
-    roughness: 0.52,
+    color: 0x0d1016,
+    metalness: 0,
+    roughness: 0.92,
   });
 
   const keycap = new THREE.MeshStandardMaterial({
-    color: 0x1e2b42,
-    emissive: 0x0ea5e9,
-    emissiveIntensity: 0.25,
-    metalness: 0.35,
-    roughness: 0.38,
+    color: 0x262b34,
+    metalness: 0,
+    roughness: 0.8,
   });
 
   const portLed = new THREE.MeshStandardMaterial({
     color: 0x34d399,
     emissive: 0x10b981,
-    emissiveIntensity: 1.45,
-    metalness: 0.15,
-    roughness: 0.25,
+    emissiveIntensity: 1.1,
+    metalness: 0,
+    roughness: 0.5,
   });
 
   const alarmKey = new THREE.MeshStandardMaterial({
-    color: 0xf59e0b,
+    color: 0xd97706,
     emissive: 0xf59e0b,
-    emissiveIntensity: 1.05,
-    metalness: 0.2,
-    roughness: 0.32,
+    emissiveIntensity: 0.55,
+    metalness: 0,
+    roughness: 0.6,
   });
 
-  const accentTrim = new THREE.MeshStandardMaterial({
-    color: preset.trimColor,
-    emissive: preset.trimColor,
-    emissiveIntensity: 1.45,
-    metalness: 0.82,
-    roughness: 0.18,
-  });
-
-  const warmAccentLed = new THREE.MeshStandardMaterial({
-    color: 0xfbbf24,
-    emissive: 0xf59e0b,
-    emissiveIntensity: 1.55,
-    metalness: 0.2,
-    roughness: 0.2,
-  });
-
-  const holoWire = new THREE.MeshBasicMaterial({
-    color: 0x00e5ff,
-    transparent: true,
-    opacity: 0.34,
-    wireframe: true,
-    depthWrite: false,
-  });
-
-  const dustParticle = new THREE.PointsMaterial({
-    map: dustTex,
-    color: 0x7dd3fc,
-    size: 0.055,
-    transparent: true,
-    opacity: 0.72,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    sizeAttenuation: true,
-  });
-
-  const screenGlass = new THREE.MeshPhysicalMaterial({
-    color: 0x0b1930,
-    metalness: 0.04,
-    roughness: 0.06,
-    transmission: isSoftwareGl ? 0 : 0.22,
-    transparent: true,
-    opacity: isSoftwareGl ? 0.16 : 0.32,
-    ior: 1.52,
-    thickness: 0.04,
-    clearcoat: 1,
-    clearcoatRoughness: 0.04,
-    depthWrite: false,
-  });
-
-  const primaryScreen = new THREE.MeshBasicMaterial({
-    map: primaryTexture,
-  });
-
-  const auxScreen = new THREE.MeshBasicMaterial({
-    map: auxTexture,
-  });
-
-  const briefcamScreen = new THREE.MeshBasicMaterial({
-    map: briefcamTexture,
-  });
+  const primaryScreen = new THREE.MeshBasicMaterial({ map: primaryTexture });
+  const auxScreen = new THREE.MeshBasicMaterial({ map: auxTexture });
+  const briefcamScreen = new THREE.MeshBasicMaterial({ map: briefcamTexture });
 
   return {
     plinth,
     deskSlab,
-    deskGrid,
+    deskMat,
     contactShadow,
     chassis,
     serverFaceplate,
@@ -1243,11 +1097,6 @@ export function createSurveillanceMaterials(
     keycap,
     portLed,
     alarmKey,
-    accentTrim,
-    warmAccentLed,
-    holoWire,
-    dustParticle,
-    screenGlass,
     primaryScreen,
     auxScreen,
     briefcamScreen,
@@ -1257,15 +1106,7 @@ export function createSurveillanceMaterials(
     auxTexture,
     briefcamCanvas,
     briefcamTexture,
-    textures: [
-      deskGridTex,
-      brushedRoughnessTex,
-      contactShadowTex,
-      dustTex,
-      primaryTexture,
-      auxTexture,
-      briefcamTexture,
-    ],
+    textures: [contactShadowTex, floorFadeTex, primaryTexture, auxTexture, briefcamTexture],
   };
 }
 
@@ -1275,75 +1116,31 @@ export function applyFinishPreset(bundle: MaterialBundle, finishId: FinishId): v
   bundle.chassis.metalness = preset.chassisMetalness;
   bundle.chassis.roughness = preset.chassisRoughness;
   bundle.armMetal.color.setHex(preset.armColor);
-  bundle.accentTrim.color.setHex(preset.trimColor);
-  bundle.accentTrim.emissive.setHex(preset.trimColor);
 }
-
-const _trimBaseColor = new THREE.Color();
 
 export function applyInterpolatedThemeToMaterials(
   bundle: MaterialBundle,
   themeState: InterpolatedSceneTheme,
-  finishId: FinishId,
 ): void {
   const t = themeState.mix;
   bundle.plinth.color.copy(themeState.plinth);
-  bundle.plinth.metalness = 0.08 + t * 0.04;
-  bundle.plinth.roughness = 0.88 - t * 0.08;
-  bundle.plinth.envMapIntensity = 0.12 + t * 0.16;
+  bundle.plinth.envMapIntensity = 0.35 + t * 0.2;
 
-  // Keep brushed metal rich and contrasted in Light Mode without mirroring overhead white IBL
   bundle.deskSlab.color.copy(themeState.deskSlab);
-  bundle.deskSlab.metalness = 0.76 - t * 0.2;
-  bundle.deskSlab.roughness = 0.28 + t * 0.08;
-  bundle.deskSlab.envMapIntensity = 1.0 - t * 0.45;
-  bundle.deskSlab.clearcoat = 0.42 - t * 0.14;
+  bundle.deskSlab.envMapIntensity = 0.55;
 
-  // Keep monitor glass reflective without washing dark feeds into milky grey under studio IBL
-  bundle.screenGlass.envMapIntensity = 1.0 - t * 0.58;
-  bundle.screenGlass.clearcoat = 1.0 - t * 0.28;
-  bundle.chassis.envMapIntensity = 1.0 - t * 0.24;
-
-  bundle.deskGrid.color.copy(themeState.deskGrid);
-  bundle.deskGrid.opacity = themeState.deskGridOpacity;
-  bundle.deskGrid.envMapIntensity = 0.12 + t * 0.22;
+  bundle.chassis.envMapIntensity = 0.6;
   bundle.contactShadow.opacity = themeState.contactShadowOpacity;
 
-  bundle.holoWire.color.copy(themeState.holoWire);
-  bundle.holoWire.opacity = themeState.holoWireOpacity;
-
-  bundle.dustParticle.color.copy(themeState.dust);
-  bundle.dustParticle.opacity = themeState.dustOpacity;
-  const targetBlending = themeState.dustUseNormalBlending
-    ? THREE.NormalBlending
-    : THREE.AdditiveBlending;
-  if (bundle.dustParticle.blending !== targetBlending) {
-    bundle.dustParticle.blending = targetBlending;
-    bundle.dustParticle.needsUpdate = true;
-  }
-
-  // Keep finish selection respected while ensuring strong light-mode trim contrast
-  if (finishId === 'slate') {
-    bundle.accentTrim.color.copy(themeState.accentTrim);
-    bundle.accentTrim.emissive.copy(themeState.accentTrimEmissive);
-  } else {
-    _trimBaseColor.setHex(FINISH_PRESETS[finishId].trimColor);
-    bundle.accentTrim.color.copy(_trimBaseColor).lerp(themeState.accentTrim, themeState.mix * 0.65);
-    bundle.accentTrim.emissive.copy(bundle.accentTrim.color);
-  }
-  bundle.accentTrim.emissiveIntensity = themeState.accentTrimEmissiveIntensity;
-
-  // Tone down neon bloom drivers slightly (more in light mode) so details stay rich instead of white-hot
-  bundle.portLed.emissiveIntensity = 1.45 - t * 0.6;
-  bundle.alarmKey.emissiveIntensity = 1.05 - t * 0.38;
-  bundle.warmAccentLed.emissiveIntensity = 1.55 - t * 0.64;
-  bundle.keycap.emissiveIntensity = 0.25 - t * 0.1;
+  // Status LEDs stay small and readable instead of blooming into glow blobs
+  bundle.portLed.emissiveIntensity = 1.1 - t * 0.4;
+  bundle.alarmKey.emissiveIntensity = 0.55 - t * 0.2;
 }
 
 export function disposeMaterialBundle(bundle: MaterialBundle): void {
   bundle.plinth.dispose();
   bundle.deskSlab.dispose();
-  bundle.deskGrid.dispose();
+  bundle.deskMat.dispose();
   bundle.contactShadow.dispose();
   bundle.chassis.dispose();
   bundle.serverFaceplate.dispose();
@@ -1353,11 +1150,6 @@ export function disposeMaterialBundle(bundle: MaterialBundle): void {
   bundle.keycap.dispose();
   bundle.portLed.dispose();
   bundle.alarmKey.dispose();
-  bundle.accentTrim.dispose();
-  bundle.warmAccentLed.dispose();
-  bundle.holoWire.dispose();
-  bundle.dustParticle.dispose();
-  bundle.screenGlass.dispose();
   bundle.primaryScreen.dispose();
   bundle.auxScreen.dispose();
   bundle.briefcamScreen.dispose();
