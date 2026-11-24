@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { VmsViewMode } from '@/context/VmsContext';
 import type { MaterialBundle } from './materials';
 
@@ -20,13 +20,6 @@ export interface HoverPartHighlight {
 
 export interface SurveillanceAssembly {
   root: THREE.Group;
-  displayGroup: THREE.Group;
-  joystickStick: THREE.Group;
-  orbitRing: THREE.Mesh;
-  innerOrbitRing: THREE.Mesh;
-  holoNodesGroup: THREE.Group;
-  dustPoints: THREE.Points;
-  dustBasePositions: Float32Array;
   hoverHighlights: HoverPartHighlight[];
   hoverMaterial: THREE.LineBasicMaterial;
   explodeLayers: Array<{
@@ -37,6 +30,11 @@ export interface SurveillanceAssembly {
   clickableTargets: THREE.Object3D[];
   geometries: THREE.BufferGeometry[];
 }
+
+type Vec3 = readonly [number, number, number];
+
+/** Desk surface height. Everything that sits on the desk is placed relative to this. */
+const DESK_TOP = 0.78;
 
 function tagInspectable(
   object: THREE.Object3D,
@@ -50,43 +48,11 @@ function tagInspectable(
   targets.push(object);
 }
 
-function makeRoundedBox(w: number, h: number, d: number, radius = 0.03): THREE.BufferGeometry {
-  const hw = Math.max(0.01, w / 2 - radius);
-  const hh = Math.max(0.01, h / 2 - radius);
-  const shape = new THREE.Shape();
-  shape.moveTo(-hw, -hh - radius);
-  shape.lineTo(hw, -hh - radius);
-  shape.quadraticCurveTo(hw + radius, -hh - radius, hw + radius, -hh);
-  shape.lineTo(hw + radius, hh);
-  shape.quadraticCurveTo(hw + radius, hh + radius, hw, hh + radius);
-  shape.lineTo(-hw, hh + radius);
-  shape.quadraticCurveTo(-hw - radius, hh + radius, -hw - radius, hh);
-  shape.lineTo(-hw - radius, -hh);
-  shape.quadraticCurveTo(-hw - radius, -hh - radius, -hw, -hh - radius);
-
-  const rawGeo = new THREE.ExtrudeGeometry(shape, {
-    depth: d,
-    bevelEnabled: true,
-    curveSegments: 10,
-    bevelSegments: 4,
-    steps: 1,
-    bevelSize: 0.012,
-    bevelThickness: 0.012,
-  });
-  rawGeo.translate(0, 0, -d / 2);
-  const indexedGeo = mergeVertices(rawGeo);
-  rawGeo.dispose();
-  if (
-    indexedGeo.index &&
-    indexedGeo.attributes.position &&
-    indexedGeo.attributes.normal &&
-    indexedGeo.attributes.uv
-  ) {
-    indexedGeo.computeTangents();
-  }
-  return indexedGeo;
-}
-
+/**
+ * Builds a calm, static operator console: a desk with three monitors on real stands,
+ * keyboard + mouse on a desk mat, a PTZ joystick deck, and a network rack beside the desk.
+ * Nothing in here animates on its own; it only reacts to the user (hover, click, explode).
+ */
 export function buildSurveillanceAssembly(materials: MaterialBundle): SurveillanceAssembly {
   const root = new THREE.Group();
   const geometries: THREE.BufferGeometry[] = [];
@@ -101,6 +67,53 @@ export function buildSurveillanceAssembly(materials: MaterialBundle): Surveillan
   });
 
   const dummy = new THREE.Object3D();
+
+  const roundedBox = (w: number, h: number, d: number, radius: number): THREE.BufferGeometry => {
+    const geo = new RoundedBoxGeometry(w, h, d, 3, radius);
+    geometries.push(geo);
+    return geo;
+  };
+
+  const plainBox = (w: number, h: number, d: number): THREE.BufferGeometry => {
+    const geo = new THREE.BoxGeometry(w, h, d);
+    geometries.push(geo);
+    return geo;
+  };
+
+  const addMesh = (
+    parent: THREE.Object3D,
+    geo: THREE.BufferGeometry,
+    mat: THREE.Material,
+    x: number,
+    y: number,
+    z: number,
+    shadows = true,
+  ): THREE.Mesh => {
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(x, y, z);
+    mesh.castShadow = shadows;
+    mesh.receiveShadow = shadows;
+    parent.add(mesh);
+    return mesh;
+  };
+
+  const instanced = (
+    geo: THREE.BufferGeometry,
+    mat: THREE.Material,
+    positions: readonly Vec3[],
+  ): THREE.InstancedMesh => {
+    const mesh = new THREE.InstancedMesh(geo, mat, positions.length);
+    positions.forEach((p, i) => {
+      dummy.position.set(p[0], p[1], p[2]);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.setScalar(1);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+    return mesh;
+  };
 
   const attachHoverRing = (
     partId: string,
@@ -123,590 +136,355 @@ export function buildSurveillanceAssembly(materials: MaterialBundle): Surveillan
     hoverHighlights.push({ id: partId, group, ring: frame });
   };
 
-  // 1. Soft studio contact shadow grounded at y = 0
-  const shadowGeo = new THREE.PlaneGeometry(4.6, 4.6);
+  // 1. Floor and a soft contact shadow under the whole workstation
+  const floorGeo = new THREE.CircleGeometry(4.4, 96);
+  geometries.push(floorGeo);
+  const floor = new THREE.Mesh(floorGeo, materials.plinth);
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  root.add(floor);
+
+  const shadowGeo = new THREE.PlaneGeometry(5.6, 2.8);
   geometries.push(shadowGeo);
   const shadowMesh = new THREE.Mesh(shadowGeo, materials.contactShadow);
   shadowMesh.rotation.x = -Math.PI / 2;
-  shadowMesh.position.y = 0.004;
+  shadowMesh.position.set(0.55, 0.004, 0.05);
   root.add(shadowMesh);
 
-  // 2. Workstation Console Plinth grounded flush at y = 0
-  const plinthProfile = [
-    new THREE.Vector2(0.0, 0.0),
-    new THREE.Vector2(1.94, 0.0),
-    new THREE.Vector2(1.94, 0.055),
-    new THREE.Vector2(1.82, 0.115),
-    new THREE.Vector2(1.62, 0.115),
-    new THREE.Vector2(0.0, 0.115),
-  ];
-  const plinthGeo = new THREE.LatheGeometry(plinthProfile, 64);
-  geometries.push(plinthGeo);
-  const plinthMesh = new THREE.Mesh(plinthGeo, materials.plinth);
-  plinthMesh.castShadow = true;
-  plinthMesh.receiveShadow = true;
-  root.add(plinthMesh);
-
-  // Thin luminous lip around the plinth edge for a premium, floating-base read
-  const plinthLipGeo = new THREE.TorusGeometry(1.945, 0.0055, 8, 128);
-  geometries.push(plinthLipGeo);
-  const plinthLip = new THREE.Mesh(plinthLipGeo, materials.accentTrim);
-  plinthLip.rotation.x = Math.PI / 2;
-  plinthLip.position.y = 0.04;
-  root.add(plinthLip);
-
-  const dialGeo = new THREE.CircleGeometry(1.6, 64);
-  geometries.push(dialGeo);
-  const dialMesh = new THREE.Mesh(dialGeo, materials.deskGrid);
-  dialMesh.rotation.x = -Math.PI / 2;
-  dialMesh.position.y = 0.12;
-  dialMesh.receiveShadow = true;
-  root.add(dialMesh);
-
-  // Brushed-metal Command Desk Surface resting atop plinth
+  // 2. Operator desk: top, two panel legs and a rear modesty panel
   const deskGroup = new THREE.Group();
-  deskGroup.position.set(0, 0.155, 0.08);
-  const deskSlabGeo = makeRoundedBox(2.58, 0.055, 1.56, 0.06);
-  geometries.push(deskSlabGeo);
-  const deskSlabMesh = new THREE.Mesh(deskSlabGeo, materials.deskSlab);
-  deskSlabMesh.castShadow = true;
-  deskSlabMesh.receiveShadow = true;
-  deskGroup.add(deskSlabMesh);
-
-  // Recessed glowing cyan edge strip around desk front apron
-  const deskStripGeo = new THREE.BoxGeometry(2.38, 0.012, 0.018);
-  geometries.push(deskStripGeo);
-  const deskStripMesh = new THREE.Mesh(deskStripGeo, materials.accentTrim);
-  deskStripMesh.position.set(0, 0, 0.788);
-  deskGroup.add(deskStripMesh);
+  addMesh(deskGroup, roundedBox(3.0, 0.05, 1.25, 0.012), materials.deskSlab, 0, DESK_TOP - 0.025, 0);
+  addMesh(deskGroup, roundedBox(0.05, DESK_TOP - 0.05, 1.05, 0.01), materials.chassis, -1.38, (DESK_TOP - 0.05) / 2, 0);
+  addMesh(deskGroup, roundedBox(0.05, DESK_TOP - 0.05, 1.05, 0.01), materials.chassis, 1.38, (DESK_TOP - 0.05) / 2, 0);
+  addMesh(deskGroup, plainBox(2.7, 0.36, 0.02), materials.chassis, 0, 0.52, -0.48);
   root.add(deskGroup);
 
   tagInspectable(
-    plinthMesh,
+    deskGroup,
     {
       id: 'plinth',
-      label: 'Control Desk Telemetry Base',
-      spec: 'Patli Sector Workstation · Click Footprint to inspect site corridor',
+      label: 'Operator Control Desk',
+      spec: 'Patli Sector Workstation · Click to open the site footprint map',
       sectionId: 'footprint',
       vmsMode: 'smart-map',
       actionLabel: 'Open Footprint Map',
     },
     clickableTargets,
   );
-  attachHoverRing('plinth', root, 3.6, 3.6, 0.13);
+  attachHoverRing('plinth', deskGroup, 3.0, 1.25, DESK_TOP + 0.012);
 
-  // 3. Orbital Telemetry Rings framing the workstation
-  const orbitRingGeo = new THREE.TorusGeometry(1.98, 0.014, 16, 112);
-  geometries.push(orbitRingGeo);
-  const orbitRing = new THREE.Mesh(orbitRingGeo, materials.accentTrim);
-  orbitRing.rotation.x = Math.PI / 2;
-  orbitRing.position.y = 0.15;
-  root.add(orbitRing);
+  // Large desk mat that the keyboard, mouse and joystick deck rest on
+  addMesh(root, roundedBox(2.2, 0.006, 0.46, 0.002), materials.deskMat, 0.25, DESK_TOP + 0.003, 0.3, false);
 
-  const innerOrbitGeo = new THREE.TorusGeometry(1.74, 0.008, 12, 96, Math.PI * 1.4);
-  geometries.push(innerOrbitGeo);
-  const innerOrbitRing = new THREE.Mesh(innerOrbitGeo, materials.warmAccentLed);
-  innerOrbitRing.rotation.x = Math.PI / 2;
-  innerOrbitRing.position.y = 0.21;
-  root.add(innerOrbitRing);
-
-  // 4. Milestone XProtect Recording Server Blade (3U Rackmount Unit under riser)
-  const serverGroup = new THREE.Group();
-  serverGroup.position.set(0, 0.32, -0.32);
-
-  const serverShellGeo = makeRoundedBox(1.66, 0.26, 0.74, 0.03);
-  geometries.push(serverShellGeo);
-  const serverShell = new THREE.Mesh(serverShellGeo, materials.chassis);
-  serverShell.castShadow = true;
-  serverShell.receiveShadow = true;
-  serverGroup.add(serverShell);
-
-  const serverFaceGeo = new THREE.BoxGeometry(1.54, 0.2, 0.03);
-  geometries.push(serverFaceGeo);
-  const serverFace = new THREE.Mesh(serverFaceGeo, materials.serverFaceplate);
-  serverFace.position.set(0, 0, 0.375);
-  serverGroup.add(serverFace);
-
-  // 8 Hot-Swap NVMe Storage Bays (InstancedMesh)
-  const caddyGeo = new THREE.BoxGeometry(0.145, 0.13, 0.028);
-  geometries.push(caddyGeo);
-  const caddyMesh = new THREE.InstancedMesh(caddyGeo, materials.armMetal, 8);
-  for (let i = 0; i < 8; i++) {
-    dummy.position.set(-0.62 + i * 0.178, -0.012, 0.386);
-    dummy.rotation.set(0, 0, 0);
-    dummy.scale.setScalar(1);
-    dummy.updateMatrix();
-    caddyMesh.setMatrixAt(i, dummy.matrix);
-  }
-  caddyMesh.instanceMatrix.needsUpdate = true;
-  caddyMesh.computeBoundingSphere();
-  serverGroup.add(caddyMesh);
-
-  // 8 Warm Drive Activity LEDs
-  const driveLedGeo = new THREE.BoxGeometry(0.022, 0.012, 0.015);
-  geometries.push(driveLedGeo);
-  const driveLeds = new THREE.InstancedMesh(driveLedGeo, materials.warmAccentLed, 8);
-  for (let i = 0; i < 8; i++) {
-    dummy.position.set(-0.62 + i * 0.178, 0.038, 0.398);
-    dummy.rotation.set(0, 0, 0);
-    dummy.scale.setScalar(1);
-    dummy.updateMatrix();
-    driveLeds.setMatrixAt(i, dummy.matrix);
-  }
-  driveLeds.instanceMatrix.needsUpdate = true;
-  driveLeds.computeBoundingSphere();
-  serverGroup.add(driveLeds);
-
-  // Server Milestone status trim bar
-  const serverBarGeo = new THREE.BoxGeometry(1.52, 0.016, 0.02);
-  geometries.push(serverBarGeo);
-  const serverBar = new THREE.Mesh(serverBarGeo, materials.accentTrim);
-  serverBar.position.set(0, 0.095, 0.385);
-  serverGroup.add(serverBar);
-
-  root.add(serverGroup);
-  explodeLayers.push({ object: serverGroup, baseY: 0.32, offsetY: 0.16 });
-  tagInspectable(
-    serverGroup,
-    {
-      id: 'recording-server',
-      label: 'XProtect Recording Server',
-      spec: '8-bay RAID archiving · Dual-stream NVR retention & playback index',
-      sectionId: 'operations',
-      vmsMode: 'playback',
-      actionLabel: 'Open Forensics',
-    },
-    clickableTargets,
-  );
-  attachHoverRing('recording-server', serverGroup, 1.5, 0.8, 0.16);
-
-  // 5. 24-Port Managed PoE+ Network Switch stacked atop server
-  const switchGroup = new THREE.Group();
-  switchGroup.position.set(0, 0.54, -0.32);
-
-  const switchGeo = makeRoundedBox(1.56, 0.11, 0.64, 0.025);
-  geometries.push(switchGeo);
-  const switchMesh = new THREE.Mesh(switchGeo, materials.switchBody);
-  switchMesh.castShadow = true;
-  switchMesh.receiveShadow = true;
-  switchGroup.add(switchMesh);
-
-  // 24 Instanced PoE+ Port Link LEDs
-  const ledGeo = new THREE.BoxGeometry(0.028, 0.018, 0.02);
-  geometries.push(ledGeo);
-  const ledCount = 24;
-  const ledMesh = new THREE.InstancedMesh(ledGeo, materials.portLed, ledCount);
-  for (let i = 0; i < ledCount; i++) {
-    const col = i % 12;
-    const row = Math.floor(i / 12);
-    dummy.position.set(-0.52 + col * 0.074, row === 0 ? 0.016 : -0.016, 0.325);
-    dummy.rotation.set(0, 0, 0);
-    dummy.scale.setScalar(1);
-    dummy.updateMatrix();
-    ledMesh.setMatrixAt(i, dummy.matrix);
-  }
-  ledMesh.instanceMatrix.needsUpdate = true;
-  ledMesh.computeBoundingSphere();
-  switchGroup.add(ledMesh);
-
-  root.add(switchGroup);
-  explodeLayers.push({ object: switchGroup, baseY: 0.54, offsetY: 0.38 });
-  tagInspectable(
-    switchGroup,
-    {
-      id: 'poe-switch',
-      label: '24-Port PoE+ Surveillance Switch',
-      spec: 'IPv4 VLAN camera segmentation · Fiber uplink & CLI diagnostics',
-      sectionId: 'skills',
-      vmsMode: 'live',
-      actionLabel: 'Inspect Network Skills',
-    },
-    clickableTargets,
-  );
-  attachHoverRing('poe-switch', switchGroup, 1.4, 0.7, 0.08);
-
-  // 6. Three-Screen Curved XProtect Smart Client Command Display Wall
+  // 3. Three monitors on proper desk stands (base plate, neck and VESA mount)
   const displayGroup = new THREE.Group();
-  displayGroup.position.set(0, 1.38, -0.22);
 
-  // Central machined VESA spine column
-  const spineGeo = new THREE.CylinderGeometry(0.058, 0.074, 0.98, 24);
-  geometries.push(spineGeo);
-  const spineMesh = new THREE.Mesh(spineGeo, materials.armMetal);
-  spineMesh.position.set(0, -0.3, -0.16);
-  spineMesh.castShadow = true;
-  displayGroup.add(spineMesh);
-
-  // Articulated Horizontal Cross-Beam Bar
-  const crossGeo = makeRoundedBox(2.26, 0.068, 0.064, 0.02);
-  geometries.push(crossGeo);
-  const crossMesh = new THREE.Mesh(crossGeo, materials.armMetal);
-  crossMesh.position.set(0, 0.02, -0.1);
-  crossMesh.castShadow = true;
-  displayGroup.add(crossMesh);
-
-  // Braided Cat6A & Power Cable Harness descending from display bar into switch/server
-  const cablePaths = [
-    [
-      new THREE.Vector3(-0.22, -0.02, -0.14),
-      new THREE.Vector3(-0.32, -0.35, -0.26),
-      new THREE.Vector3(-0.28, -0.74, -0.2),
-    ],
-    [
-      new THREE.Vector3(0.0, -0.02, -0.14),
-      new THREE.Vector3(0.02, -0.4, -0.28),
-      new THREE.Vector3(0.04, -0.78, -0.2),
-    ],
-    [
-      new THREE.Vector3(0.24, -0.02, -0.14),
-      new THREE.Vector3(0.36, -0.35, -0.25),
-      new THREE.Vector3(0.28, -0.74, -0.2),
-    ],
-  ];
-  for (let c = 0; c < cablePaths.length; c++) {
-    const curve = new THREE.CatmullRomCurve3(cablePaths[c]!);
-    const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.015, 8, false);
-    geometries.push(tubeGeo);
-    const tubeMesh = new THREE.Mesh(tubeGeo, c === 1 ? materials.accentTrim : materials.cable);
-    displayGroup.add(tubeMesh);
+  interface MonitorSpec {
+    screenW: number;
+    screenH: number;
+    bodyBottom: number;
+    x: number;
+    z: number;
+    rotY: number;
+    screenMaterial: THREE.Material;
   }
 
-  // Primary XProtect Smart Client Widescreen (Center)
-  const primaryMonitor = new THREE.Group();
-  primaryMonitor.position.set(-0.04, 0.06, 0.02);
+  const buildMonitor = (spec: MonitorSpec) => {
+    const bezel = 0.026;
+    const chin = 0.014;
+    const bodyD = 0.04;
+    const bodyW = spec.screenW + bezel * 2;
+    const bodyH = spec.screenH + bezel * 2 + chin;
+    const centerY = spec.bodyBottom + bodyH / 2;
 
-  const pFrameGeo = makeRoundedBox(1.48, 0.86, 0.06, 0.025);
-  geometries.push(pFrameGeo);
-  const pFrameMesh = new THREE.Mesh(pFrameGeo, materials.chassis);
-  pFrameMesh.castShadow = true;
-  pFrameMesh.receiveShadow = true;
-  primaryMonitor.add(pFrameMesh);
+    const group = new THREE.Group();
+    group.position.set(spec.x, DESK_TOP, spec.z);
+    group.rotation.y = spec.rotY;
 
-  const pScreenGeo = new THREE.PlaneGeometry(1.4, 0.77);
-  geometries.push(pScreenGeo);
-  const pScreenMesh = new THREE.Mesh(pScreenGeo, materials.primaryScreen);
-  pScreenMesh.position.z = 0.043;
-  primaryMonitor.add(pScreenMesh);
+    addMesh(group, roundedBox(0.3, 0.016, 0.2, 0.006), materials.armMetal, 0, 0.008, 0);
+    const neckH = centerY + bodyH * 0.1 - 0.016;
+    addMesh(group, plainBox(0.06, neckH, 0.026), materials.armMetal, 0, 0.016 + neckH / 2, -0.065);
+    addMesh(group, roundedBox(0.16, 0.12, 0.04, 0.008), materials.armMetal, 0, centerY, -0.04);
+    addMesh(group, roundedBox(bodyW, bodyH, bodyD, 0.012), materials.chassis, 0, centerY, 0);
 
-  const pGlassGeo = new THREE.PlaneGeometry(1.42, 0.79);
-  geometries.push(pGlassGeo);
-  const pGlassMesh = new THREE.Mesh(pGlassGeo, materials.screenGlass);
-  pGlassMesh.position.z = 0.048;
-  pGlassMesh.renderOrder = 3;
-  primaryMonitor.add(pGlassMesh);
+    const screenGeo = new THREE.PlaneGeometry(spec.screenW, spec.screenH);
+    geometries.push(screenGeo);
+    const screen = new THREE.Mesh(screenGeo, spec.screenMaterial);
+    screen.position.set(0, centerY + chin / 2, bodyD / 2 + 0.0015);
+    group.add(screen);
 
-  const pLedBarGeo = new THREE.BoxGeometry(0.42, 0.012, 0.018);
-  geometries.push(pLedBarGeo);
-  const pLedBar = new THREE.Mesh(pLedBarGeo, materials.accentTrim);
-  pLedBar.position.set(0, -0.44, 0.036);
-  primaryMonitor.add(pLedBar);
+    // tiny power LED in the chin
+    addMesh(group, plainBox(0.012, 0.005, 0.004), materials.portLed, bodyW / 2 - 0.05, spec.bodyBottom + chin / 2 + 0.004, bodyD / 2 + 0.002, false);
 
-  displayGroup.add(primaryMonitor);
+    displayGroup.add(group);
+    return { group, bodyW, bodyH, centerY };
+  };
+
+  const primary = buildMonitor({
+    screenW: 1.4,
+    screenH: 0.7875,
+    bodyBottom: 0.13,
+    x: 0,
+    z: -0.3,
+    rotY: 0,
+    screenMaterial: materials.primaryScreen,
+  });
   tagInspectable(
-    primaryMonitor,
+    primary.group,
     {
       id: 'smart-client-wall',
       label: 'Milestone XProtect Smart Client',
-      spec: '2x2 Multi-Camera Quad + Sequence Timeline Scrubber · live feeds',
+      spec: '2x2 live view grid with timeline scrubber · multi-camera monitoring',
       sectionId: 'operations',
       vmsMode: 'live',
       actionLabel: 'View Deployments',
     },
     clickableTargets,
   );
-  attachHoverRing('smart-client-wall', primaryMonitor, 1.35, 0.85, 0, 0.055, 0);
+  attachHoverRing('smart-client-wall', primary.group, primary.bodyW, primary.bodyH, primary.centerY, 0.03, 0);
 
-  // Secondary Right Angled Display: Smart Map & Alarm Queue
-  const auxMonitor = new THREE.Group();
-  auxMonitor.position.set(1.06, 0.06, 0.22);
-  auxMonitor.rotation.y = -0.38;
-
-  const aFrameGeo = makeRoundedBox(0.76, 0.86, 0.06, 0.025);
-  geometries.push(aFrameGeo);
-  const aFrameMesh = new THREE.Mesh(aFrameGeo, materials.chassis);
-  aFrameMesh.castShadow = true;
-  aFrameMesh.receiveShadow = true;
-  auxMonitor.add(aFrameMesh);
-
-  const aScreenGeo = new THREE.PlaneGeometry(0.68, 0.78);
-  geometries.push(aScreenGeo);
-  const aScreenMesh = new THREE.Mesh(aScreenGeo, materials.auxScreen);
-  aScreenMesh.position.z = 0.043;
-  auxMonitor.add(aScreenMesh);
-
-  const aGlassGeo = new THREE.PlaneGeometry(0.7, 0.8);
-  geometries.push(aGlassGeo);
-  const aGlassMesh = new THREE.Mesh(aGlassGeo, materials.screenGlass);
-  aGlassMesh.position.z = 0.048;
-  aGlassMesh.renderOrder = 3;
-  auxMonitor.add(aGlassMesh);
-
-  const aLedBar = new THREE.Mesh(
-    new THREE.BoxGeometry(0.28, 0.012, 0.018),
-    materials.warmAccentLed,
-  );
-  geometries.push(aLedBar.geometry);
-  aLedBar.position.set(0, -0.44, 0.036);
-  auxMonitor.add(aLedBar);
-
-  displayGroup.add(auxMonitor);
+  const mapMonitor = buildMonitor({
+    screenW: 0.64,
+    screenH: 0.756,
+    bodyBottom: 0.1,
+    x: 1.13,
+    z: -0.18,
+    rotY: -0.34,
+    screenMaterial: materials.auxScreen,
+  });
   tagInspectable(
-    auxMonitor,
+    mapMonitor.group,
     {
       id: 'smart-map-display',
       label: 'XProtect Smart Map & Alarm Queue',
-      spec: 'Patli Hub GIS overlay · Real-time GIGO & perimeter alarm triage',
+      spec: 'Patli Hub site map · GIGO and perimeter alarm triage',
       sectionId: 'footprint',
       vmsMode: 'smart-map',
       actionLabel: 'Focus Smart Map',
     },
     clickableTargets,
   );
-  attachHoverRing('smart-map-display', auxMonitor, 0.78, 0.78, 0, 0.055, 0);
+  attachHoverRing('smart-map-display', mapMonitor.group, mapMonitor.bodyW, mapMonitor.bodyH, mapMonitor.centerY, 0.03, 0);
 
-  // Third Left Angled Display: BriefCam Analytics & Gate LPR Telemetry
-  const briefcamMonitor = new THREE.Group();
-  briefcamMonitor.position.set(-1.12, 0.06, 0.22);
-  briefcamMonitor.rotation.y = 0.38;
-
-  const bFrameGeo = makeRoundedBox(0.72, 0.86, 0.06, 0.025);
-  geometries.push(bFrameGeo);
-  const bFrameMesh = new THREE.Mesh(bFrameGeo, materials.chassis);
-  bFrameMesh.castShadow = true;
-  bFrameMesh.receiveShadow = true;
-  briefcamMonitor.add(bFrameMesh);
-
-  const bScreenGeo = new THREE.PlaneGeometry(0.64, 0.78);
-  geometries.push(bScreenGeo);
-  const bScreenMesh = new THREE.Mesh(bScreenGeo, materials.briefcamScreen);
-  bScreenMesh.position.z = 0.043;
-  briefcamMonitor.add(bScreenMesh);
-
-  const bGlassGeo = new THREE.PlaneGeometry(0.66, 0.8);
-  geometries.push(bGlassGeo);
-  const bGlassMesh = new THREE.Mesh(bGlassGeo, materials.screenGlass);
-  bGlassMesh.position.z = 0.048;
-  bGlassMesh.renderOrder = 3;
-  briefcamMonitor.add(bGlassMesh);
-
-  const bLedBar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.012, 0.018), materials.accentTrim);
-  geometries.push(bLedBar.geometry);
-  bLedBar.position.set(0, -0.44, 0.036);
-  briefcamMonitor.add(bLedBar);
-
-  displayGroup.add(briefcamMonitor);
+  const briefcamMonitor = buildMonitor({
+    screenW: 0.57,
+    screenH: 0.76,
+    bodyBottom: 0.1,
+    x: -1.1,
+    z: -0.18,
+    rotY: 0.34,
+    screenMaterial: materials.briefcamScreen,
+  });
   tagInspectable(
-    briefcamMonitor,
+    briefcamMonitor.group,
     {
       id: 'briefcam-telemetry',
       label: 'BriefCam Analytics & GIGO LPR',
-      spec: 'Video synopsis motion spectrum & live commercial fleet LPR stream',
+      spec: 'Video synopsis motion graph and gate vehicle log',
       sectionId: 'operations',
       vmsMode: 'alarms',
       actionLabel: 'Inspect Forensics',
     },
     clickableTargets,
   );
-  attachHoverRing('briefcam-telemetry', briefcamMonitor, 0.72, 0.86, 0, 0.055, 0);
+  attachHoverRing('briefcam-telemetry', briefcamMonitor.group, briefcamMonitor.bodyW, briefcamMonitor.bodyH, briefcamMonitor.centerY, 0.03, 0);
 
   root.add(displayGroup);
-  explodeLayers.push({ object: displayGroup, baseY: 1.38, offsetY: 0.62 });
+  explodeLayers.push({ object: displayGroup, baseY: 0, offsetY: 0.5 });
 
-  // 7. Operator Desk Pod (Right): Precision PTZ Joystick & Jog-Shuttle Controller
-  const podGroup = new THREE.Group();
-  podGroup.position.set(0.56, 0.24, 0.56);
-  podGroup.rotation.x = 0.1;
-
-  const podBaseGeo = makeRoundedBox(1.06, 0.085, 0.42, 0.03);
-  geometries.push(podBaseGeo);
-  const podBaseMesh = new THREE.Mesh(podBaseGeo, materials.chassis);
-  podBaseMesh.castShadow = true;
-  podBaseMesh.receiveShadow = true;
-  podGroup.add(podBaseMesh);
-
-  // Tactile Aluminum Jog-Shuttle Playback Wheel (LatheGeometry)
-  const wheelProfile = [
-    new THREE.Vector2(0.0, 0.0),
-    new THREE.Vector2(0.115, 0.0),
-    new THREE.Vector2(0.115, 0.035),
-    new THREE.Vector2(0.09, 0.046),
-    new THREE.Vector2(0.048, 0.046),
-    new THREE.Vector2(0.048, 0.035),
-    new THREE.Vector2(0.0, 0.035),
-  ];
-  const wheelGeo = new THREE.LatheGeometry(wheelProfile, 40);
-  geometries.push(wheelGeo);
-  const wheelMesh = new THREE.Mesh(wheelGeo, materials.armMetal);
-  wheelMesh.position.set(-0.32, 0.046, 0.02);
-  wheelMesh.castShadow = true;
-  podGroup.add(wheelMesh);
-
-  // 12 Macro Alarm / Preset Hotkeys (InstancedMesh)
-  const keyGeo = new THREE.BoxGeometry(0.056, 0.024, 0.056);
-  geometries.push(keyGeo);
-  const keysMesh = new THREE.InstancedMesh(keyGeo, materials.alarmKey, 12);
-  for (let i = 0; i < 12; i++) {
-    const col = i % 4;
-    const row = Math.floor(i / 4);
-    dummy.position.set(-0.08 + col * 0.078, 0.054, -0.08 + row * 0.078);
-    dummy.rotation.set(0, 0, 0);
-    dummy.scale.setScalar(1);
-    dummy.updateMatrix();
-    keysMesh.setMatrixAt(i, dummy.matrix);
-  }
-  keysMesh.instanceMatrix.needsUpdate = true;
-  keysMesh.computeBoundingSphere();
-  podGroup.add(keysMesh);
-
-  // Sculpted 3-Axis PTZ Joystick
-  const joystickBaseGeo = new THREE.CylinderGeometry(0.09, 0.11, 0.04, 32);
-  geometries.push(joystickBaseGeo);
-  const joystickBase = new THREE.Mesh(joystickBaseGeo, materials.armMetal);
-  joystickBase.position.set(0.34, 0.058, 0.02);
-  podGroup.add(joystickBase);
-
-  const joystickStick = new THREE.Group();
-  joystickStick.position.set(0.34, 0.078, 0.02);
-
-  const shaftGeo = new THREE.CylinderGeometry(0.017, 0.023, 0.14, 16);
-  geometries.push(shaftGeo);
-  const shaftMesh = new THREE.Mesh(shaftGeo, materials.armMetal);
-  shaftMesh.position.y = 0.07;
-  joystickStick.add(shaftMesh);
-
-  const knobGeo = new THREE.SphereGeometry(0.044, 24, 20);
-  geometries.push(knobGeo);
-  const knobMesh = new THREE.Mesh(knobGeo, materials.accentTrim);
-  knobMesh.position.y = 0.15;
-  knobMesh.scale.set(1, 1.25, 1);
-  knobMesh.castShadow = true;
-  joystickStick.add(knobMesh);
-
-  podGroup.add(joystickStick);
-  root.add(podGroup);
-  explodeLayers.push({ object: podGroup, baseY: 0.24, offsetY: 0.24 });
-
-  tagInspectable(
-    podGroup,
-    {
-      id: 'ptz-console',
-      label: 'PTZ Joystick & Jog-Shuttle Deck',
-      spec: 'Hall-effect camera patrol · Timeline jog-shuttle & Alarm hotkeys',
-      sectionId: 'experience',
-      vmsMode: 'alarms',
-      actionLabel: 'View Operational Logbook',
-    },
-    clickableTargets,
-  );
-  attachHoverRing('ptz-console', podGroup, 1.0, 0.5, 0.08);
-
-  // 8. Left Desk Module: Backlit Mechanical Operator Keyboard
+  // 4. Keyboard + mouse
   const kbGroup = new THREE.Group();
-  kbGroup.position.set(-0.56, 0.22, 0.56);
-  kbGroup.rotation.x = 0.07;
+  kbGroup.position.set(-0.18, DESK_TOP + 0.006, 0.32);
+  addMesh(kbGroup, roundedBox(0.92, 0.026, 0.3, 0.01), materials.chassis, 0, 0.013, 0);
 
-  const kbBodyGeo = makeRoundedBox(0.96, 0.052, 0.36, 0.025);
-  geometries.push(kbBodyGeo);
-  const kbBody = new THREE.Mesh(kbBodyGeo, materials.chassis);
-  kbBody.castShadow = true;
-  kbBody.receiveShadow = true;
-  kbGroup.add(kbBody);
-
-  const kbKeyGeo = new THREE.BoxGeometry(0.044, 0.018, 0.044);
-  geometries.push(kbKeyGeo);
+  const keyPositions: Vec3[] = [];
   const kbCols = 14;
-  const kbRows = 4;
-  const kbKeyInst = new THREE.InstancedMesh(kbKeyGeo, materials.keycap, kbCols * kbRows);
+  const kbRows = 5;
   for (let r = 0; r < kbRows; r++) {
     for (let c = 0; c < kbCols; c++) {
-      const idx = r * kbCols + c;
-      dummy.position.set(-0.38 + c * 0.058, 0.036, -0.095 + r * 0.058);
-      dummy.rotation.set(0, 0, 0);
-      dummy.scale.setScalar(1);
-      dummy.updateMatrix();
-      kbKeyInst.setMatrixAt(idx, dummy.matrix);
+      keyPositions.push([-0.4 + c * 0.0615, 0.033, -0.105 + r * 0.052]);
     }
   }
-  kbKeyInst.instanceMatrix.needsUpdate = true;
-  kbKeyInst.computeBoundingSphere();
-  kbGroup.add(kbKeyInst);
+  kbGroup.add(instanced(plainBox(0.05, 0.014, 0.044), materials.keycap, keyPositions));
+
+  // mouse
+  addMesh(kbGroup, roundedBox(0.072, 0.03, 0.118, 0.014), materials.chassis, 0.68, 0.015, 0.02);
+  addMesh(kbGroup, plainBox(0.004, 0.002, 0.04), materials.cable, 0.68, 0.031, -0.018, false);
 
   root.add(kbGroup);
-  explodeLayers.push({ object: kbGroup, baseY: 0.22, offsetY: 0.18 });
+  explodeLayers.push({ object: kbGroup, baseY: DESK_TOP + 0.006, offsetY: 0.18 });
   tagInspectable(
     kbGroup,
     {
       id: 'operator-keyboard',
-      label: 'Backlit Operator Console Deck',
-      spec: 'XProtect hotkey matrix · GIGO gate logging & instant incident macro triggers',
+      label: 'Operator Keyboard & Mouse',
+      spec: 'XProtect shortcuts · GIGO gate logging and incident macros',
       sectionId: 'about',
       vmsMode: 'live',
       actionLabel: 'View Operator Profile',
     },
     clickableTargets,
   );
-  attachHoverRing('operator-keyboard', kbGroup, 0.9, 0.45, 0.06);
+  attachHoverRing('operator-keyboard', kbGroup, 1.7, 0.34, 0.05);
 
-  // 9. Floating Holographic Reticle Nodes & Surveillance Icons around Workstation
-  const holoNodesGroup = new THREE.Group();
-  const holoNodePositions: Array<[number, number, number]> = [
-    [-1.78, 1.52, 0.35],
-    [1.76, 1.48, 0.42],
-    [0.05, 2.08, -0.25],
-    [-1.24, 0.85, 0.92],
-    [1.24, 0.92, 0.92],
-  ];
-  const icoGeo = new THREE.OctahedronGeometry(0.07, 0);
-  const frameRingGeo = new THREE.RingGeometry(0.11, 0.125, 4);
-  geometries.push(icoGeo, frameRingGeo);
+  // 5. PTZ joystick + jog-shuttle deck
+  const deckGroup = new THREE.Group();
+  deckGroup.position.set(1.04, DESK_TOP + 0.006, 0.34);
+  addMesh(deckGroup, roundedBox(0.46, 0.05, 0.3, 0.012), materials.chassis, 0, 0.025, 0);
 
-  for (let i = 0; i < holoNodePositions.length; i++) {
-    const pos = holoNodePositions[i]!;
-    const node = new THREE.Group();
-    node.position.set(pos[0], pos[1], pos[2]);
+  // jog-shuttle wheel
+  const wheelOuter = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 40);
+  const wheelInner = new THREE.CylinderGeometry(0.038, 0.038, 0.012, 40);
+  geometries.push(wheelOuter, wheelInner);
+  addMesh(deckGroup, wheelOuter, materials.armMetal, -0.12, 0.06, 0.05);
+  addMesh(deckGroup, wheelInner, materials.chassis, -0.12, 0.076, 0.05);
 
-    const core = new THREE.Mesh(icoGeo, materials.holoWire);
-    const frame = new THREE.Mesh(frameRingGeo, materials.accentTrim);
-    frame.rotation.z = Math.PI / 4;
-    node.add(core, frame);
-    node.userData.baseY = pos[1];
-    node.userData.phase = i * 1.3;
-    holoNodesGroup.add(node);
+  // preset keys
+  const deckKeyPositions: Vec3[] = [];
+  for (let c = 0; c < 4; c++) {
+    deckKeyPositions.push([-0.19 + c * 0.05, 0.057, -0.085]);
   }
-  root.add(holoNodesGroup);
+  deckGroup.add(instanced(plainBox(0.04, 0.014, 0.036), materials.keycap, deckKeyPositions));
+  addMesh(deckGroup, plainBox(0.04, 0.014, 0.036), materials.alarmKey, 0.01, 0.057, -0.085, false);
 
-  // 10. Drifting Atmospheric Light Dust & Data Particles
-  const dustCount = 150;
-  const dustPositions = new Float32Array(dustCount * 3);
-  const dustBasePositions = new Float32Array(dustCount * 3);
-  for (let i = 0; i < dustCount; i++) {
-    const angle = (i * 2.39996) % (Math.PI * 2);
-    const radius = 0.9 + ((i * 73) % 100) * 0.022;
-    const x = Math.cos(angle) * radius;
-    const y = 0.25 + ((i * 37) % 100) * 0.024;
-    const z = Math.sin(angle) * radius;
-    dustPositions[i * 3] = x;
-    dustPositions[i * 3 + 1] = y;
-    dustPositions[i * 3 + 2] = z;
-    dustBasePositions[i * 3] = x;
-    dustBasePositions[i * 3 + 1] = y;
-    dustBasePositions[i * 3 + 2] = z;
+  // joystick
+  const stickBase = new THREE.CylinderGeometry(0.068, 0.076, 0.024, 36);
+  const stickBoot = new THREE.CylinderGeometry(0.018, 0.03, 0.09, 20);
+  const stickKnob = new THREE.SphereGeometry(0.034, 24, 18);
+  geometries.push(stickBase, stickBoot, stickKnob);
+  addMesh(deckGroup, stickBase, materials.armMetal, 0.12, 0.062, 0.04);
+  addMesh(deckGroup, stickBoot, materials.cable, 0.12, 0.119, 0.04);
+  const knob = addMesh(deckGroup, stickKnob, materials.chassis, 0.12, 0.178, 0.04);
+  knob.scale.set(1, 1.2, 1);
+
+  root.add(deckGroup);
+  explodeLayers.push({ object: deckGroup, baseY: DESK_TOP + 0.006, offsetY: 0.24 });
+  tagInspectable(
+    deckGroup,
+    {
+      id: 'ptz-console',
+      label: 'PTZ Joystick & Jog-Shuttle Deck',
+      spec: 'Camera patrol control · timeline jog-shuttle and preset keys',
+      sectionId: 'experience',
+      vmsMode: 'alarms',
+      actionLabel: 'View Operational Logbook',
+    },
+    clickableTargets,
+  );
+  attachHoverRing('ptz-console', deckGroup, 0.46, 0.3, 0.09);
+
+  // 6. Network rack beside the desk: UPS, recording server, PoE switch, cable manager
+  const rackGroup = new THREE.Group();
+  rackGroup.position.set(2.2, 0, -0.05);
+  addMesh(rackGroup, roundedBox(0.7, 0.94, 0.75, 0.015), materials.chassis, 0, 0.52, 0);
+  const footGeo = new THREE.CylinderGeometry(0.03, 0.035, 0.05, 16);
+  geometries.push(footGeo);
+  for (const fx of [-0.3, 0.3]) {
+    for (const fz of [-0.3, 0.3]) {
+      addMesh(rackGroup, footGeo, materials.cable, fx, 0.025, fz);
+    }
   }
-  const dustGeo = new THREE.BufferGeometry();
-  dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
-  geometries.push(dustGeo);
-  const dustPoints = new THREE.Points(dustGeo, materials.dustParticle);
-  root.add(dustPoints);
+  root.add(rackGroup);
+
+  const frontZ = 0.375;
+
+  // UPS (bottom)
+  const upsGroup = new THREE.Group();
+  upsGroup.position.set(0, 0.2, frontZ);
+  addMesh(upsGroup, roundedBox(0.6, 0.2, 0.03, 0.006), materials.serverFaceplate, 0, 0, 0);
+  addMesh(upsGroup, plainBox(0.12, 0.04, 0.006), materials.cable, -0.18, 0.02, 0.018, false);
+  addMesh(upsGroup, plainBox(0.01, 0.01, 0.006), materials.portLed, -0.14, -0.04, 0.018, false);
+  rackGroup.add(upsGroup);
+
+  // Recording server
+  const serverGroup = new THREE.Group();
+  serverGroup.position.set(0, 0.46, frontZ);
+  addMesh(serverGroup, roundedBox(0.6, 0.16, 0.03, 0.006), materials.serverFaceplate, 0, 0, 0);
+  const bayPositions: Vec3[] = [];
+  const bayLedPositions: Vec3[] = [];
+  for (let i = 0; i < 8; i++) {
+    bayPositions.push([-0.262 + i * 0.0748, -0.006, 0.018]);
+    bayLedPositions.push([-0.262 + i * 0.0748, 0.058, 0.018]);
+  }
+  serverGroup.add(instanced(plainBox(0.06, 0.1, 0.012), materials.armMetal, bayPositions));
+  serverGroup.add(instanced(plainBox(0.012, 0.006, 0.006), materials.portLed, bayLedPositions));
+  rackGroup.add(serverGroup);
+  explodeLayers.push({ object: serverGroup, baseY: 0.46, offsetY: 0.3 });
+  tagInspectable(
+    serverGroup,
+    {
+      id: 'recording-server',
+      label: 'XProtect Recording Server',
+      spec: 'RAID archive storage · recording retention and playback index',
+      sectionId: 'operations',
+      vmsMode: 'playback',
+      actionLabel: 'Open Forensics',
+    },
+    clickableTargets,
+  );
+  attachHoverRing('recording-server', serverGroup, 0.62, 0.18, 0, 0.02, 0);
+
+  // 24-port PoE switch
+  const switchGroup = new THREE.Group();
+  switchGroup.position.set(0, 0.64, frontZ);
+  addMesh(switchGroup, roundedBox(0.6, 0.075, 0.03, 0.005), materials.switchBody, 0, 0, 0);
+  const portPositions: Vec3[] = [];
+  const portLedPositions: Vec3[] = [];
+  for (let i = 0; i < 24; i++) {
+    const col = i % 12;
+    const row = Math.floor(i / 12);
+    portPositions.push([-0.255 + col * 0.0405, row === 0 ? 0.014 : -0.014, 0.017]);
+    portLedPositions.push([-0.255 + col * 0.0405, row === 0 ? 0.027 : 0.0, 0.019]);
+  }
+  switchGroup.add(instanced(plainBox(0.026, 0.016, 0.006), materials.cable, portPositions));
+  switchGroup.add(instanced(plainBox(0.01, 0.004, 0.004), materials.portLed, portLedPositions));
+  rackGroup.add(switchGroup);
+  explodeLayers.push({ object: switchGroup, baseY: 0.64, offsetY: 0.5 });
+  tagInspectable(
+    switchGroup,
+    {
+      id: 'poe-switch',
+      label: '24-Port PoE Surveillance Switch',
+      spec: 'IPv4 VLAN camera segmentation · uplink and CLI diagnostics',
+      sectionId: 'skills',
+      vmsMode: 'live',
+      actionLabel: 'Inspect Network Skills',
+    },
+    clickableTargets,
+  );
+  attachHoverRing('poe-switch', switchGroup, 0.62, 0.095, 0, 0.02, 0);
+
+  // Patch panel: two rows of 12 keystone jacks, with a cable manager strip above it
+  const patchGroup = new THREE.Group();
+  patchGroup.position.set(0, 0.8, frontZ);
+  addMesh(patchGroup, roundedBox(0.6, 0.08, 0.03, 0.005), materials.serverFaceplate, 0, 0, 0);
+  const jackPositions: Vec3[] = [];
+  for (let i = 0; i < 24; i++) {
+    const col = i % 12;
+    const row = Math.floor(i / 12);
+    jackPositions.push([-0.255 + col * 0.0405, row === 0 ? 0.016 : -0.016, 0.017]);
+  }
+  patchGroup.add(instanced(plainBox(0.024, 0.018, 0.006), materials.cable, jackPositions));
+  rackGroup.add(patchGroup);
+  addMesh(rackGroup, plainBox(0.6, 0.035, 0.03), materials.cable, 0, 0.88, frontZ);
+
+  // 7. Cable run from the desk to the rack
+  const cableCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(1.1, DESK_TOP - 0.02, -0.5),
+    new THREE.Vector3(1.25, 0.55, -0.66),
+    new THREE.Vector3(1.45, 0.05, -0.7),
+    new THREE.Vector3(1.95, 0.03, -0.55),
+    new THREE.Vector3(2.0, 0.35, -0.3),
+    new THREE.Vector3(1.85, 0.64, 0.12),
+  ]);
+  const cableGeo = new THREE.TubeGeometry(cableCurve, 48, 0.013, 8, false);
+  geometries.push(cableGeo);
+  const cableMesh = new THREE.Mesh(cableGeo, materials.cable);
+  cableMesh.castShadow = true;
+  root.add(cableMesh);
 
   return {
     root,
-    displayGroup,
-    joystickStick,
-    orbitRing,
-    innerOrbitRing,
-    holoNodesGroup,
-    dustPoints,
-    dustBasePositions,
     hoverHighlights,
     hoverMaterial,
     explodeLayers,
