@@ -11,15 +11,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { VMS_WORKSPACE_PRESETS, useVms } from '@/context/VmsContext';
 import type { ThemeMode } from '@/hooks/useTheme';
-import {
-  HERO_OVERVIEW_CAMERA,
-  applyImpulse3D,
-  computeParallaxOffset,
-  computeScrollOrbitOffset,
-  createSpring3DState,
-  getPartFocusPreset,
-  stepSpring3D,
-} from '@/utils/stagePhysics';
+import { HERO_OVERVIEW_CAMERA, getPartFocusPreset } from '@/utils/stagePhysics';
 import {
   createInterpolatedThemeBuffer,
   interpolateSceneTheme,
@@ -59,21 +51,21 @@ const CAMERA_PRESETS: readonly CameraPreset[] = [
   {
     id: 'smart-client',
     label: 'Smart Client',
-    position: [-0.15, 1.42, 2.05],
-    target: [-0.22, 1.32, -0.04],
+    position: [0.0, 1.32, 1.55],
+    target: [0.0, 1.3, -0.3],
   },
   {
     id: 'rack',
     label: 'Rack & Deck',
-    position: [1.55, 0.92, 2.25],
-    target: [0.0, 0.44, -0.04],
+    position: [1.75, 1.0, 2.3],
+    target: [1.5, 0.6, 0.1],
   },
 ];
 
 const DEFAULT_PART_INFO: InspectablePartInfo = {
   id: 'xprotect-vms',
   label: 'Milestone XProtect VMS + BriefCam L4',
-  spec: 'Drag anywhere to orbit 360° · Scroll to pan · Click any monitor or deck to zoom in',
+  spec: 'Drag to look around · Click any monitor, deck or rack unit to zoom in',
 };
 
 const SurveillanceFilmShader = {
@@ -140,8 +132,6 @@ const SurveillanceFilmShader = {
 const _targetCamPos = new THREE.Vector3();
 const _targetLook = new THREE.Vector3();
 const _pointer = new THREE.Vector2();
-const _spherical = new THREE.Spherical();
-const _offsetVec = new THREE.Vector3();
 const _themeBuffer = createInterpolatedThemeBuffer();
 
 interface WebGLCapability {
@@ -226,7 +216,6 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     target: HERO_OVERVIEW_CAMERA.target,
   });
   const focusedModeRef = useRef(false);
-  const springRigRef = useRef(createSpring3DState());
   const hoveredPartIdRef = useRef<string | null>(null);
 
   const applyThemeCallbackRef = useRef<((nextTheme: ThemeMode) => void) | null>(null);
@@ -401,46 +390,26 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(...HERO_OVERVIEW_CAMERA.target);
-    controls.enableDamping = !isSoftwareGl;
-    controls.dampingFactor = 0.055;
+    // The scene is static: it only moves when the visitor drags or picks a camera preset.
+    // No inertia, no auto-rotation, and the view is limited to the front of the desk.
+    controls.enableDamping = false;
     controls.enablePan = false;
     controls.enableZoom = false; // Keep normal page scroll smooth; camera preset clicks handle zoom
-    controls.minDistance = 1.65;
-    controls.maxDistance = 7.4;
-    controls.minPolarAngle = 0.2;
-    controls.maxPolarAngle = Math.PI * 0.49;
-    controls.minAzimuthAngle = -Infinity;
-    controls.maxAzimuthAngle = Infinity;
+    controls.minDistance = 1.1;
+    controls.maxDistance = 6.5;
+    controls.minPolarAngle = 0.45;
+    controls.maxPolarAngle = Math.PI * 0.5;
+    controls.minAzimuthAngle = -0.6;
+    controls.maxAzimuthAngle = 1.5;
     controls.update();
 
-    let isUserDragging = false;
-    let lastDragX = 0;
-    let lastDragY = 0;
-    let dragVelX = 0;
-    let dragVelY = 0;
-
     const onControlStart = () => {
-      isUserDragging = true;
       presetFlightRef.current.active = false;
       focusedModeRef.current = true;
       setIsFocusedView(true);
     };
 
-    const onControlEnd = () => {
-      isUserDragging = false;
-      // Inject physical spring overshoot from drag inertia
-      springRigRef.current = applyImpulse3D(
-        springRigRef.current,
-        dragVelY * 0.28,
-        -dragVelX * 0.28,
-        -0.06,
-      );
-      dragVelX = 0;
-      dragVelY = 0;
-    };
-
     controls.addEventListener('start', onControlStart);
-    controls.addEventListener('end', onControlEnd);
 
     // Adaptive Lighting Rig (Dark Command Room <-> Light Architectural Studio)
     const hemiLight = new THREE.HemisphereLight(
@@ -610,7 +579,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         }
       }
 
-      applyInterpolatedThemeToMaterials(materials, state, finishRef.current);
+      applyInterpolatedThemeToMaterials(materials, state);
 
       assembly.hoverMaterial.color.copy(state.hover);
       for (const h of assembly.hoverHighlights) {
@@ -633,7 +602,6 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       applyInterpolatedThemeToMaterials(
         materials,
         interpolateSceneTheme(currentThemeMix, _themeBuffer),
-        nextFinish,
       );
       renderScene();
     };
@@ -648,12 +616,6 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     let lastHoverCheck = 0;
     let pointerDownX = 0;
     let pointerDownY = 0;
-    let targetParallaxX = 0;
-    let targetParallaxY = 0;
-    let currentParallaxX = 0;
-    let currentParallaxY = 0;
-    let targetScrollProgress = 0;
-    let currentScrollProgress = 0;
 
     const updatePointer = (event: PointerEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -665,8 +627,6 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     const onPointerDown = (event: PointerEvent) => {
       pointerDownX = event.clientX;
       pointerDownY = event.clientY;
-      lastDragX = event.clientX;
-      lastDragY = event.clientY;
     };
 
     const onPointerUp = (event: PointerEvent) => {
@@ -692,28 +652,11 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         };
         focusedModeRef.current = true;
         setIsFocusedView(true);
-        // Physical spring tap impulse
-        springRigRef.current = applyImpulse3D(springRigRef.current, 0.25, -0.18, -0.14);
         requestRender();
       }
     };
 
     const onWindowPointerMove = (event: PointerEvent) => {
-      if (isUserDragging) {
-        dragVelX = THREE.MathUtils.clamp((event.clientX - lastDragX) * 0.04, -1.2, 1.2);
-        dragVelY = THREE.MathUtils.clamp((event.clientY - lastDragY) * 0.04, -1.2, 1.2);
-        lastDragX = event.clientX;
-        lastDragY = event.clientY;
-      }
-
-      const vw = Math.max(1, window.innerWidth);
-      const vh = Math.max(1, window.innerHeight);
-      const nx = (event.clientX / vw) * 2 - 1;
-      const ny = -(event.clientY / vh) * 2 + 1;
-      const parallax = computeParallaxOffset(nx, ny, 1);
-      targetParallaxX = parallax.x;
-      targetParallaxY = parallax.y;
-
       const now = performance.now();
       if (now - lastHoverCheck < 45) return;
       lastHoverCheck = now;
@@ -746,19 +689,9 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       }
     };
 
-    const onScroll = () => {
-      const stageEl = stageRef.current;
-      if (!stageEl) return;
-      const rect = stageEl.getBoundingClientRect();
-      const vh = window.innerHeight || 900;
-      const progress = Math.min(1, Math.max(0, (vh - rect.top) / Math.max(420, vh + rect.height)));
-      targetScrollProgress = progress;
-    };
-
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointermove', onWindowPointerMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
 
     const onContextLost = (event: Event) => {
       event.preventDefault();
@@ -785,8 +718,8 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
     let isTabVisible = !document.hidden;
     let notifiedReady = false;
 
-    const baseOverviewPos = new THREE.Vector3(...HERO_OVERVIEW_CAMERA.position);
-    const baseOverviewTarget = new THREE.Vector3(...HERO_OVERVIEW_CAMERA.target);
+    // Static scene: only redraw when something actually changed (camera, theme, hover, screens)
+    let dirty = true;
 
     function afterDraw(cb: () => void) {
       const gl = renderer.getContext() as WebGL2RenderingContext;
@@ -814,7 +747,8 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       frameId = window.setTimeout(poll, 5);
     }
 
-    function requestRender() {
+    function requestRender(fromLoop = false) {
+      if (!fromLoop) dirty = true;
       if (isDisposed || !isVisible || !isTabVisible || frameRequested || isRenderingTick) return;
       frameRequested = true;
       if (isSoftwareGl) {
@@ -885,7 +819,9 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       elapsed += delta;
 
       // Smooth ~0.5s transition between Dark & Light scene themes
+      let themeChanged = false;
       if (Math.abs(currentThemeMix - targetThemeMix) > 0.0008) {
+        themeChanged = true;
         currentThemeMix = THREE.MathUtils.damp(currentThemeMix, targetThemeMix, 8.0, delta);
         if (Math.abs(currentThemeMix - targetThemeMix) <= 0.0008) {
           currentThemeMix = targetThemeMix;
@@ -895,6 +831,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
       // Explode layers
       const targetExplode = explodeTargetRef.current;
+      const prevExplode = currentExplode;
       currentExplode = THREE.MathUtils.damp(currentExplode, targetExplode, 9, delta);
       if (Math.abs(currentExplode - targetExplode) < 0.001) {
         currentExplode = targetExplode;
@@ -903,25 +840,10 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         layer.object.position.y = layer.baseY + layer.offsetY * currentExplode;
       }
 
-      // Soft physical spring physics on workstation root
-      springRigRef.current = stepSpring3D(springRigRef.current, delta, 145, 11.5);
-      assembly.root.rotation.x = springRigRef.current.rotX.value;
-      assembly.root.rotation.z = springRigRef.current.rotZ.value;
-      const scaleVal = springRigRef.current.scale.value;
-      assembly.root.scale.setScalar(scaleVal);
-
-      // Damped mouse parallax & scroll orbit
-      currentParallaxX = THREE.MathUtils.damp(currentParallaxX, targetParallaxX, 6, delta);
-      currentParallaxY = THREE.MathUtils.damp(currentParallaxY, targetParallaxY, 6, delta);
-      currentScrollProgress = THREE.MathUtils.damp(
-        currentScrollProgress,
-        targetScrollProgress,
-        5,
-        delta,
-      );
-
-      // Camera flight or idle scroll-orbit + parallax
+      // Camera only moves for an explicit preset / part click (smooth glide), never on its own
       const flight = presetFlightRef.current;
+      let needsDraw = dirty;
+      dirty = false;
       if (flight.active) {
         _targetCamPos.set(...flight.position);
         _targetLook.set(...flight.target);
@@ -936,77 +858,28 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
           controls.target.copy(_targetLook);
           flight.active = false;
         }
-      } else if (!focusedModeRef.current && !isUserDragging) {
-        // Gentle scroll-linked orbit + pointer parallax around overview framing
-        const scrollOff = computeScrollOrbitOffset(currentScrollProgress);
-        _offsetVec.copy(baseOverviewPos).sub(baseOverviewTarget);
-        _spherical.setFromVector3(_offsetVec);
-        _spherical.theta += scrollOff.azimuth + currentParallaxX * 0.25;
-        _spherical.phi = THREE.MathUtils.clamp(
-          _spherical.phi - scrollOff.elevation + currentParallaxY * 0.14,
-          0.25,
-          Math.PI * 0.46,
-        );
-        _targetCamPos.setFromSpherical(_spherical).add(baseOverviewTarget);
-        _targetCamPos.x += scrollOff.panX;
-        _targetCamPos.y += scrollOff.panY;
-        camera.position.lerp(_targetCamPos, 1 - Math.exp(-7 * delta));
-        controls.target.set(
-          baseOverviewTarget.x + currentParallaxX * 0.08,
-          baseOverviewTarget.y + currentParallaxY * 0.05 + scrollOff.panY * 0.35,
-          baseOverviewTarget.z,
-        );
+        needsDraw = true;
       }
 
-      controls.update();
+      if (controls.update()) needsDraw = true;
+      if (currentExplode !== prevExplode || themeChanged) needsDraw = true;
 
-      // Hover perimeter outline subtle pulse highlight
+      // Hover outline: steady fade in/out, no pulsing
       for (const h of assembly.hoverHighlights) {
         const isHovered = h.id === hoveredPartIdRef.current;
         const mat = h.ring.material as THREE.LineBasicMaterial;
-        const targetOp = isHovered ? 0.72 + Math.sin(elapsed * 6) * 0.16 : 0;
-        mat.opacity = THREE.MathUtils.damp(mat.opacity, targetOp, 10, delta);
+        const targetOp = isHovered ? 0.85 : 0;
+        if (Math.abs(mat.opacity - targetOp) > 0.002) {
+          mat.opacity = THREE.MathUtils.damp(mat.opacity, targetOp, 10, delta);
+          needsDraw = true;
+        } else if (mat.opacity !== targetOp) {
+          mat.opacity = targetOp;
+          needsDraw = true;
+        }
       }
 
-      // Ambient kinetic hardware & drifting dust
-      if (assembly.joystickStick) {
-        assembly.joystickStick.rotation.z = Math.sin(elapsed * 1.6) * 0.055;
-        assembly.joystickStick.rotation.x = Math.cos(elapsed * 1.3) * 0.045;
-      }
-      if (assembly.orbitRing) {
-        assembly.orbitRing.rotation.z = elapsed * 0.12;
-      }
-      if (assembly.innerOrbitRing) {
-        assembly.innerOrbitRing.rotation.z = -elapsed * 0.22;
-      }
-
-      // Holographic node float
-      const holoChildren = assembly.holoNodesGroup.children;
-      for (let i = 0; i < holoChildren.length; i++) {
-        const node = holoChildren[i];
-        if (!node) continue;
-        const baseY = (node.userData.baseY as number) ?? 1.2;
-        const phase = (node.userData.phase as number) ?? 0;
-        node.position.y = baseY + Math.sin(elapsed * 1.4 + phase) * 0.055;
-        node.rotation.y = elapsed * 0.55 + phase;
-      }
-
-      // Dust particles gentle swirl
-      const dustPosAttr = assembly.dustPoints.geometry.getAttribute(
-        'position',
-      ) as THREE.BufferAttribute;
-      const dustArr = dustPosAttr.array as Float32Array;
-      const baseArr = assembly.dustBasePositions;
-      for (let i = 0; i < dustArr.length; i += 3) {
-        const idx = i / 3;
-        dustArr[i] = baseArr[i]! + Math.sin(elapsed * 0.35 + idx) * 0.08;
-        dustArr[i + 1] = baseArr[i + 1]! + ((elapsed * 0.09 + idx * 0.07) % 0.65) - 0.25;
-        dustArr[i + 2] = baseArr[i + 2]! + Math.cos(elapsed * 0.3 + idx) * 0.08;
-      }
-      dustPosAttr.needsUpdate = true;
-
-      // Live screen animation throttled (~10Hz on GPU, ~2Hz on software GL)
-      const screenInterval = isSoftwareGl ? 0.6 : 0.1;
+      // Screens refresh once per second (clock / timecode), they do not animate otherwise
+      const screenInterval = isSoftwareGl ? 1.5 : 1;
       if (lastScreenDraw < 0 || elapsed - lastScreenDraw >= screenInterval) {
         lastScreenDraw = elapsed;
         const animState = { ...screenStateRef.current, time: elapsed };
@@ -1016,14 +889,12 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
         materials.auxTexture.needsUpdate = true;
         drawBriefCamCanvas(materials.briefcamCanvas, animState);
         materials.briefcamTexture.needsUpdate = true;
+        needsDraw = true;
       }
 
-      const timeUniform = filmPass?.material.uniforms.uTime;
-      if (timeUniform) {
-        timeUniform.value = elapsed;
+      if (needsDraw) {
+        renderScene();
       }
-
-      renderScene();
       isRenderingTick = false;
 
       if (!notifiedReady && !isDisposed) {
@@ -1033,7 +904,7 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
 
       // Keep running smoothly while visible (pauses cleanly when off-screen!)
       if (isVisible && isTabVisible && !isDisposed) {
-        requestRender();
+        requestRender(true);
       }
     }
 
@@ -1049,12 +920,10 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibilityChange);
       controls.removeEventListener('start', onControlStart);
-      controls.removeEventListener('end', onControlEnd);
       controls.removeEventListener('change', onControlChange);
       renderer.domElement.removeEventListener('pointerdown', onPointerDown);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointermove', onWindowPointerMove);
-      window.removeEventListener('scroll', onScroll);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       controls.dispose();
@@ -1084,7 +953,6 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       position: preset.position,
       target: preset.target,
     };
-    springRigRef.current = applyImpulse3D(springRigRef.current, 0.14, 0.12, -0.05);
     requestRenderRef.current?.();
   };
 
@@ -1098,7 +966,6 @@ export const SurveillanceStage3D = memo(function SurveillanceStage3D({
       position: HERO_OVERVIEW_CAMERA.position,
       target: HERO_OVERVIEW_CAMERA.target,
     };
-    springRigRef.current = applyImpulse3D(springRigRef.current, -0.18, 0.15, 0.08);
     requestRenderRef.current?.();
   };
 
